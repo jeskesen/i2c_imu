@@ -1,7 +1,7 @@
 *.pro.user
 *.cache
 Makefile*
-!RTIMULib/RTIMULibDrive/Makefile
+!RTIMULibDrive/Makefile
 obj/
 libs/
 bin/
