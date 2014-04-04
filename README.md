@@ -230,7 +230,7 @@ SyntroPiNav (an app for the Raspberry Pi) and SyntroNavView can be used as a con
 
 Since all IMU data is sent to SyntroNavView, SyntroNavView can run its own local filter. This makes it a very convenient testbed for new filter development as the speed of the desktop can be used to accelerate implementation and testing. When ready, the updated RTIMULib can be compiled into SyntroPiNav and should work exactly the same as on the desktop.
 
-SyntroPiNav is as part of the richards-tech SyntroPiApps repo (https://github.com/richards-tech/SyntroPiApps) while SyntroNavView is available as part of the richards-tech SyntroApps repo (https://github.com/richards-tech/SyntroApps).
+SyntroPiNav is available as part of the richards-tech SyntroPiApps repo (https://github.com/richards-tech/SyntroPiApps) while SyntroNavView is available as part of the richards-tech SyntroApps repo (https://github.com/richards-tech/SyntroApps).
 
 
 
