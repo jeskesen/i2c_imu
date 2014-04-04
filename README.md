@@ -116,6 +116,10 @@ The .ini file created by RTIMULibDemo can also be used by RTIMULibDrive - just r
 
 It's possible you'll see the odd fifo error message displayed, especially at high sampling rates. It seems to be caused by the overhead of the GUI so this is not a great concern and is handled correctly by the driver anyway. 
 
+# Gyro bias compensation
+
+At the moment, gyro bias is calculated during the first 5 seconds of operation. If the IMU chip is moved during this period, the bias may be calculated incorrectly and the app will need to be restarted. The effectiveness of the gyro bias compensation can be monitored using RTIMULibDemo. If the IMU chip is not in motion, the gyro rates should be close to 0 (usually around 0.001 radians per second).
+
 # .ini File Settings
 
 By default, the .ini file will look something like this:
