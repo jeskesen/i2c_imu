@@ -150,15 +150,7 @@ void RTVector3::accelToEuler(RTVector3& rollPitchYaw) const
 
     normAccel.normalize();
 
-    RTVector3 xAxis(1.0f, 0.0f, 0.0f);
-
-    RTVector3 temp1;
-    RTVector3 temp2;
-
-    RTVector3::crossProduct(normAccel, xAxis, temp1);
-    RTVector3::crossProduct(xAxis, temp1, temp2);
-
-    rollPitchYaw.setX(atan2(temp2.y(), temp2.z()));
+    rollPitchYaw.setX(atan2(normAccel.y(), normAccel.z()));
     rollPitchYaw.setY(-atan2(normAccel.x(), sqrt(normAccel.y() * normAccel.y() + normAccel.z() * normAccel.z())));
     rollPitchYaw.setZ(0);
 }
