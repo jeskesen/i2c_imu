@@ -175,7 +175,7 @@ This sets the sample rate for gyro and accel data. It can be between 5 and 1000 
 
 This sets the compass sample rate. It can be between 1 and 100 samples per second.
 
-## MPI9150GyroAccelLpf
+## MPU9150GyroAccelLpf
 
 This sets the low pass filtering for the gyro and accel data. Valid values are:
 

@@ -55,6 +55,10 @@ public:
 
     static uint64_t currentUSecsSinceEpoch();
 
+    //  poseFromAccelMag generates pose Euler angles from measured settings
+
+    static RTVector3 poseFromAccelMag(const RTVector3& accel, const RTVector3& mag);
+
 private:
     static char m_string[1000];                             // for the display routines
 };

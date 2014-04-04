@@ -60,6 +60,26 @@ const char *RTMath::display(const char *label, RTMatrix4x4& mat)
     return m_string;
 }
 
+RTVector3 RTMath::poseFromAccelMag(const RTVector3& accel, const RTVector3& mag)
+{
+    RTVector3 result;
+    RTQuaternion m;
+    RTQuaternion q;
+
+    accel.accelToEuler(result);
+
+    q.fromEuler(result);
+    m.setScalar(0);
+    m.setX(mag.x());
+    m.setY(mag.y());
+    m.setZ(mag.z());
+
+    m = q * m * q.conjugate();
+    result.setZ(-atan2(m.y(), m.x()));
+    return result;
+}
+
+
 
 //----------------------------------------------------------
 //
