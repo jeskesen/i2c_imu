@@ -18,22 +18,45 @@
 //
 
 #include "IMUThread.h"
-#include "RTIMUMPU9150.h"
-#include "RTKalman.h"
-#include "RTIMULibDemo.h"
-#include "RTIMUSettings.h"
+#include <QDebug>
 
 IMUThread::IMUThread() : QObject()
 {
     m_imu = NULL;
     m_calibrationMode = false;
-    m_settings = new RTIMUSettings(PRODUCT_TYPE);
+    m_settings = new RTIMUSettings();                       // just use default name (RTIMULib.ini) for settings file
+    m_timer = -1;
 }
 
 IMUThread::~IMUThread()
 {
 
 }
+
+void IMUThread::newIMU()
+{
+    if (m_imu != NULL) {
+        delete m_imu;
+        m_imu = NULL;
+    }
+
+    if (m_timer != -1) {
+        killTimer(m_timer);
+        m_timer = -1;
+    }
+
+    m_imu = RTIMU::createIMU(m_settings);
+
+    if (m_imu == NULL)
+        return;
+
+    //  set up IMU
+
+    m_imu->IMUInit();
+
+    m_timer = startTimer(m_imu->IMUGetPollInterval());
+}
+
 
 
 void IMUThread::setCalibrationMode(bool enable)
@@ -54,19 +77,35 @@ void IMUThread::newCompassCalData(const RTVector3& compassCalMin, const RTVector
 
 void IMUThread::initThread()
 {
-    m_imu = new RTIMUMPU9150(m_settings->m_kalmanType);
+    //  create IMU. There's a special function call for this
+    //  as it makes sure that the required one is created as specified in the settings.
+
+    m_imu = RTIMU::createIMU(m_settings);
+
+    if (m_imu == NULL) {
+        qDebug() << "No IMU found.";
+        return;
+    }
 
     //  set up IMU
 
-    m_imu->IMUInit(m_settings);
+    m_imu->IMUInit();
 
-    m_timer = startTimer(1000 / (2 * m_settings->m_MPU9150GyroAccelSampleRate));
+    //  poll at the rate suggested bu the IMU
+
+    m_timer = startTimer(m_imu->IMUGetPollInterval());
+
+    //  up the priority in case it's helpful
+
     m_thread->setPriority(QThread::TimeCriticalPriority);
 }
 
 void IMUThread::finishThread()
 {
-    killTimer(m_timer);
+    if (m_timer != -1)
+        killTimer(m_timer);
+
+    m_timer = -1;
 
     if (m_imu != NULL)
         delete m_imu;
@@ -78,12 +117,13 @@ void IMUThread::finishThread()
 
 void IMUThread::timerEvent(QTimerEvent * /* event */)
 {
-    if (m_imu->IMURead()) {
+    //  loop here to clear all samples just in case things aren't keeping up
+
+    while (m_imu->IMURead()) {
         if (m_calibrationMode) {
             emit newCalData(m_imu->getCompass());
         } else {
-            emit newIMUData(m_imu->getKalmanPose(), m_imu->getKalmanQPose(),
-                            m_imu->getGyro(), m_imu->getAccel(), m_imu->getCompass());
+            emit newIMUData(m_imu->getIMUData());
         }
     }
 }

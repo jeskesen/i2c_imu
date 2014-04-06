@@ -18,12 +18,13 @@
 //
 
 #include "RTIMUMPU9150.h"
+#include "RTIMUSettings.h"
 
 //  this sets the learning rate for compass running average calculation
 
 #define COMPASS_ALPHA 0.2f
 
-RTIMUMPU9150::RTIMUMPU9150(int kalmanType) : RTIMU(kalmanType)
+RTIMUMPU9150::RTIMUMPU9150(RTIMUSettings *settings) : RTIMU(settings)
 {
 
 }
@@ -59,6 +60,7 @@ bool RTIMUMPU9150::setSampleRate(int rate)
         return false;
     }
     m_sampleRate = rate;
+    m_sampleInterval = (uint64_t)1000000 / m_sampleRate;
     return true;
 }
 
@@ -131,29 +133,42 @@ bool RTIMUMPU9150::setAccelFsr(unsigned char fsr)
 }
 
 
-bool RTIMUMPU9150::IMUInit(RTIMUSettings *settings)
+bool RTIMUMPU9150::IMUInit()
 {
     unsigned char result;
     int loop;
     unsigned char asa[3];
 
+    m_firstTime = true;
+
+    // set validity flags
+
+    m_imuData.fusionPoseValid = false;
+    m_imuData.fusionQPoseValid = false;
+    m_imuData.gyroValid = true;
+    m_imuData.accelValid = true;
+    m_imuData.compassValid = true;
+    m_imuData.pressureValid = false;
+    m_imuData.temperatureValid = false;
+    m_imuData.humidityValid = false;
+
     //  configure IMU
 
-    m_slaveAddr = settings->m_I2CSlaveAddress;
-    m_bus = settings->m_I2CBus;
+    m_slaveAddr = m_settings->m_I2CSlaveAddress;
+    m_bus = m_settings->m_I2CBus;
 
-    setSampleRate(settings->m_MPU9150GyroAccelSampleRate);
-    setCompassRate(settings->m_MPU9150CompassSampleRate);
-    setLpf(settings->m_MPU9150GyroAccelLpf);
-    setGyroFsr(settings->m_MPU9150GyroFsr);
-    setAccelFsr(settings->m_MPU9150AccelFsr);
+    setSampleRate(m_settings->m_MPU9150GyroAccelSampleRate);
+    setCompassRate(m_settings->m_MPU9150CompassSampleRate);
+    setLpf(m_settings->m_MPU9150GyroAccelLpf);
+    setGyroFsr(m_settings->m_MPU9150GyroFsr);
+    setAccelFsr(m_settings->m_MPU9150AccelFsr);
 
-    setCalibrationData(settings->m_compassCalValid, settings->m_compassCalMin,
-                              settings->m_compassCalMax);
+    setCalibrationData(m_settings->m_compassCalValid, m_settings->m_compassCalMin,
+                              m_settings->m_compassCalMax);
 
 
     //  enable the I2C bus
-    setI2CBus(1);
+    setI2CBus(m_bus);
     if (!I2COpen())
         return false;
 
@@ -387,40 +402,41 @@ bool RTIMUMPU9150::setCompassRate()
     return true;
 }
 
+int RTIMUMPU9150::IMUGetPollInterval()
+{
+    return (400 / m_sampleRate);
+}
+
 bool RTIMUMPU9150::IMURead()
 {
-    unsigned char intStatus;
     unsigned char fifoCount[2];
     unsigned int count;
     unsigned char fifoData[12];
     unsigned char compassData[8];
-
-    if (!I2CRead(m_slaveAddr, MPU9150_INT_STATUS, 1, &intStatus, "Failed to read int status"))
-         return false;
-
-    if ((intStatus & 1) == 0)
-        return false;
 
     if (!I2CRead(m_slaveAddr, MPU9150_FIFO_COUNT_H, 2, fifoCount, "Failed to read fifo count"))
          return false;
 
     count = ((unsigned int)fifoCount[0] << 8) + fifoCount[1];
 
-    if (count == 0)
-        return false;
-
-    while (count >= 24) {
-        //  must have missed a sample. Just discard old ones
-        if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, 12, fifoData, "Failed to read fifo data"))
-            return false;
-        count -= 12;
-    }
-
-    if (count < 12) {
-        HAL_ERROR1("Incorrect fifo count %d\n", count);
+    if (count == 1024) {
+        HAL_INFO("MPU9150 fifo has overflowed");
         resetFifo();
         return false;
     }
+
+    if (count > 480) {
+        // more than 40 samples behind - going too slowly so discard some samples but maintain timestamp correctly
+        while (count >= 120) {
+            if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, 12, fifoData, "Failed to read fifo data"))
+                return false;
+            count -= 12;
+            m_imuData.timestamp += m_sampleInterval;
+        }
+    }
+
+    if (count < 12)
+        return false;
 
     if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, 12, fifoData, "Failed to read fifo data"))
         return false;
@@ -428,82 +444,70 @@ bool RTIMUMPU9150::IMURead()
     if (!I2CRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, compassData, "Failed to read compass data"))
         return false;
 
-     convertToVector(fifoData, m_accelData, m_accelScale);
-     convertToVector(fifoData + 6, m_gyroData, m_gyroScale);
-     convertToVector(compassData + 1, m_compassData, 0.3f, false);
+    RTMath::convertToVector(fifoData, m_imuData.accel, m_accelScale, true);
+    RTMath::convertToVector(fifoData + 6, m_imuData.gyro, m_gyroScale, true);
+    RTMath::convertToVector(compassData + 1, m_imuData.compass, 0.3f, false);
 
-     if (m_gyroLearning) {
-         // update gyro bias
+    if (m_gyroLearning) {
+        // update gyro bias
 
-         m_gyroBias.setX((1.0 - m_gyroAlpha) * m_gyroBias.x() + m_gyroAlpha * m_gyroData.x());
-         m_gyroBias.setY((1.0 - m_gyroAlpha) * m_gyroBias.y() + m_gyroAlpha * m_gyroData.y());
-         m_gyroBias.setZ((1.0 - m_gyroAlpha) * m_gyroBias.z() + m_gyroAlpha * m_gyroData.z());
+        m_gyroBias.setX((1.0 - m_gyroAlpha) * m_gyroBias.x() + m_gyroAlpha * m_imuData.gyro.x());
+        m_gyroBias.setY((1.0 - m_gyroAlpha) * m_gyroBias.y() + m_gyroAlpha * m_imuData.gyro.y());
+        m_gyroBias.setZ((1.0 - m_gyroAlpha) * m_gyroBias.z() + m_gyroAlpha * m_imuData.gyro.z());
 
-         if ((RTMath::currentUSecsSinceEpoch() - m_gyroStartTime) > 5000000)
-             m_gyroLearning = false;                     // only do this for 5 seconds
-     }
-
-     //  sort out gyro axes and correct for bias
-
-     m_gyroData.setX(m_gyroData.x() - m_gyroBias.x());
-     m_gyroData.setY(-(m_gyroData.y() - m_gyroBias.y()));
-     m_gyroData.setZ(-(m_gyroData.z() - m_gyroBias.z()));
-
-     //  sort out accel data;
-
-     m_accelData.setX(-m_accelData.x());
-
-     //  sort out compass axes
-
-     float temp;
-
-     temp = m_compassData.x();
-     m_compassData.setX(m_compassData.y());
-     m_compassData.setY(-temp);
-
-     //  use the fuse data adjustments
-
-     m_compassData.setX(m_compassData.x() * m_compassAdjust[0]);
-     m_compassData.setY(m_compassData.y() * m_compassAdjust[1]);
-     m_compassData.setZ(m_compassData.z() * m_compassAdjust[2]);
-
-     //  calibrate if required
-
-     if (!m_calibrationMode && m_calibrationValid) {
-         m_compassData.setX((m_compassData.x() - m_compassCalOffset[0]) * m_compassCalScale[0]);
-         m_compassData.setY((m_compassData.y() - m_compassCalOffset[1]) * m_compassCalScale[1]);
-         m_compassData.setZ((m_compassData.z() - m_compassCalOffset[2]) * m_compassCalScale[2]);
-     }
-
-     //  update running average
-
-     m_compassAverage.setX(m_compassData.x() * COMPASS_ALPHA + m_compassAverage.x() * (1.0 - COMPASS_ALPHA));
-     m_compassAverage.setY(m_compassData.y() * COMPASS_ALPHA + m_compassAverage.y() * (1.0 - COMPASS_ALPHA));
-     m_compassAverage.setZ(m_compassData.z() * COMPASS_ALPHA + m_compassAverage.z() * (1.0 - COMPASS_ALPHA));
-     m_compassData = m_compassAverage;
-
-     //  now update the filter
-
-     updateKalman(RTMath::currentUSecsSinceEpoch());
-
-     return true;
-}
-
-void RTIMUMPU9150::convertToVector(unsigned char *rawData, RTVector3& vec, float scale, bool bigEndian)
-{
-    unsigned int val;
-    float data[3];
-
-    for (int i = 0; i < 3; i++) {
-        if (bigEndian)
-            val = (((unsigned int)rawData[i * 2]) << 8) + rawData[i * 2 + 1];
-        else
-            val = (((unsigned int)rawData[i * 2 + 1]) << 8) + rawData[i * 2];
-        if (val & 0x8000)
-            val |= 0xffff0000;
-        data[i] = (float)((int)val) * scale;
+        if ((RTMath::currentUSecsSinceEpoch() - m_gyroStartTime) > 5000000)
+            m_gyroLearning = false;                     // only do this for 5 seconds
     }
-    vec.setX(data[0]);
-    vec.setY(data[1]);
-    vec.setZ(data[2]);
+
+    //  sort out gyro axes and correct for bias
+
+    m_imuData.gyro.setX(m_imuData.gyro.x() - m_gyroBias.x());
+    m_imuData.gyro.setY(-(m_imuData.gyro.y() - m_gyroBias.y()));
+    m_imuData.gyro.setZ(-(m_imuData.gyro.z() - m_gyroBias.z()));
+
+    //  sort out accel data;
+
+    m_imuData.accel.setX(-m_imuData.accel.x());
+
+    //  sort out compass axes
+
+    float temp;
+
+    temp = m_imuData.compass.x();
+    m_imuData.compass.setX(m_imuData.compass.y());
+    m_imuData.compass.setY(-temp);
+
+    //  use the fuse data adjustments
+
+    m_imuData.compass.setX(m_imuData.compass.x() * m_compassAdjust[0]);
+    m_imuData.compass.setY(m_imuData.compass.y() * m_compassAdjust[1]);
+    m_imuData.compass.setZ(m_imuData.compass.z() * m_compassAdjust[2]);
+
+    //  calibrate if required
+
+    if (!m_calibrationMode && m_calibrationValid) {
+        m_imuData.compass.setX((m_imuData.compass.x() - m_compassCalOffset[0]) * m_compassCalScale[0]);
+        m_imuData.compass.setY((m_imuData.compass.y() - m_compassCalOffset[1]) * m_compassCalScale[1]);
+        m_imuData.compass.setZ((m_imuData.compass.z() - m_compassCalOffset[2]) * m_compassCalScale[2]);
+    }
+
+    //  update running average
+
+    m_compassAverage.setX(m_imuData.compass.x() * COMPASS_ALPHA + m_compassAverage.x() * (1.0 - COMPASS_ALPHA));
+    m_compassAverage.setY(m_imuData.compass.y() * COMPASS_ALPHA + m_compassAverage.y() * (1.0 - COMPASS_ALPHA));
+    m_compassAverage.setZ(m_imuData.compass.z() * COMPASS_ALPHA + m_compassAverage.z() * (1.0 - COMPASS_ALPHA));
+    m_imuData.compass = m_compassAverage;
+
+    if (m_firstTime)
+        m_imuData.timestamp = RTMath::currentUSecsSinceEpoch();
+    else
+        m_imuData.timestamp += m_sampleInterval;
+
+    m_firstTime = false;
+
+    //  now update the filter
+
+    updateFusion();
+
+    return true;
 }

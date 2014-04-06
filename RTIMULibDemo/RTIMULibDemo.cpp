@@ -23,10 +23,8 @@
 
 #include "RTIMULibDemo.h"
 #include "CompassCalDlg.h"
+#include "SelectIMUDlg.h"
 #include "IMUThread.h"
-
-#include "RTIMUMPU9150.h"
-#include "RTKalman.h"
 
 #define RATE_TIMER_INTERVAL 2
 
@@ -44,6 +42,7 @@ RTIMULibDemo::RTIMULibDemo()
 
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui.actionCalibrateCompass, SIGNAL(triggered()), this, SLOT(onCalibrateCompass()));
+    connect(ui.actionSelectIMU, SIGNAL(triggered()), this, SLOT(onSelectIMU()));
     connect(m_enableGyro, SIGNAL(stateChanged(int)), this, SLOT(onEnableGyro(int)));
     connect(m_enableAccel, SIGNAL(stateChanged(int)), this, SLOT(onEnableAccel(int)));
     connect(m_enableCompass, SIGNAL(stateChanged(int)), this, SLOT(onEnableCompass(int)));
@@ -53,11 +52,10 @@ RTIMULibDemo::RTIMULibDemo()
 
     m_imuThread = new IMUThread();
 
-    connect(m_imuThread,
-            SIGNAL(newIMUData(const RTVector3&, const RTQuaternion&, const RTVector3&, const RTVector3&, const RTVector3&)),
-            this,
-            SLOT(newIMUData(const RTVector3&, const RTQuaternion&, const RTVector3&, const RTVector3&, const RTVector3&)),
-            Qt::DirectConnection);
+    connect(m_imuThread, SIGNAL(newIMUData(const RTIMU_DATA&)),
+            this, SLOT(newIMUData(const RTIMU_DATA&)), Qt::DirectConnection);
+
+    connect(this, SIGNAL(newIMU()), m_imuThread, SLOT(newIMU()));
 
     m_imuThread->resumeThread();
 	
@@ -78,10 +76,22 @@ RTIMULibDemo::~RTIMULibDemo()
 {
 }
 
+void RTIMULibDemo::onSelectIMU()
+{
+    SelectIMUDlg dlg(m_imuThread->getSettings(), this);
+
+    if (dlg.exec() == QDialog::Accepted) {
+        emit newIMU();
+    }
+}
+
+
 void RTIMULibDemo::onCalibrateCompass()
 {
     CompassCalDlg dlg(this);
 
+    if (m_imuThread->getIMU() == NULL)
+        return;
     m_imuThread->setCalibrationMode(true);
     connect(m_imuThread, SIGNAL(newCalData(const RTVector3&)), &dlg,
             SLOT(newCalData(const RTVector3&)), Qt::DirectConnection);
@@ -93,35 +103,34 @@ void RTIMULibDemo::onCalibrateCompass()
     disconnect(m_imuThread, SIGNAL(newCalData(const RTVector3&)), &dlg, SLOT(newCalData(const RTVector3&)));
 }
 
-void RTIMULibDemo::newIMUData(const RTVector3& kalmanPose, const RTQuaternion& kalmanQPose,
-                             const RTVector3& gyro, const RTVector3& accel, const RTVector3& compass)
+void RTIMULibDemo::newIMUData(const RTIMU_DATA& data)
 {
-    m_kalmanPose = kalmanPose;
-    m_kalmanQPose = kalmanQPose;
-    m_gyro = gyro;
-    m_accel = accel;
-    m_compass = compass;
+    m_imuData = data;
     m_sampleCount++;
 }
 
 void RTIMULibDemo::onEnableGyro(int state)
 {
-    m_imuThread->getIMU()->setGyroEnable(state == Qt::Checked);
+    if (m_imuThread->getIMU() != NULL)
+        m_imuThread->getIMU()->setGyroEnable(state == Qt::Checked);
 }
 
 void RTIMULibDemo::onEnableAccel(int state)
 {
-    m_imuThread->getIMU()->setAccelEnable(state == Qt::Checked);
+    if (m_imuThread->getIMU() != NULL)
+        m_imuThread->getIMU()->setAccelEnable(state == Qt::Checked);
 }
 
 void RTIMULibDemo::onEnableCompass(int state)
 {
-    m_imuThread->getIMU()->setCompassEnable(state == Qt::Checked);
+    if (m_imuThread->getIMU() != NULL)
+        m_imuThread->getIMU()->setCompassEnable(state == Qt::Checked);
 }
 
 void RTIMULibDemo::onEnableDebug(int state)
 {
-    m_imuThread->getIMU()->setDebugEnable(state == Qt::Checked);
+    if (m_imuThread->getIMU() != NULL)
+        m_imuThread->getIMU()->setDebugEnable(state == Qt::Checked);
 }
 
 void RTIMULibDemo::closeEvent(QCloseEvent *)
@@ -136,26 +145,26 @@ void RTIMULibDemo::timerEvent(QTimerEvent *event)
     if (event->timerId() == m_displayTimer) {
         //  Update the GUI
 
-        m_gyroX->setText(QString::number(m_gyro.x(), 'g', 4));
-        m_gyroY->setText(QString::number(m_gyro.y(), 'g', 4));
-        m_gyroZ->setText(QString::number(m_gyro.z(), 'g', 4));
+        m_gyroX->setText(QString::number(m_imuData.gyro.x(), 'g', 6));
+        m_gyroY->setText(QString::number(m_imuData.gyro.y(), 'g', 6));
+        m_gyroZ->setText(QString::number(m_imuData.gyro.z(), 'g', 6));
 
-        m_accelX->setText(QString::number(m_accel.x(), 'g', 4));
-        m_accelY->setText(QString::number(m_accel.y(), 'g', 4));
-        m_accelZ->setText(QString::number(m_accel.z(), 'g', 4));
+        m_accelX->setText(QString::number(m_imuData.accel.x(), 'g', 6));
+        m_accelY->setText(QString::number(m_imuData.accel.y(), 'g', 6));
+        m_accelZ->setText(QString::number(m_imuData.accel.z(), 'g', 6));
 
-        m_compassX->setText(QString::number(m_compass.x(), 'g', 4));
-        m_compassY->setText(QString::number(m_compass.y(), 'g', 4));
-        m_compassZ->setText(QString::number(m_compass.z(), 'g', 4));
+        m_compassX->setText(QString::number(m_imuData.compass.x(), 'g', 6));
+        m_compassY->setText(QString::number(m_imuData.compass.y(), 'g', 6));
+        m_compassZ->setText(QString::number(m_imuData.compass.z(), 'g', 6));
 
-        m_kalmanPoseX->setText(QString::number(m_kalmanPose.x() * RTMATH_RAD_TO_DEGREE, 'g', 4));
-        m_kalmanPoseY->setText(QString::number(m_kalmanPose.y() * RTMATH_RAD_TO_DEGREE, 'g', 4));
-        m_kalmanPoseZ->setText(QString::number(m_kalmanPose.z() * RTMATH_RAD_TO_DEGREE, 'g', 4));
+        m_fusionPoseX->setText(QString::number(m_imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE, 'g', 6));
+        m_fusionPoseY->setText(QString::number(m_imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE, 'g', 6));
+        m_fusionPoseZ->setText(QString::number(m_imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE, 'g', 6));
 
-        m_kalmanQPoseScalar->setText(QString::number(m_kalmanQPose.scalar(), 'g', 4));
-        m_kalmanQPoseX->setText(QString::number(m_kalmanQPose.x(), 'g', 4));
-        m_kalmanQPoseY->setText(QString::number(m_kalmanQPose.y(), 'g', 4));
-        m_kalmanQPoseZ->setText(QString::number(m_kalmanQPose.z(), 'g', 4));
+        m_fusionQPoseScalar->setText(QString::number(m_imuData.fusionQPose.scalar(), 'g', 6));
+        m_fusionQPoseX->setText(QString::number(m_imuData.fusionQPose.x(), 'g', 6));
+        m_fusionQPoseY->setText(QString::number(m_imuData.fusionQPose.y(), 'g', 6));
+        m_fusionQPoseZ->setText(QString::number(m_imuData.fusionQPose.z(), 'g', 6));
     } else {
 
         //  Update the sample rate
@@ -164,10 +173,14 @@ void RTIMULibDemo::timerEvent(QTimerEvent *event)
         m_sampleCount = 0;
         m_rateStatus->setText(QString("Sample rate: %1 per second").arg(rate));
 
-        if (m_imuThread->getIMU()->getCalibrationValid())
-            m_calStatus->setText("Calibration in use");
-        else
-            m_calStatus->setText("Uncalibrated");
+        if (m_imuThread->getIMU() == NULL) {
+            m_calStatus->setText("No IMU found");
+        } else {
+            if (m_imuThread->getIMU()->getCalibrationValid())
+                m_calStatus->setText("Calibration in use");
+            else
+                m_calStatus->setText("Uncalibrated");
+        }
     }
 }
 
@@ -177,39 +190,39 @@ void RTIMULibDemo::layoutWindow()
     vLayout->setContentsMargins(3, 3, 3, 3);
     vLayout->setSpacing(3);
 
-    vLayout->addWidget(new QLabel("Kalman state (quaternion): "));
+    vLayout->addWidget(new QLabel("Fusion state (quaternion): "));
 
     QHBoxLayout *dataLayout = new QHBoxLayout();
     dataLayout->addSpacing(30);
-    m_kalmanQPoseScalar = new QLabel("1");
-    m_kalmanQPoseScalar->setFrameStyle(QFrame::Panel);
-    m_kalmanQPoseX = new QLabel("0");
-    m_kalmanQPoseX->setFrameStyle(QFrame::Panel);
-    m_kalmanQPoseY = new QLabel("0");
-    m_kalmanQPoseY->setFrameStyle(QFrame::Panel);
-    m_kalmanQPoseZ = new QLabel("0");
-    m_kalmanQPoseZ->setFrameStyle(QFrame::Panel);
-    dataLayout->addWidget(m_kalmanQPoseScalar);
-    dataLayout->addWidget(m_kalmanQPoseX);
-    dataLayout->addWidget(m_kalmanQPoseY);
-    dataLayout->addWidget(m_kalmanQPoseZ);
+    m_fusionQPoseScalar = new QLabel("1");
+    m_fusionQPoseScalar->setFrameStyle(QFrame::Panel);
+    m_fusionQPoseX = new QLabel("0");
+    m_fusionQPoseX->setFrameStyle(QFrame::Panel);
+    m_fusionQPoseY = new QLabel("0");
+    m_fusionQPoseY->setFrameStyle(QFrame::Panel);
+    m_fusionQPoseZ = new QLabel("0");
+    m_fusionQPoseZ->setFrameStyle(QFrame::Panel);
+    dataLayout->addWidget(m_fusionQPoseScalar);
+    dataLayout->addWidget(m_fusionQPoseX);
+    dataLayout->addWidget(m_fusionQPoseY);
+    dataLayout->addWidget(m_fusionQPoseZ);
     dataLayout->addSpacing(30);
     vLayout->addLayout(dataLayout);
 
     vLayout->addSpacing(10);
     vLayout->addWidget(new QLabel("Pose - roll, pitch, yaw (degrees): "));
 
-    m_kalmanPoseX = new QLabel("0");
-    m_kalmanPoseX->setFrameStyle(QFrame::Panel);
-    m_kalmanPoseY = new QLabel("0");
-    m_kalmanPoseY->setFrameStyle(QFrame::Panel);
-    m_kalmanPoseZ = new QLabel("0");
-    m_kalmanPoseZ->setFrameStyle(QFrame::Panel);
+    m_fusionPoseX = new QLabel("0");
+    m_fusionPoseX->setFrameStyle(QFrame::Panel);
+    m_fusionPoseY = new QLabel("0");
+    m_fusionPoseY->setFrameStyle(QFrame::Panel);
+    m_fusionPoseZ = new QLabel("0");
+    m_fusionPoseZ->setFrameStyle(QFrame::Panel);
     dataLayout = new QHBoxLayout();
     dataLayout->addSpacing(30);
-    dataLayout->addWidget(m_kalmanPoseX);
-    dataLayout->addWidget(m_kalmanPoseY);
-    dataLayout->addWidget(m_kalmanPoseZ);
+    dataLayout->addWidget(m_fusionPoseX);
+    dataLayout->addWidget(m_fusionPoseY);
+    dataLayout->addWidget(m_fusionPoseZ);
     dataLayout->addSpacing(137);
     vLayout->addLayout(dataLayout);
 
@@ -265,7 +278,7 @@ void RTIMULibDemo::layoutWindow()
     vLayout->addLayout(dataLayout);
 
     vLayout->addSpacing(10);
-    vLayout->addWidget(new QLabel("Kalman controls: "));
+    vLayout->addWidget(new QLabel("Fusion controls: "));
 
     m_enableGyro = new QCheckBox("Enable gyros");
     m_enableGyro->setChecked(true);

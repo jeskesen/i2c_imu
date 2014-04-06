@@ -17,7 +17,7 @@
 //  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "RTKalman4.h"
+#include "RTFusionKalman4.h"
 
 //  The QVALUE affects the gyro response.
 
@@ -28,7 +28,7 @@
 
 #define KALMAN_RVALUE	0.0005f
 
-RTKalman4::RTKalman4()
+RTFusionKalman4::RTFusionKalman4()
 {
     m_Rk.fill(0);
     m_Q.fill(0);
@@ -47,21 +47,23 @@ RTKalman4::RTKalman4()
             m_Rk.setVal(i, i, KALMAN_RVALUE);
 }
 
-RTKalman4::~RTKalman4()
+RTFusionKalman4::~RTFusionKalman4()
 {
 }
 
-void RTKalman4::reset()
+void RTFusionKalman4::reset()
 {
     m_firstTime = true;
-    m_kalmanPose = RTVector3();
+    m_fusionPose = RTVector3();
+    m_fusionQPose.fromEuler(m_fusionPose);
+    m_gyro = RTVector3();
+    m_accel = RTVector3();
+    m_compass = RTVector3();
     m_measuredPose = RTVector3();
+    m_measuredQPose.fromEuler(m_measuredPose);
 }
 
-
-
-
-void RTKalman4::predict()
+void RTFusionKalman4::predict()
 {
     RTMatrix4x4 mat;
     RTQuaternion tQuat;
@@ -115,7 +117,7 @@ void RTKalman4::predict()
 }
 
 
-void RTKalman4::update()
+void RTFusionKalman4::update()
 {
     RTQuaternion delta;
     RTMatrix4x4 Sk, SkInverse;
@@ -160,10 +162,18 @@ void RTKalman4::update()
         HAL_INFO(RTMath::display("Cov", m_Pkk));
 }
 
-void RTKalman4::newIMUData(const RTVector3& accel, const RTVector3& gyro, const RTVector3& mag, RTFLOAT deltaTime)
+void RTFusionKalman4::newIMUData(RTIMU_DATA& data)
 {
+    if (m_enableGyro)
+        m_gyro = data.gyro;
+    else
+        m_gyro = RTVector3();
+    m_accel = data.accel;
+    m_compass = data.compass;
+
     if (m_firstTime) {
-        calculatePose(accel, mag);
+        m_lastFusionTime = data.timestamp;
+        calculatePose(m_accel, m_compass);
         m_Fk.fill(0);
 
         //  init covariance matrix to something
@@ -179,38 +189,37 @@ void RTKalman4::newIMUData(const RTVector3& accel, const RTVector3& gyro, const 
         //  initialize the poses
 
         m_stateQ.fromEuler(m_measuredPose);
-        m_kalmanQPose = m_stateQ;
-        m_kalmanPose = m_measuredPose;
+        m_fusionQPose = m_stateQ;
+        m_fusionPose = m_measuredPose;
         m_firstTime = false;
     } else {
-        if (deltaTime == 0)
+        m_timeDelta = (RTFLOAT)(data.timestamp - m_lastFusionTime) / (RTFLOAT)1000000;
+        m_lastFusionTime = data.timestamp;
+        if (m_timeDelta <= 0)
             return;
 
         if (m_debug) {
             HAL_INFO("\n------\n");
-            HAL_INFO1("IMU update delta time: %f\n", deltaTime);
+            HAL_INFO1("IMU update delta time: %f\n", m_timeDelta);
         }
 
-        if (m_enableGyro)
-            m_gyro = gyro;
-        else
-            m_gyro = RTVector3();
-
-        m_timeDelta = deltaTime;
-
-        calculatePose(accel, mag);
+        calculatePose(data.accel, data.compass);
 
         predict();
         update();
-        m_stateQ.toEuler(m_kalmanPose);
-        m_kalmanQPose = m_stateQ;
+        m_stateQ.toEuler(m_fusionPose);
+        m_fusionQPose = m_stateQ;
 
         if (m_debug) {
             HAL_INFO(RTMath::displayRadians("Measured pose", m_measuredPose));
-            HAL_INFO(RTMath::displayRadians("Kalman pose", m_kalmanPose));
+            HAL_INFO(RTMath::displayRadians("Kalman pose", m_fusionPose));
             HAL_INFO(RTMath::displayRadians("Measured quat", m_measuredPose));
             HAL_INFO(RTMath::display("Kalman quat", m_stateQ));
             HAL_INFO(RTMath::display("Error quat", m_stateQError));
          }
     }
+    data.fusionPoseValid = true;
+    data.fusionQPoseValid = true;
+    data.fusionPose = m_fusionPose;
+    data.fusionQPose = m_fusionQPose;
 }

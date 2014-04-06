@@ -18,24 +18,53 @@
 //
 
 #include "RTIMU.h"
-#include "RTKalman.h"
+#include "RTFusionKalman4.h"
+#include "RTIMUSettings.h"
 
-#include "RTKalman4.h"
+#include "RTIMUNull.h"
+#include "RTIMUMPU9150.h"
+#include "RTIMUGD20M303.h"
 
-RTIMU::RTIMU(int kalmanType)
+RTIMU *RTIMU::createIMU(RTIMUSettings *settings)
 {
-    m_firstKalmanUpdate = true;
+    switch (settings->m_imuType) {
+    case RTIMU_TYPE_MPU9150:
+        return new RTIMUMPU9150(settings);
+
+    case RTIMU_TYPE_GD20M303:
+        return new RTIMUGD20M303(settings);
+
+    case RTIMU_TYPE_AUTODISCOVER:
+        if (settings->discoverIMU(settings->m_imuType, settings->m_I2CSlaveAddress)) {
+            settings->saveSettings();
+            return RTIMU::createIMU(settings);
+        }
+        return NULL;
+
+    case RTIMU_TYPE_NULL:
+        return new RTIMUNull(settings);
+
+    default:
+        return NULL;
+    }
+}
+
+
+RTIMU::RTIMU(RTIMUSettings *settings)
+{
+    m_settings = settings;
+
     m_calibrationMode = false;
     m_calibrationValid = false;
 
-    switch (kalmanType) {
-    case RTKALMAN_TYPE_STATE4:
-        m_kalman = new RTKalman4();
+    switch (m_settings->m_fusionType) {
+    case RTFUSION_TYPE_KALMANSTATE4:
+        m_fusion = new RTFusionKalman4();
         HAL_INFO("Using Kalman STATE4\n");
         break;
 
     default:
-        m_kalman = new RTKalman();
+        m_fusion = new RTFusion();
         HAL_INFO("Using Kalman NULL\n");
         break;
     }
@@ -43,8 +72,8 @@ RTIMU::RTIMU(int kalmanType)
 
 RTIMU::~RTIMU()
 {
-    delete m_kalman;
-    m_kalman = NULL;
+    delete m_fusion;
+    m_fusion = NULL;
 }
 
 void RTIMU::setCalibrationData(const bool valid,
@@ -80,9 +109,8 @@ void RTIMU::setCalibrationData(const bool valid,
     HAL_INFO("Compass is calibrated\n");
 }
 
-void RTIMU::updateKalman(uint64_t timestamp)
+void RTIMU::updateFusion()
 {
-    m_kalman->newIMUData(m_accelData, m_gyroData, m_compassData, (RTFLOAT)(timestamp - m_lastKalmanTime) / (RTFLOAT)1000000.0);
-    m_lastKalmanTime = timestamp;
+    m_fusion->newIMUData(m_imuData);
 }
 

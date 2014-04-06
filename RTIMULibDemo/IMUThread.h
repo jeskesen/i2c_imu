@@ -22,10 +22,7 @@
 
 #include <QThread>
 
-#include "RTMath.h"
-
-class RTIMU;
-class RTIMUSettings;
+#include "RTIMULib.h"
 
 class IMUThread : public QObject
 {
@@ -52,6 +49,7 @@ public:
 public slots:
     void internalRunLoop() { initThread(); emit running();}
     void cleanup() {finishThread(); emit internalKillThread(); }
+    void newIMU();
 
 signals:
     void running();											// emitted when everything set up and thread active
@@ -59,8 +57,7 @@ signals:
     void internalKillThread();								// tells the QThread to quit
 
     void newCalData(const RTVector3& compass);              // this is uncalibrated compass data emitted in cal mode
-    void newIMUData(const RTVector3& kalmanPose, const RTQuaternion& kalmanQPose, const RTVector3& gyro,   // this is the normal data
-                    const RTVector3& accel, const RTVector3& compass);
+    void newIMUData(const RTIMU_DATA& data);                // this contains the latest data form the IMU
 
 protected:
     void initThread();

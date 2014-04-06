@@ -12,6 +12,26 @@ The instructions here are for the Raspberry Pi but RTIMULib can be use easily wi
 
 Check out www.richards-tech.com for more details, updates and news.
 
+# Release history
+
+## Current
+
+### Partial support for STM L3GD20H/LSM303D IMUs
+
+This is in a very early state and only supports the gyro sensor at the moment.
+
+### Improved performance with MPU9150
+
+Now can achieve rates up to around 860 Kalman-fused samples per second using the MPU9150 and 900MHz Raspberry Pi.
+
+### Auto detection of IMU
+
+RTIMULib can now scan for supported IMUs and configure automatically. This is the default behavior now.
+
+## April 4 2014 - 0.9.0
+
+Initial release with support for MPU9150.
+
 # RTIMULib on the Raspberry Pi/Raspbian
 
 ## Obtaining RTIMULib

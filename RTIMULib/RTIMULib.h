@@ -17,35 +17,23 @@
 //  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef _RTIMUNULL_H
-#define	_RTIMUNULL_H
+#ifndef _RTIMULIB_H
+#define	_RTIMULIB_H
 
-//  IMUNull is a dummy IMU that assumes sensor data is coming from elsewhere,
-//  for example, across a network.
-//
-//  Call IMUInit in the normal way. Then for every update, call setIMUData and then IMURead
-//  to kick the kalman filter.
+#include "RTIMULibDefs.h"
 
+#include "RTMath.h"
+
+#include "RTFusion.h"
+#include "RTFusionKalman4.h"
+
+#include "RTIMUHal.h"
 #include "RTIMU.h"
+#include "RTIMUNull.h"
+#include "RTIMUMPU9150.h"
+#include "RTIMUGD20M303.h"
 
-class RTIMUSettings;
+#include "RTIMUSettings.h"
 
-class RTIMUNull : public RTIMU
-{
-public:
-    RTIMUNull(RTIMUSettings *settings);
-    ~RTIMUNull();
 
-    // The timestamp parameter is assumed to be from RTMath::currentUSecsSinceEpoch()
-
-    void setIMUData(const RTIMU_DATA& data);
-
-    virtual bool IMUInit();
-    virtual int IMUGetPollInterval();
-    virtual bool IMURead();
-
-private:
-    uint64_t m_timestamp;
-};
-
-#endif // _RTIMUNULL_H
+#endif // _RTIMULIB_H

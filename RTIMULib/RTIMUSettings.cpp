@@ -19,6 +19,7 @@
 
 #include "RTIMUSettings.h"
 #include "RTIMUMPU9150.h"
+#include "RTIMUGD20M303.h"
 
 #define RATE_TIMER_INTERVAL 2
 
@@ -33,6 +34,62 @@ RTIMUSettings::RTIMUSettings(const char *productType)
     loadSettings();
 }
 
+bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
+{
+    unsigned char result;
+
+    setI2CBus(m_I2CBus);
+    if (!I2COpen()) {
+        HAL_ERROR1("Failed to open I2C bus %d\n", m_I2CBus);
+        return false;
+    }
+
+    if (I2CRead(MPU9150_ADDRESS0, MPU9150_WHO_AM_I, 1, &result, "")) {
+        if (result == 0x68) {
+            imuType = RTIMU_TYPE_MPU9150;
+            slaveAddress = MPU9150_ADDRESS0;
+            I2CClose();
+            HAL_INFO("Detected MPU9150 at standard address\n");
+            return true;
+        }
+    }
+
+    if (I2CRead(MPU9150_ADDRESS1, MPU9150_WHO_AM_I, 1, &result, "")) {
+        if (result == 0x68) {
+            imuType = RTIMU_TYPE_MPU9150;
+            slaveAddress = MPU9150_ADDRESS1;
+            I2CClose();
+            HAL_INFO("Detected MPU9150 at option address\n");
+            return true;
+        }
+    }
+
+    if (I2CRead(L3GD20H_ADDRESS0, L3GD20H_WHO_AM_I, 1, &result, "")) {
+        if (result == 0xd7) {
+            imuType = RTIMU_TYPE_GD20M303;
+            slaveAddress = L3GD20H_ADDRESS0;
+            I2CClose();
+            HAL_INFO("Detected L3GD20H at standard address\n");
+            return true;
+        }
+    }
+
+    if (I2CRead(L3GD20H_ADDRESS1, L3GD20H_WHO_AM_I, 1, &result, "")) {
+        if (result == 0xd7) {
+            imuType = RTIMU_TYPE_GD20M303;
+            slaveAddress = L3GD20H_ADDRESS1;
+            I2CClose();
+            HAL_INFO("Detected L3GD20H at option address\n");
+            return true;
+        }
+    }
+
+    I2CClose();
+
+    HAL_ERROR("No IMU detected\n");
+    return false;
+}
+
 bool RTIMUSettings::loadSettings()
 {
     char buf[200];
@@ -42,10 +99,10 @@ bool RTIMUSettings::loadSettings()
 
     //  preset general defaults
 
-    m_imuType = RTIMU_TYPE_MPU9150;
-    m_I2CSlaveAddress = MPU9150_ADDRESS0;
+    m_imuType = RTIMU_TYPE_AUTODISCOVER;
+    m_I2CSlaveAddress = 0;
     m_I2CBus = 1;
-    m_kalmanType = RTKALMAN_TYPE_STATE4;
+    m_fusionType = RTFUSION_TYPE_KALMANSTATE4;
     m_compassCalValid = false;
 
     //  MPU9150 defaults
@@ -55,6 +112,15 @@ bool RTIMUSettings::loadSettings()
     m_MPU9150GyroAccelLpf = MPU9150_LPF_20;
     m_MPU9150GyroFsr = MPU9150_GYROFSR_1000;
     m_MPU9150AccelFsr = MPU9150_ACCELFSR_8;
+
+    //  GD20M303 defaults
+
+    m_GD20M303GyroSampleRate = L3GD20H_SAMPLERATE_50;
+    m_GD20M303AccelSampleRate = 0;
+    m_GD20M303CompassSampleRate = 0;
+    m_GD20M303GyroBW = L3GD20H_BANDWIDTH_1;
+    m_GD20M303GyroHpf = L3GD20H_HPF_4;
+    m_GD20M303GyroFsr = L3GD20H_FSR_500;
 
     //  check to see if settings file exists
 
@@ -74,12 +140,12 @@ bool RTIMUSettings::loadSettings()
 
         if (strcmp(key, RTIMULIB_IMU_TYPE) == 0) {
             m_imuType = atoi(val);
+        } else if (strcmp(key, RTIMULIB_FUSION_TYPE) == 0) {
+            m_fusionType = atoi(val);
         } else if (strcmp(key, RTIMULIB_I2C_BUS) == 0) {
-                m_I2CBus = atoi(val);
+            m_I2CBus = atoi(val);
         } else if (strcmp(key, RTIMULIB_I2C_SLAVEADDRESS) == 0) {
             m_I2CSlaveAddress = atoi(val);
-         } else if (strcmp(key, RTIMULIB_KALMAN_TYPE) == 0) {
-            m_kalmanType = atoi(val);
         } else if (strcmp(key, RTIMULIB_COMPASSCAL_VALID) == 0) {
             m_compassCalValid = strcmp(val, "true") == 0;
         } else if (strcmp(key, RTIMULIB_COMPASSCAL_MINX) == 0) {
@@ -132,10 +198,9 @@ bool RTIMUSettings::saveSettings()
         return false;
     }
     setValue(RTIMULIB_IMU_TYPE, m_imuType);
+    setValue(RTIMULIB_FUSION_TYPE, m_fusionType);
     setValue(RTIMULIB_I2C_BUS, m_I2CBus);
     setValue(RTIMULIB_I2C_SLAVEADDRESS, m_I2CSlaveAddress);
-
-    setValue(RTIMULIB_KALMAN_TYPE, m_kalmanType);
 
     setValue(RTIMULIB_COMPASSCAL_VALID, m_compassCalValid);
     setValue(RTIMULIB_COMPASSCAL_MINX, m_compassCalMin.x());

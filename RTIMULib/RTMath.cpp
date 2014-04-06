@@ -79,6 +79,25 @@ RTVector3 RTMath::poseFromAccelMag(const RTVector3& accel, const RTVector3& mag)
     return result;
 }
 
+void RTMath::convertToVector(unsigned char *rawData, RTVector3& vec, RTFLOAT scale, bool bigEndian)
+{
+    unsigned int val;
+    RTFLOAT data[3];
+
+    for (int i = 0; i < 3; i++) {
+        if (bigEndian)
+            val = (((unsigned int)rawData[i * 2]) << 8) | rawData[i * 2 + 1];
+        else
+            val = (((unsigned int)rawData[i * 2 + 1]) << 8) | rawData[i * 2];
+        if (val & 0x8000)
+            val |= 0xffff0000;
+        data[i] = (float)((int)val) * scale;
+    }
+    vec.setX(data[0]);
+    vec.setY(data[1]);
+    vec.setZ(data[2]);
+}
+
 
 
 //----------------------------------------------------------

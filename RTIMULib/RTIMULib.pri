@@ -20,21 +20,25 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-HEADERS += $$PWD/RTMath.h \
+HEADERS += $$PWD/RTIMULib.h \
+    $$PWD/RTIMULibDefs.h \
+    $$PWD/RTMath.h \
     $$PWD/RTIMUHal.h \
     $$PWD/RTIMU.h \
     $$PWD/RTIMUMPU9150.h \
+    $$PWD/RTIMUGD20M303.h \
     $$PWD/RTIMUNull.h \
-    $$PWD/RTKalman.h \
-    $$PWD/RTKalman4.h \
+    $$PWD/RTFusion.h \
+    $$PWD/RTFusionKalman4.h \
     $$PWD/RTIMUSettings.h
  
 SOURCES += $$PWD/RTMath.cpp \
     $$PWD/RTIMUHal.cpp \
     $$PWD/RTIMU.cpp \
     $$PWD/RTIMUMPU9150.cpp \
+    $$PWD/RTIMUGD20M303.cpp \
     $$PWD/RTIMUNull.cpp \
-    $$PWD/RTKalman.cpp \
-    $$PWD/RTKalman4.cpp \
+    $$PWD/RTFusion.cpp \
+    $$PWD/RTFusionKalman4.cpp \
     $$PWD/RTIMUSettings.cpp
 

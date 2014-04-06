@@ -18,8 +18,9 @@
 //
 
 #include "RTIMUNull.h"
+#include "RTIMUSettings.h"
 
-RTIMUNull::RTIMUNull(int kalmanType) : RTIMU(kalmanType)
+RTIMUNull::RTIMUNull(RTIMUSettings *settings) : RTIMU(settings)
 {
 }
 
@@ -32,16 +33,18 @@ bool RTIMUNull::IMUInit()
     return true;
 }
 
+int RTIMUNull::IMUGetPollInterval()
+{
+    return (100);                                           // just a dummy value really
+}
+
 bool RTIMUNull::IMURead()
 {
-    updateKalman(m_timestamp);
+    updateFusion();
     return true;
 }
 
-void RTIMUNull::setIMUData(const RTVector3& gyro, const RTVector3& accel, const RTVector3& compass, uint64_t timestamp)
+void RTIMUNull::setIMUData(const RTIMU_DATA& data)
 {
-    m_gyroData = gyro;
-    m_accelData = accel;
-    m_compassData = compass;
-    m_timestamp = timestamp;
+    m_imuData = data;
 }

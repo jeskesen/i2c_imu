@@ -105,7 +105,7 @@
 class RTIMUMPU9150 : public RTIMU
 {
 public:
-    RTIMUMPU9150(int kalmanType = RTKALMAN_TYPE_NULL);
+    RTIMUMPU9150(RTIMUSettings *settings);
     ~RTIMUMPU9150();
 
     bool setLpf(unsigned char lpf);
@@ -114,8 +114,9 @@ public:
     bool setGyroFsr(unsigned char fsr);
     bool setAccelFsr(unsigned char fsr);
 
-    virtual bool IMUInit(RTIMUSettings *settings);
+    virtual bool IMUInit();
     virtual bool IMURead();
+    virtual int IMUGetPollInterval();
 
 private:
     bool bypassOn();                                        // talk to compass
@@ -123,24 +124,26 @@ private:
     bool setSampleRate();
     bool setCompassRate();
     bool resetFifo();
-    void convertToVector(unsigned char *rawData, RTVector3& vec, float scale, bool bigEndian = true);
+
+    bool m_firstTime;                                       // if first sample
 
     unsigned char m_slaveAddr;                              // I2C address of MPU9150
     unsigned char m_bus;                                    // I2C bus (usually 1 for Raspberry Pi for example)
 
     unsigned char m_lpf;                                    // low pass filter setting
     int m_sampleRate;                                       // sample rate in Hz for gyro and accel
+    uint64_t m_sampleInterval;                              // interval between samples in microseonds
     int m_compassRate;                                      // compass sample rate in Hz
     unsigned char m_gyroFsr;
     unsigned char m_accelFsr;
 
-    float m_gyroScale;
-    float m_accelScale;
+    RTFLOAT m_gyroScale;
+    RTFLOAT m_accelScale;
 
-    float m_compassAdjust[3];                               // the compass fuse ROM values converted for use
+    RTFLOAT m_compassAdjust[3];                             // the compass fuse ROM values converted for use
 
     RTVector3 m_gyroBias;                                   // an accumulated bias for the gyros
-    float m_gyroAlpha;                                      // gyro bias learning rate
+    RTFLOAT m_gyroAlpha;                                    // gyro bias learning rate
     uint64_t m_gyroStartTime;                               // time at which the learning started
     bool m_gyroLearning;                                    // if in learning mode
 

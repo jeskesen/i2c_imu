@@ -21,39 +21,52 @@
 #define	_RTIMU_H
 
 #include "RTMath.h"
-#include "RTKalman.h"
 #include "RTIMUHal.h"
-#include "RTIMUSettings.h"
+#include "RTFusion.h"
+
+class RTIMUSettings;
 
 class RTIMU : public RTIMUHal
 {
 public:
-    RTIMU(int kalmanType);
+    //  IMUs should always be created with the following call
+
+    static RTIMU *createIMU(RTIMUSettings *settings);
+
+    //  Constructor/destructor
+
+    RTIMU(RTIMUSettings *settings);
     virtual ~RTIMU();
 
-    //  call the following to reset the Kalman
+    //  These functions must be provided by sub classes
 
-    void resetKalman() { m_kalman->reset(); }
+    virtual bool IMUInit() = 0;                             // set up the IMU
+    virtual int IMUGetPollInterval() = 0;                   // returns the recommended poll interval in mS
+    virtual bool IMURead() = 0;                             // get a sample
+
+
+    //  call the following to reset the fusion algorithm
+
+    void resetFusion() { m_fusion->reset(); }
 
     //  the following three functions control the influence of the gyro, accel and compass sensors
 
-    void setGyroEnable(bool enable) { m_kalman->setGyroEnable(enable);}
-    void setAccelEnable(bool enable) { m_kalman->setAccelEnable(enable);}
-    void setCompassEnable(bool enable) { m_kalman->setCompassEnable(enable);}
+    void setGyroEnable(bool enable) { m_fusion->setGyroEnable(enable);}
+    void setAccelEnable(bool enable) { m_fusion->setAccelEnable(enable);}
+    void setCompassEnable(bool enable) { m_fusion->setCompassEnable(enable);}
 
     //  call the following to enable debug messages
 
-    void setDebugEnable(bool enable) { m_kalman->setDebugEnable(enable); }
+    void setDebugEnable(bool enable) { m_fusion->setDebugEnable(enable); }
+
+    //  getIMUData returns the standard outputs of the IMU and fusion filter
+
+    const RTIMU_DATA& getIMUData() { return m_imuData; }
 
     //  the following two functions get access to the measured pose (accel and compass)
 
-    const RTVector3& getMeasuredPose() { return m_kalman->getMeasuredPose(); }
-    const RTQuaternion& getMeasuredQPose() { return m_kalman->getMeasuredQPose(); }
-
-    //  the following two functions get access to the computed Kalman pose
-
-    const RTVector3& getKalmanPose() { return m_kalman->getKalmanPose(); }
-    const RTQuaternion& getKalmanQPose() { return m_kalman->getKalmanQPose(); }
+    const RTVector3& getMeasuredPose() { return m_fusion->getMeasuredPose(); }
+    const RTQuaternion& getMeasuredQPose() { return m_fusion->getMeasuredQPose(); }
 
     //  setCalibrationMode() turns off use of cal data so that raw data can be accumulated
     //  to derive calibration data
@@ -68,26 +81,21 @@ public:
 
     bool getCalibrationValid() { return !m_calibrationMode && m_calibrationValid; }
 
-    virtual bool IMUInit(RTIMUSettings *settings) = 0;
-    virtual bool IMURead() = 0;
-
-    const RTVector3& getGyro() { return m_gyroData; }       // gets gyro rates in radians/sec
-    const RTVector3& getAccel() { return m_accelData; }     // get accel data in gs
-    const RTVector3& getCompass() { return m_compassData; } // gets compass data in uT
+    const RTVector3& getGyro() { return m_imuData.gyro; }   // gets gyro rates in radians/sec
+    const RTVector3& getAccel() { return m_imuData.accel; } // get accel data in gs
+    const RTVector3& getCompass() { return m_imuData.compass; } // gets compass data in uT
 
 protected:
-    void updateKalman(uint64_t timestamp);                  // timestamp is in microseconds since epoch
+    void updateFusion();                                    // call when new data to update fusion state
 
     bool m_calibrationMode;                                 // true if cal mode so don't use cal data!
-    bool m_calibrationValid;                                // tru if cal data is valid and can be used
+    bool m_calibrationValid;                                // tru if call data is valid and can be used
 
-    RTVector3 m_gyroData;                                   // the scaled gyro data
-    RTVector3 m_accelData;                                  // the scaled accel data
-    RTVector3 m_compassData;                                // the compass data
+    RTIMU_DATA m_imuData;                                   // the data from the IMU
 
-    RTKalman *m_kalman;
-    bool m_firstKalmanUpdate;                               // microseconds since epoch of previous update
-    uint64_t m_lastKalmanTime;
+    RTIMUSettings *m_settings;                              // the settings object pointer
+
+    RTFusion *m_fusion;                                     // the fusion algorithm
 
     float m_compassCalOffset[3];
     float m_compassCalScale[3];

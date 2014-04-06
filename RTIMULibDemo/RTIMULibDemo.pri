@@ -22,11 +22,13 @@ DEPENDPATH += $$PWD
 
 HEADERS += RTIMULibDemo.h \
         CompassCalDlg.h \
+	SelectIMUDlg.h \
 	IMUThread.h
 
 SOURCES += main.cpp \
         RTIMULibDemo.cpp \
         CompassCalDlg.cpp \
+	SelectIMUDlg.cpp \
 	IMUThread.cpp
 
 FORMS += RTIMULibDemo.ui

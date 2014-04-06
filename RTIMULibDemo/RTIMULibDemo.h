@@ -26,9 +26,7 @@
 
 #include "ui_RTIMULibDemo.h"
 
-#include "RTMath.h"
-
-#define PRODUCT_TYPE "RTIMULib"
+#include "RTIMULib.h"
 
 class IMUThread;
 
@@ -42,12 +40,15 @@ public:
 
 public slots:
     void onCalibrateCompass();
+    void onSelectIMU();
     void onEnableGyro(int);
     void onEnableAccel(int);
     void onEnableCompass(int);
     void onEnableDebug(int);
-    void newIMUData(const RTVector3& kalmanPose, const RTQuaternion& kalmanQPose, const RTVector3& gyro,
-                    const RTVector3& accel, const RTVector3& compass);
+    void newIMUData(const RTIMU_DATA&);
+
+signals:
+    void newIMU();
 
 protected:
 	void timerEvent(QTimerEvent *event);
@@ -59,34 +60,20 @@ private:
 
     IMUThread *m_imuThread;                                 // the thread that operates the imu
 
-    //  These are the (possibly) calibrated sensor outputs
-    //  They are always in standard units no matter what the IMU actually is:
-    //
-    //  gyro is in radians per second
-    //  accel is in g
-    //  compass is in uT
-
-    RTVector3 m_gyro;
-    RTVector3 m_accel;
-    RTVector3 m_compass;
-
-    //  These are the outputs from the kalman filter as Euler angles and a quaternion
-
-    RTVector3 m_kalmanPose;
-    RTQuaternion m_kalmanQPose;
+    RTIMU_DATA m_imuData;                                   // this holds the IMU information and funsion output
 
     //  Qt GUI stuff
 
     Ui::RTIMULibDemoClass ui;
 
-    QLabel *m_kalmanQPoseScalar;
-    QLabel *m_kalmanQPoseX;
-    QLabel *m_kalmanQPoseY;
-    QLabel *m_kalmanQPoseZ;
+    QLabel *m_fusionQPoseScalar;
+    QLabel *m_fusionQPoseX;
+    QLabel *m_fusionQPoseY;
+    QLabel *m_fusionQPoseZ;
 
-    QLabel *m_kalmanPoseX;
-    QLabel *m_kalmanPoseY;
-    QLabel *m_kalmanPoseZ;
+    QLabel *m_fusionPoseX;
+    QLabel *m_fusionPoseY;
+    QLabel *m_fusionPoseZ;
 
     QLabel *m_gyroX;
     QLabel *m_gyroY;

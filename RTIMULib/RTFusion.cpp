@@ -17,10 +17,10 @@
 //  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "RTKalman.h"
+#include "RTFusion.h"
 #include "RTIMUHal.h"
 
-RTKalman::RTKalman()
+RTFusion::RTFusion()
 {
     m_debug = false;
     m_firstTime = true;
@@ -29,16 +29,16 @@ RTKalman::RTKalman()
     m_enableCompass = true;
 }
 
-RTKalman::~RTKalman()
+RTFusion::~RTFusion()
 {
 }
 
-void RTKalman::newIMUData(const RTVector3&, const RTVector3&, const RTVector3&, RTFLOAT)
+void RTFusion::newIMUData(RTIMU_DATA& )
 {
     HAL_ERROR("No implementation of newIMUData() supplied!\n");
 }
 
-void RTKalman::calculatePose(const RTVector3& accel, const RTVector3& mag)
+void RTFusion::calculatePose(const RTVector3& accel, const RTVector3& mag)
 {
     RTQuaternion m;
     RTQuaternion q;
@@ -46,7 +46,7 @@ void RTKalman::calculatePose(const RTVector3& accel, const RTVector3& mag)
     if (m_enableAccel) {
         accel.accelToEuler(m_measuredPose);
     } else {
-        m_measuredPose = m_kalmanPose;
+        m_measuredPose = m_fusionPose;
         m_measuredPose.setZ(0);
     }
 
@@ -60,7 +60,7 @@ void RTKalman::calculatePose(const RTVector3& accel, const RTVector3& mag)
         m = q * m * q.conjugate();
         m_measuredPose.setZ(-atan2(m.y(), m.x()));
     } else {
-        m_measuredPose.setZ(m_kalmanPose.z());
+        m_measuredPose.setZ(m_fusionPose.z());
     }
 
     m_measuredQPose.fromEuler(m_measuredPose);
@@ -81,8 +81,8 @@ void RTKalman::calculatePose(const RTVector3& accel, const RTVector3& mag)
     //  if the biggest component has a different sign in the measured and kalman poses,
     //  change the sign of the measured pose to match.
 
-    if (((m_measuredQPose.data(maxIndex) < 0) && (m_kalmanQPose.data(maxIndex) > 0)) ||
-            ((m_measuredQPose.data(maxIndex) > 0) && (m_kalmanQPose.data(maxIndex) < 0))) {
+    if (((m_measuredQPose.data(maxIndex) < 0) && (m_fusionQPose.data(maxIndex) > 0)) ||
+            ((m_measuredQPose.data(maxIndex) > 0) && (m_fusionQPose.data(maxIndex) < 0))) {
         m_measuredQPose.setScalar(-m_measuredQPose.scalar());
         m_measuredQPose.setX(-m_measuredQPose.x());
         m_measuredQPose.setY(-m_measuredQPose.y());

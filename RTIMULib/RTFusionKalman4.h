@@ -17,20 +17,20 @@
 //  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef _RTKALMAN4_H
-#define	_RTKALMAN4_H
+#ifndef _RTFUSIONKALMAN4_H
+#define	_RTFUSIONKALMAN4_H
 
-#include "RTKalman.h"
+#include "RTFusion.h"
 
 #define KALMAN_QUATERNION_LENGTH	4
 
 #define	KALMAN_STATE_LENGTH	4								// just the quaternion for the moment
 
-class RTKalman4 : public RTKalman
+class RTFusionKalman4 : public RTFusion
 {
 public:
-    RTKalman4();
-    ~RTKalman4();
+    RTFusionKalman4();
+    ~RTFusionKalman4();
 
     //  reset() resets the kalman state but keeps any setting changes (such as enables)
 
@@ -39,7 +39,7 @@ public:
     //  newIMUData() should be called for subsequent updates
     //  deltaTime is in units of seconds
 
-    void newIMUData(const RTVector3& accel, const RTVector3& gyro, const RTVector3& mag, RTFLOAT deltaTime);
+    void newIMUData(RTIMU_DATA& data);
 
     //  the following two functions can be called before initKalman to customize the covariance matrices
 
@@ -71,4 +71,4 @@ private:
 //    RTMatrix4x4> m_HkTranspose;                           // transpose of map
 };
 
-#endif // _RTKALMAN4_H
+#endif // _RTFUSIONKALMAN4_H

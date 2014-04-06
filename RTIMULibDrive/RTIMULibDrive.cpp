@@ -17,9 +17,7 @@
 //  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "RTIMU.h"
-#include "RTIMUMPU9150.h"
-#include "RTIMUSettings.h"
+#include "RTIMULib.h"
 
 int main()
 {
@@ -33,11 +31,16 @@ int main()
 
     RTIMUSettings *settings = new RTIMUSettings("RTIMULib");
 
-    RTIMUMPU9150 *imu = new RTIMUMPU9150(settings->m_kalmanType);
+    RTIMU *imu = RTIMU::createIMU(settings);
+
+    if (imu == NULL) {
+        printf("No IMU found\n");
+        exit(1);
+    }
 
     //  set up IMU
 
-    imu->IMUInit(settings);
+    imu->IMUInit();
 
     //  set up for rate timer
 
@@ -46,12 +49,12 @@ int main()
     //  now just process data
 
     while (1) {
-        //  poll at twice the sample rate (or more)
+        //  poll at the rate recommended by the IMU
 
-        usleep(400000 / settings->m_MPU9150GyroAccelSampleRate);
+        usleep(imu->IMUGetPollInterval() * 1000);
 
-        if (imu->IMURead()) {
-            RTVector3 pose = imu->getKalmanPose();
+        while (imu->IMURead()) {
+            RTIMU_DATA imuData = imu->getIMUData();
             sampleCount++;
 
             now = RTMath::currentUSecsSinceEpoch();
@@ -59,7 +62,7 @@ int main()
             //  display 10 times per second
 
             if ((now - displayTimer) > 10000) {
-                printf("Sample rate %d: %s\r", sampleRate, RTMath::displayDegrees("", pose));
+                printf("Sample rate %d: %s\r", sampleRate, RTMath::displayDegrees("", imuData.fusionPose));
                 displayTimer = now;
             }
 

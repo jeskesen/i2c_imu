@@ -18,14 +18,12 @@
 //
 
 #include "RTIMU.h"
-#include "RTKalman.h"
 
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <unistd.h>
 
-#include "RTKalman4.h"
 
 RTIMUHal::RTIMUHal()
 {
@@ -92,10 +90,12 @@ bool RTIMUHal::I2CWrite(unsigned char slaveAddr, unsigned char regAddr,
         result = write(m_I2C, &regAddr, 1);
 
         if (result < 0) {
-            HAL_ERROR1(" I2C write of regAddr failed - %s\n", errorMsg);
+            if (strlen(errorMsg) > 0)
+                HAL_ERROR1(" I2C write of regAddr failed - %s\n", errorMsg);
             return false;
         } else if (result != 1) {
-            HAL_ERROR1(" I2C write of regAddr failed (nothing written) - %s\n", errorMsg);
+            if (strlen(errorMsg) > 0)
+                HAL_ERROR1(" I2C write of regAddr failed (nothing written) - %s\n", errorMsg);
             return false;
         }
     } else {
@@ -107,10 +107,12 @@ bool RTIMUHal::I2CWrite(unsigned char slaveAddr, unsigned char regAddr,
         result = write(m_I2C, txBuff, length + 1);
 
         if (result < 0) {
-            HAL_ERROR2("I2C data write of %d bytes failed - %s\n", length, errorMsg);
+            if (strlen(errorMsg) > 0)
+                HAL_ERROR2("I2C data write of %d bytes failed - %s\n", length, errorMsg);
             return false;
         } else if (result < (int)length) {
-            HAL_ERROR3("I2C data write of %d bytes failed, ony %d written - %s\n", length, result, errorMsg);
+            if (strlen(errorMsg) > 0)
+                HAL_ERROR3("I2C data write of %d bytes failed, ony %d written - %s\n", length, result, errorMsg);
             return false;
         }
     }
@@ -134,7 +136,8 @@ bool RTIMUHal::I2CRead(unsigned char slaveAddr, unsigned char regAddr, unsigned 
         result = read(m_I2C, data + total, length - total);
 
         if (result < 0) {
-            HAL_ERROR3("I2C read error from %d, %d - %s\n", slaveAddr, regAddr, errorMsg);
+            if (strlen(errorMsg) > 0)
+                HAL_ERROR3("I2C read error from %d, %d - %s\n", slaveAddr, regAddr, errorMsg);
             return false;
         }
 
@@ -148,7 +151,8 @@ bool RTIMUHal::I2CRead(unsigned char slaveAddr, unsigned char regAddr, unsigned 
     }
 
     if (total < length) {
-        HAL_ERROR3("I2C read from %d, %d failed - %s\n", slaveAddr, regAddr, errorMsg);
+        if (strlen(errorMsg) > 0)
+            HAL_ERROR3("I2C read from %d, %d failed - %s\n", slaveAddr, regAddr, errorMsg);
         return false;
     }
     return true;

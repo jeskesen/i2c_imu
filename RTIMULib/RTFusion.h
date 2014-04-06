@@ -17,26 +17,26 @@
 //  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef _RTKALMAN_H
-#define	_RTKALMAN_H
+#ifndef _RTFUSION_H
+#define	_RTFUSION_H
 
-#include "RTMath.h"
+#include "RTIMULibDefs.h"
 
-class RTKalman
+class RTFusion
 {
 public:
 
-    RTKalman();
-    virtual ~RTKalman();
+    RTFusion();
+    virtual ~RTFusion();
 
-    //  reset() resets the kalman state but keeps any setting changes (such as enables)
+    //  reset() resets the fusion state but keeps any setting changes (such as enables)
 
     virtual void reset() {}
 
     //  newIMUData() should be called for subsequent updates
-    //  deltaTime is in units of seconds
+    //  the fusion fields are updated with the results
 
-    virtual void newIMUData(const RTVector3& accel, const RTVector3& gyro, const RTVector3& mag, float deltaTime);
+    virtual void newIMUData(RTIMU_DATA& data);
 
     //  the following three functions control the influence of the gyro, accel and compass sensors
 
@@ -44,21 +44,22 @@ public:
     void setAccelEnable(bool enable) { m_enableAccel = enable; reset();}
     void setCompassEnable(bool enable) { m_enableCompass = enable; reset();}
 
-
     inline const RTVector3& getMeasuredPose() {return m_measuredPose;}
     inline const RTQuaternion& getMeasuredQPose() {return m_measuredQPose;}
-    inline const RTVector3& getKalmanPose() {return m_kalmanPose;}
-    inline const RTQuaternion& getKalmanQPose() {return m_kalmanQPose;}
 
     void setDebugEnable(bool enable) { m_debug = enable; }
 
 protected:
     void calculatePose(const RTVector3& accel, const RTVector3& mag); // generates pose from accels and heading
 
-    RTQuaternion m_kalmanQPose;                             // the computed pose from the quaternion state
-    RTVector3 m_kalmanPose;                                 // the vector form of the pose
+    RTVector3 m_gyro;                                       // current gyro sample
+    RTVector3 m_accel;                                      // current accel sample
+    RTVector3 m_compass;                                    // current compass sample
+
     RTQuaternion m_measuredQPose;       					// quaternion form of pose from measurement
     RTVector3 m_measuredPose;								// vector form of pose from measurement
+    RTQuaternion m_fusionQPose;                             // quaternion form of pose from fusion
+    RTVector3 m_fusionPose;                                 // vector form of pose from fusion
 
 	bool m_debug;
     bool m_enableGyro;                                      // enables gyro as input
@@ -66,6 +67,7 @@ protected:
     bool m_enableCompass;                                   // enables compass a input
 
     bool m_firstTime;                                       // if first time after reset
+    uint64_t m_lastFusionTime;                              // for delta time calculation
 };
 
-#endif // _RTKALMAN_H
+#endif // _RTFUSION_H

@@ -51,22 +51,26 @@ OBJECTS_DIR   = objects/
 # Files
 
 DEPS          = $(RTIMULIBPATH)/RTMath.h \
+		$(RTIMULIBPATH)/RTIMULib.h \
+		$(RTIMULIBPATH)/RTIMULibDefs.h \
 		$(RTIMULIBPATH)/RTIMUHal.h \
 		$(RTIMULIBPATH)/RTIMU.h \
-		$(RTIMULIBPATH)/RTIMUMPU9150.h \
 		$(RTIMULIBPATH)/RTIMUNull.h \
-		$(RTIMULIBPATH)/RTKalman.h \
-		$(RTIMULIBPATH)/RTKalman4.h \
+		$(RTIMULIBPATH)/RTIMUMPU9150.h \
+		$(RTIMULIBPATH)/RTIMUGD20M303.h \
+		$(RTIMULIBPATH)/RTFusion.h \
+		$(RTIMULIBPATH)/RTFusionKalman4.h \
 		$(RTIMULIBPATH)/RTIMUSettings.h
 
 OBJECTS       = objects/RTIMULibDrive.o \
 		objects/RTMath.o \
 		objects/RTIMUHal.o \
 		objects/RTIMU.o \
-		objects/RTIMUMPU9150.o \
 		objects/RTIMUNull.o \
-		objects/RTKalman.o \
-		objects/RTKalman4.o \
+		objects/RTIMUMPU9150.o \
+		objects/RTIMUGD20M303.o \
+		objects/RTFusion.o \
+		objects/RTFusionKalman4.o \
 		objects/RTIMUSettings.o 
 
 MAKE_TARGET   = RTIMULibDrive

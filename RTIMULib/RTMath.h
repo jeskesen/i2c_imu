@@ -59,6 +59,11 @@ public:
 
     static RTVector3 poseFromAccelMag(const RTVector3& accel, const RTVector3& mag);
 
+    //  Takes signed 16 bit data from a char array and converts it to a vector of scaled RTFLOATs
+
+    static void convertToVector(unsigned char *rawData, RTVector3& vec, RTFLOAT scale, bool bigEndian);
+
+
 private:
     static char m_string[1000];                             // for the display routines
 };
