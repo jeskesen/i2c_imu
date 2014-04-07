@@ -14,19 +14,19 @@ Check out www.richards-tech.com for more details, updates and news.
 
 # Release history
 
-## Current
+## April 7 2014 - 0.9.1
+
+### Improved performance with MPU-9150
+
+A new caching strategy for the MPU-9150 seems to be achieving 1000 samples per second without fifo overflows using a 900MHz Raspberry Pi and 400kHz I2C bus. This is as reported by RTIMULibDrive with a CPU utilization of 28%. RTIMULibDemo manages 890 samples per second with the MPU-9150 set to 1000 samples per second. The driver gracefully handles this situation although there is increased delay when the application cannot handle the full sample rate.
+
+### Auto detection of IMU
+
+RTIMULib can now scan for supported IMUs and configure automatically. This is the default behavior now. It handles IMUs at alternate address automatically as well (for example, it will detect an MPU-9150 at 0x68 or 0x69).
 
 ### Partial support for STM L3GD20H/LSM303D IMUs
 
 This is in a very early state and only supports the gyro sensor at the moment.
-
-### Improved performance with MPU9150
-
-Now can achieve rates up to around 860 Kalman-fused samples per second using the MPU9150 and 900MHz Raspberry Pi.
-
-### Auto detection of IMU
-
-RTIMULib can now scan for supported IMUs and configure automatically. This is the default behavior now.
 
 ## April 4 2014 - 0.9.0
 

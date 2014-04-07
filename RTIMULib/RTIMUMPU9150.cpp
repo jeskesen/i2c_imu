@@ -141,6 +141,10 @@ bool RTIMUMPU9150::IMUInit()
 
     m_firstTime = true;
 
+#ifdef MPU9150_CACHE_MODE
+    m_cacheIn = m_cacheOut = m_cacheCount = 0;
+#endif
+
     // set validity flags
 
     m_imuData.fusionPoseValid = false;
@@ -422,27 +426,92 @@ bool RTIMUMPU9150::IMURead()
     if (count == 1024) {
         HAL_INFO("MPU9150 fifo has overflowed");
         resetFifo();
+        m_imuData.timestamp += m_sampleInterval * (1024 / MPU9150_FIFO_CHUNK_SIZE + 1); // try to fix timestamp
         return false;
     }
 
-    if (count > 480) {
-        // more than 40 samples behind - going too slowly so discard some samples but maintain timestamp correctly
-        while (count >= 120) {
-            if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, 12, fifoData, "Failed to read fifo data"))
+
+#ifdef MPU9150_CACHE_MODE
+    if ((m_cacheCount == 0) && (count  >= MPU9150_FIFO_CHUNK_SIZE) && (count < (MPU9150_CACHE_SIZE * MPU9150_FIFO_CHUNK_SIZE))) {
+        // special case of a small fifo and nothing cached - just handle as simple read
+
+        if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
+            return false;
+
+        if (!I2CRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, compassData, "Failed to read compass data"))
+            return false;
+    } else {
+        if (count >= (MPU9150_CACHE_SIZE * MPU9150_FIFO_CHUNK_SIZE)) {
+            if (m_cacheCount == MPU9150_CACHE_BLOCK_COUNT) {
+                // all cache blocks are full - discard oldest and update timestamp to account for lost samples
+                m_imuData.timestamp += m_sampleInterval * m_cache[m_cacheOut].count;
+                if (++m_cacheOut == MPU9150_CACHE_BLOCK_COUNT)
+                    m_cacheOut = 0;
+                m_cacheCount--;
+            }
+
+            int blockCount = count / MPU9150_FIFO_CHUNK_SIZE;   // number of chunks in fifo
+
+            if (blockCount > MPU9150_CACHE_SIZE)
+                blockCount = MPU9150_CACHE_SIZE;
+
+            if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE * blockCount,
+                                m_cache[m_cacheIn].data, "Failed to read fifo data"))
                 return false;
-            count -= 12;
+
+            if (!I2CRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, m_cache[m_cacheIn].compass, "Failed to read compass data"))
+                return false;
+
+            m_cache[m_cacheIn].count = blockCount;
+            m_cache[m_cacheIn].index = 0;
+
+            m_cacheCount++;
+            if (++m_cacheIn == MPU9150_CACHE_BLOCK_COUNT)
+                m_cacheIn = 0;
+
+        }
+
+        //  now fifo has been read if necessary, get something to process
+
+        if (m_cacheCount == 0)
+            return false;
+
+        memcpy(fifoData, m_cache[m_cacheOut].data + m_cache[m_cacheOut].index, MPU9150_FIFO_CHUNK_SIZE);
+        memcpy(compassData, m_cache[m_cacheOut].compass, 8);
+
+        m_cache[m_cacheOut].index += MPU9150_FIFO_CHUNK_SIZE;
+
+        if (--m_cache[m_cacheOut].count == 0) {
+            //  this cache block is now empty
+
+            if (++m_cacheOut == MPU9150_CACHE_BLOCK_COUNT)
+                m_cacheOut = 0;
+            m_cacheCount--;
+        }
+    }
+
+#else
+
+    if (count > MPU9150_FIFO_CHUNK_SIZE * 40) {
+        // more than 40 samples behind - going too slowly so discard some samples but maintain timestamp correctly
+        while (count >= MPU9150_FIFO_CHUNK_SIZE * 10) {
+            if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
+                return false;
+            count -= MPU9150_FIFO_CHUNK_SIZE;
             m_imuData.timestamp += m_sampleInterval;
         }
     }
 
-    if (count < 12)
+    if (count < MPU9150_FIFO_CHUNK_SIZE)
         return false;
 
-    if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, 12, fifoData, "Failed to read fifo data"))
+    if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
         return false;
 
     if (!I2CRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, compassData, "Failed to read compass data"))
         return false;
+
+#endif
 
     RTMath::convertToVector(fifoData, m_imuData.accel, m_accelScale, true);
     RTMath::convertToVector(fifoData + 6, m_imuData.gyro, m_gyroScale, true);
