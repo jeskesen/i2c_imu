@@ -1,52 +1,62 @@
 # RTIMULib - a versatile 9-dof IMU library for embedded Linux systems
 
-RTIMULib is the simplest way to connect a 9-dof IMU to an embedded Linux system and obtain Kalman-filtered quaternion or Euler angle pose data. Basically, two simple funtion calls (IMUInit() and IMURead()) are all that's need to integrate RTIMULib.
+RTIMULib is the simplest way to connect a 9-dof IMU to an embedded Linux system and obtain Kalman-filtered quaternion or Euler angle pose data. Basically, two simple funtion calls (IMUInit() and IMURead()) are pretty much all that's need to integrate RTIMULib.
 
 Two demo programs are included - RTIMULibDemo is a GUI-based program that shows all the data being produce and also support compass calibration. RTIMULibDrive is just about the most basic program possible and can be used for performance testing filters and drivers. It can also be used as the basis of a real application quite easily.
 
 Its prerequisites are very simple - just I2C support on the target system along with the standard build-essential (included in the Raspberry Pi Raspbian distribution by default).
 
-RTIMULib provides a flexible framework for interfacing 9-dof IMUs to embedded Linux systems. RTIMULib currently supports the InvenSense MPU9150 single chip IMU and support for others will follow. RTIMULib also supports multiple sensor integration filters such as Kalman filters.
+RTIMULib provides a flexible framework for interfacing 9-dof IMUs to embedded Linux systems. RTIMULib currently supports the InvenSense MPU9150 single chip IMU, Pololu Altimu and Adafruit 9-dof IMU. Support for others will follow. RTIMULib also supports multiple sensor integration fusion filters such as Kalman filters.
 
 The instructions here are for the Raspberry Pi but RTIMULib can be use easily with other embedded systems with minor (or no changes). An abstraction layer allows RTIMULib to be used with non-Linux systems also.
 
 Check out www.richards-tech.com for more details, updates and news.
 
-# Release history
+## Release history
 
-## April 7 2014 - 0.9.1
+### April 9 2014 - 0.9.2
 
-### Improved performance with MPU-9150
+### STM L3GD20H + LSM303D IMU Implementation now working
+
+The combination of the L3GD20H gyro and LSM303D accel/mag chip is now working. The physical configuration supported is as used on the Pololu Altimu V3 - http://www.pololu.com/product/2469. The pressure chip on the 10-dof version will be supported shortly but 9-dof is working now.
+
+### STM L3GD20 + LSM303DLHC IMU Implementation now working
+
+The combination of the L3GD20 and LSM303DLHC accel/mag chip is now working. The physical configuration supported is as used on the Adafruit 9-dof IMU - http://www.adafruit.com/products/1714.
+
+### April 7 2014 - 0.9.1
+
+#### Improved performance with MPU-9150
 
 A new caching strategy for the MPU-9150 seems to be achieving 1000 samples per second without fifo overflows using a 900MHz Raspberry Pi and 400kHz I2C bus. This is as reported by RTIMULibDrive with a CPU utilization of 28%. RTIMULibDemo manages 890 samples per second with the MPU-9150 set to 1000 samples per second. The driver gracefully handles this situation although there is increased delay when the application cannot handle the full sample rate.
 
-### Auto detection of IMU
+#### Auto detection of IMU
 
 RTIMULib can now scan for supported IMUs and configure automatically. This is the default behavior now. It handles IMUs at alternate address automatically as well (for example, it will detect an MPU-9150 at 0x68 or 0x69).
 
-### Partial support for STM L3GD20H/LSM303D IMUs
+#### Partial support for STM L3GD20H/LSM303D IMUs
 
 This is in a very early state and only supports the gyro sensor at the moment.
 
-## April 4 2014 - 0.9.0
+### April 4 2014 - 0.9.0
 
 Initial release with support for MPU9150.
 
-# RTIMULib on the Raspberry Pi/Raspbian
+## RTIMULib on the Raspberry Pi/Raspbian
 
-## Obtaining RTIMULib
+### Obtaining RTIMULib
 
 From a command prompt, enter:
 
 	git clone https://github.com/richards-tech/RTIMULib.git
 
-## Setting up the Raspberry Pi
+### Setting up the Raspberry Pi
 
-### Connecting the MPU9150
+#### Connecting the IMU
 
-The easiest way to connect the IMU to the Raspberry Pi is to use something like the Adafruit Pi Plate (http://www.adafruit.com/products/801) as it makes it obvious where the I2C bus 1 pins are and where to pick up 3.3V. Basically, you need to connect the I2C SDA, I2C SCL, 3.3V and GND to the MPU9150 breakout board you are using. Take care with these connections or else disaster may follow!
+The easiest way to connect the IMU to the Raspberry Pi is to use something like the Adafruit Pi Plate (http://www.adafruit.com/products/801) as it makes it obvious where the I2C bus 1 pins are and where to pick up 3.3V. Basically, you need to connect the I2C SDA, I2C SCL, 3.3V and GND to the IMU breakout board you are using. Take care with these connections or else disaster may follow!
 
-### Enabling and Configuring the I2C Bus
+#### Enabling and Configuring the I2C Bus
 
 Add the following two lines to /etc/modules:
 
@@ -83,20 +93,14 @@ Simplest thing is then to reboot to make this change.
 
 The I2C bus should now be ready for operation.
 
-# Compile and Run the RTIMULibDrive Demo Program
+### Compile and Run the RTIMULibDrive Demo Program
 
 RTIMULibDrive is a simple command line program that shows how simple it is to use RTIMULib. Assuming the I2C bus has been enabled, just go to the RTIMULibDrive directory and enter:
 
 	make
 	sudo make install
 
-You should be able to run the program just by entering RTIMULibDrive. If all is well, you should see a line showing the sample rate and the current Euler angles. This is updated 10 times per second, regardless of the sensor sample rate. By default, the driver runs at 50 samples per second for the gyros and accelerometers and 25 samples per second for the compass. So, you should see the sample rate indicating around 50 samples per second.
-
-If the MPU9150 was configured to be at 0x69, then run RTIMULibDrive once and enter <CTRL + C> to terminate it. This will create a file called RTIMULib.ini in the same directory. Edit this and change the slave address line to be:
-
-	I2CSlaveAddress=105
-
-Save the .ini file and rerun the program. It should then start working correctly.
+You should be able to run the program just by entering RTIMULibDrive. It will try to auto detect the connected IMU If all is well, you should see a line showing the sample rate and the current Euler angles. This is updated 10 times per second, regardless of the sensor sample rate. By default, the driver runs at 50 samples per second in most cases. So, you should see the sample rate indicating around 50 samples per second. The sample rate can be changed by editing the .ini file entry for the appropriate IMU type.
 
 The displayed pose shows the roll, pitch and yaw seen by the IMU. Using an aircraft analogy, the roll axis points from the pilot towards the nose, the pitch axis points from the pilot along the right wing and the yaw axis points from the pilot down towards the ground. Right wing down is a positive roll, nose up is a positive pitch and clockwise rotation is a positive yaw.
 
@@ -106,7 +110,7 @@ Take a look at RTIMULibDrive.cpp. Quite a few of the code lines are just to calc
 
 One thing you may notice is that the yaw isn't too accurate, especially at non zero pitch and roll. This is because the compass has not been calibrated. RTIMULibDemo can be used to do that.
 
-# Compile and Run the RTIMULibDemo Program
+###Compile and Run the RTIMULibDemo Program
 
 RTIMULibDemo is a Qt-based program (Qt is used to supply the GUI). So, do the following:
 
@@ -134,104 +138,15 @@ To calibrate the compass, click on the "Calibrate compass" tab. A new dialog wil
 
 The .ini file created by RTIMULibDemo can also be used by RTIMULibDrive - just run RTIMULibDrive in the same directory and it will pick up the compass calibration data.
 
-It's possible you'll see the odd fifo error message displayed, especially at high sampling rates. It seems to be caused by the overhead of the GUI so this is not a great concern and is handled correctly by the driver anyway. 
-
-# Gyro bias compensation
+## Gyro bias compensation
 
 At the moment, gyro bias is calculated during the first 5 seconds of operation. If the IMU chip is moved during this period, the bias may be calculated incorrectly and the app will need to be restarted. The effectiveness of the gyro bias compensation can be monitored using RTIMULibDemo. If the IMU chip is not in motion, the gyro rates should be close to 0 (usually around 0.001 radians per second).
 
-# .ini File Settings
+## .ini File Settings
 
-By default, the .ini file will look something like this:
-	
-	IMUType=1
-	I2CBus=1
-	I2CSlaveAddress=104
-	KalmanType=1
-	CompassCalValid=false
-	CompassCalMinX=0.000000
-	CompassCalMinY=0.000000
-	CompassCalMinZ=0.000000
-	CompassCalMaxX=0.000000
-	CompassCalMaxY=0.000000
-	CompassCalMaxZ=0.000000
-	MPU9150GyroAccelSampleRate=50
-	MPU9150CompassSampleRate=25
-	MPU9150GyroAccelLpf=4
-	MPU9150GyroFSR=16
-	MPU9150AccelFSR=16
+By default, RTIMULib.ini is created in the working directory. This can be easily edited and the file contains extensive comments for the settigns of every supported IMU type.
 
-This can be edited by hand to customize operation.
-
-## IMUType
-
-There are two supported values currently:
-
-	* 0 - IMUNull. This is a special purpose driver used when no IMU chip is present.
-	* 1 - MPU9150. This is the MPU9150 driver.
-
-IMUNull can be used when data is being obtained from elsewhere and only the filtering part of RTIMULib is being used.
-
-## I2CBus
-
-This is a number between 0 and 7 that specifies the I2C bus to use. For the Raspberry Pi, this is 1.
-
-## I2CSlaveAddress
-
-This sets the address of the IMU chip. It defaults to 104 which is the standard address for the MPU9150.
-
-## KalmanType
-
-This selects the type of Kalman filter in use:
-
-	* 0 - Null. Used when Kalman filtering is not required.
-	* 1 - STATE4. A Kalman filter that uses the quaternion pose as the state variable.
-
-## CompassCalValid
-
-This flag indicates if the compassCalMin and compassCalMax data that follows is valid. It is normally set by RTIMUSetting.cpp via RTIMULibDemo.
-
-## MPU9150GyroAccelSampleRate
-
-This sets the sample rate for gyro and accel data. It can be between 5 and 1000 samples per second although the Raspberry Pi tops out at around 430 samples per second.
-
-## MPU9150CompassSampleRate
-
-This sets the compass sample rate. It can be between 1 and 100 samples per second.
-
-## MPU9150GyroAccelLpf
-
-This sets the low pass filtering for the gyro and accel data. Valid values are:
-
-	* 0 - gyro: 256Hz, accel: 260Hz
-	* 1 - gyro: 188Hz, accel: 184Hz
-	* 2 - gyro: 98Hz, accel: 98Hz
-	* 3 - gyro: 42Hz, accel: 44Hz
-	* 4 - gyro: 20Hz, accel: 21Hz
-	* 5 - gyro: 10Hz, accel: 10Hz
-	* 6 - gyro: 5Hz, accel: 5Hz
-
-It's conventional to set the lpf bandwidth to roughly half the sample rate or lower (for the usual sampling reasons).
-
-## MPU9150GyroFsr
-
-This sets the full scale range of the gyro outputs. Note that RTIMULib always scales the gyro rates to be in radians per second but this sets the basic sensitivity and range of the sensor. Valid values are:
-
-	* 0 - +/- 250 degrees per second
-	* 8 - +/- 500 degrees per second
-	* 16 - +/- 1000 degrees per second
-	* 24 - +/- 2000 degrees per second
-
-## MPU9150AccelFsr
-
-This sets the full scale range of the accel outputs. Note that RTIMULib always scales the accel outputs to be in gravity units but this sets the basic sensitivity and range of the sensor. Valid values are:
-
-	* 0 - +/- 2g
-	* 8 - +/- 4g
-	* 16 - +/- 8g
-	* 24 - +/- 16g
-
-# The RTIMULib Hardware Abstraction Layer
+## The RTIMULib Hardware Abstraction Layer
 
 All of the platform-specific code is in the following files:
 
@@ -244,7 +159,7 @@ Changes to I2C code on Linux systems should only involve changes to RTIMUHal. RT
 
 RTIMUSettings would also need to be modified if new IMU drivers and filters are added to the library.
 
-# Next Steps
+## Next Steps
 
 SyntroPiNav (an app for the Raspberry Pi) and SyntroNavView can be used as a convenient system to experiment with IMU chips, drivers and filters. SyntroPiNav runs on the Pi and transmits IMU data along with filter outputs over a LAN to SyntroNavView running on an Ubuntu PC. SyntroNavView also displays the data and provides a 3D graphics view of the calculated pose.
 

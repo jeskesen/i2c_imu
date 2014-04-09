@@ -23,6 +23,7 @@
 #include "RTMath.h"
 #include "RTIMUHal.h"
 #include "RTFusion.h"
+#include "RTIMULibDefs.h"
 
 class RTIMUSettings;
 
@@ -40,10 +41,16 @@ public:
 
     //  These functions must be provided by sub classes
 
+    virtual const char *IMUName() = 0;                      // the name of the IMU
+    virtual int IMUType() = 0;                              // the type code of the IMU
     virtual bool IMUInit() = 0;                             // set up the IMU
     virtual int IMUGetPollInterval() = 0;                   // returns the recommended poll interval in mS
     virtual bool IMURead() = 0;                             // get a sample
+    virtual bool IMUGyroBiasValid() = 0;                    // returns true if valid bias
 
+    //  This one wanted a similar name but isn't pure virtual
+
+    virtual bool IMUCompassCalValid() { return m_calibrationValid; }
 
     //  call the following to reset the fusion algorithm
 

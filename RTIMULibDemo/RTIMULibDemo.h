@@ -92,6 +92,8 @@ private:
     QCheckBox *m_enableCompass;
     QCheckBox *m_enableDebug;
 
+    QLabel *m_imuType;
+    QLabel *m_biasStatus;
     QLabel *m_rateStatus;
     QLabel *m_calStatus;
 

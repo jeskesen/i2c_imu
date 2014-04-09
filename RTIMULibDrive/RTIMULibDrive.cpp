@@ -33,7 +33,7 @@ int main()
 
     RTIMU *imu = RTIMU::createIMU(settings);
 
-    if (imu == NULL) {
+    if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_NULL)) {
         printf("No IMU found\n");
         exit(1);
     }

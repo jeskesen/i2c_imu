@@ -81,21 +81,15 @@ RTVector3 RTMath::poseFromAccelMag(const RTVector3& accel, const RTVector3& mag)
 
 void RTMath::convertToVector(unsigned char *rawData, RTVector3& vec, RTFLOAT scale, bool bigEndian)
 {
-    unsigned int val;
-    RTFLOAT data[3];
-
-    for (int i = 0; i < 3; i++) {
-        if (bigEndian)
-            val = (((unsigned int)rawData[i * 2]) << 8) | rawData[i * 2 + 1];
-        else
-            val = (((unsigned int)rawData[i * 2 + 1]) << 8) | rawData[i * 2];
-        if (val & 0x8000)
-            val |= 0xffff0000;
-        data[i] = (float)((int)val) * scale;
-    }
-    vec.setX(data[0]);
-    vec.setY(data[1]);
-    vec.setZ(data[2]);
+    if (bigEndian) {
+        vec.setX((RTFLOAT)((int16_t)(((uint16_t)rawData[0] << 8) | (uint16_t)rawData[1])) * scale);
+        vec.setY((RTFLOAT)((int16_t)(((uint16_t)rawData[2] << 8) | (uint16_t)rawData[3])) * scale);
+        vec.setZ((RTFLOAT)((int16_t)(((uint16_t)rawData[4] << 8) | (uint16_t)rawData[5])) * scale);
+    } else {
+        vec.setX((RTFLOAT)((int16_t)(((uint16_t)rawData[1] << 8) | (uint16_t)rawData[0])) * scale);
+        vec.setY((RTFLOAT)((int16_t)(((uint16_t)rawData[3] << 8) | (uint16_t)rawData[2])) * scale);
+        vec.setZ((RTFLOAT)((int16_t)(((uint16_t)rawData[5] << 8) | (uint16_t)rawData[4])) * scale);
+     }
 }
 
 

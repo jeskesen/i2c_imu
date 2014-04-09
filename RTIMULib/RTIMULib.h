@@ -31,7 +31,8 @@
 #include "RTIMU.h"
 #include "RTIMUNull.h"
 #include "RTIMUMPU9150.h"
-#include "RTIMUGD20M303.h"
+#include "RTIMUGD20HM303D.h"
+#include "RTIMUGD20M303DLHC.h"
 
 #include "RTIMUSettings.h"
 

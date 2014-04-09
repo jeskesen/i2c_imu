@@ -22,6 +22,20 @@
 
 #include "RTMath.h"
 
+//  IMU type codes
+
+#define RTIMU_TYPE_AUTODISCOVER             0                   // audodiscover the IMU
+#define RTIMU_TYPE_NULL                     1                   // if no physical hardware
+#define RTIMU_TYPE_MPU9150                  2                   // InvenSense MPU9150
+#define RTIMU_TYPE_GD20HM303D               3                   // STM L3GD20H/LSM303D (Pololu Altimu)
+#define RTIMU_TYPE_GD20M303DLHC             4                   // STM L3GD20/LSM303DHLC (Adafruit IMU)
+
+//  these defines describe the various fusion filter options
+
+#define RTFUSION_TYPE_NULL                  0                   // just a dummy to keep things happy if not needed
+#define RTFUSION_TYPE_KALMANSTATE4          1                   // kalman state is the quaternion pose
+#define RTFUSION_TYPE_KALMANSTATE7          2                   // same as above but also tracks gyro bias
+
 //  This is a convenience structure that can be used to pass IMU data around
 
 typedef struct

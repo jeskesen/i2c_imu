@@ -141,9 +141,12 @@ public:
     bool setGyroFsr(unsigned char fsr);
     bool setAccelFsr(unsigned char fsr);
 
+    virtual const char *IMUName() { return "MPU-9150"; }
+    virtual int IMUType() { return RTIMU_TYPE_MPU9150; }
     virtual bool IMUInit();
     virtual bool IMURead();
     virtual int IMUGetPollInterval();
+    virtual bool IMUGyroBiasValid() { return !m_gyroLearning; }
 
 private:
     bool bypassOn();                                        // talk to compass

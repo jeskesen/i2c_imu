@@ -23,19 +23,6 @@
 #include "RTMath.h"
 #include "RTIMUHal.h"
 
-//  IMU type codes
-
-#define RTIMU_TYPE_AUTODISCOVER             0                   // audodiscover the IMU
-#define RTIMU_TYPE_NULL                     1                   // if no physical hardware
-#define RTIMU_TYPE_MPU9150                  2                   // InvenSense MPU9150
-#define RTIMU_TYPE_GD20M303                 3                   // STM L3GD20H/LSM303D
-
-//  these defines describe the various fusion filter options
-
-#define RTFUSION_TYPE_NULL                  0                   // just a dummy to keep things happy if not needed
-#define RTFUSION_TYPE_KALMANSTATE4          1                   // kalman state is the quaternion pose
-#define RTFUSION_TYPE_KALMANSTATE7          2                   // same as above but also tracks gyro bias
-
 //  Settings keys
 
 #define RTIMULIB_IMU_TYPE                   "IMUType"
@@ -51,15 +38,33 @@
 #define RTIMULIB_MPU9150_GYRO_FSR           "MPU9150GyroFSR"
 #define RTIMULIB_MPU9150_ACCEL_FSR          "MPU9150AccelFSR"
 
-//  GD20M303 settings keys
+//  GD20HM303D settings keys
 
-#define RTIMULIB_GD20M303_GYRO_SAMPLERATE   "GD20M303GyroSampleRate"
-#define RTIMULIB_GD20M303_ACCEL_SAMPLERATE  "GD20M303AccelSampleRate"
-#define RTIMULIB_GD20M303_COMPASS_SAMPLERATE "GD20M303CompassSampleRate"
-#define RTIMULIB_GD20M303_GYRO_BW           "GD20M303GyroBW"
-#define RTIMULIB_GD20M303_GYRO_HPF          "GD20M303GyroHpf"
-#define RTIMULIB_GD20M303_GYRO_FSR          "GD20M303GyroFsr"
-#define RTIMULIB_GD20M303_ACCEL_LPF         "GD20M303AccelLpf"
+#define RTIMULIB_GD20HM303D_GYRO_SAMPLERATE   "GD20HM303DGyroSampleRate"
+#define RTIMULIB_GD20HM303D_GYRO_BW           "GD20HM303DGyroBW"
+#define RTIMULIB_GD20HM303D_GYRO_HPF          "GD20HM303DGyroHpf"
+#define RTIMULIB_GD20HM303D_GYRO_FSR          "GD20HM303DGyroFsr"
+
+#define RTIMULIB_GD20HM303D_ACCEL_SAMPLERATE  "GD20HM303DAccelSampleRate"
+#define RTIMULIB_GD20HM303D_ACCEL_FSR         "GD20HM303DAccelFsr"
+#define RTIMULIB_GD20HM303D_ACCEL_LPF         "GD20HM303DAccelLpf"
+
+#define RTIMULIB_GD20HM303D_COMPASS_SAMPLERATE "GD20HM303DCompassSampleRate"
+#define RTIMULIB_GD20HM303D_COMPASS_FSR       "GD20HM303DCompassFsr"
+
+
+//  GD20M303DLHC settings keys
+
+#define RTIMULIB_GD20M303DLHC_GYRO_SAMPLERATE   "GD20M303DLHCGyroSampleRate"
+#define RTIMULIB_GD20M303DLHC_GYRO_BW           "GD20M303DLHCGyroBW"
+#define RTIMULIB_GD20M303DLHC_GYRO_HPF          "GD20M303DLHCGyroHpf"
+#define RTIMULIB_GD20M303DLHC_GYRO_FSR          "GD20M303DLHCGyroFsr"
+
+#define RTIMULIB_GD20M303DLHC_ACCEL_SAMPLERATE  "GD20M303DLHCAccelSampleRate"
+#define RTIMULIB_GD20M303DLHC_ACCEL_FSR         "GD20M303DLHCAccelFsr"
+
+#define RTIMULIB_GD20M303DLHC_COMPASS_SAMPLERATE "GD20M303DLHCCompassSampleRate"
+#define RTIMULIB_GD20M303DLHC_COMPASS_FSR       "GD20M303DLHCCompassFsr"
 
 
 //  Compass calibration settings keys
@@ -112,16 +117,37 @@ public:
     int m_MPU9150GyroFsr;                                   // FSR code for the gyro
     int m_MPU9150AccelFsr;                                  // FSR code for the accel
 
-    //  GD20M303
+    //  GD20HM303D
 
-    int m_GD20M303GyroSampleRate;                           // the gyro sample rate
-    int m_GD20M303AccelSampleRate;                          // the accel sample rate
-    int m_GD20M303CompassSampleRate;                        // the compass sample rate
-    int m_GD20M303GyroBW;                                   // the gyro bandwidth code
-    int m_GD20M303GyroHpf;                                  // the gyro high pass filter cutoff code
-    int m_GD20M303GyroFsr;                                  // the gyro full scale range
+    int m_GD20HM303DGyroSampleRate;                         // the gyro sample rate
+    int m_GD20HM303DGyroBW;                                 // the gyro bandwidth code
+    int m_GD20HM303DGyroHpf;                                // the gyro high pass filter cutoff code
+    int m_GD20HM303DGyroFsr;                                // the gyro full scale range
+
+    int m_GD20HM303DAccelSampleRate;                        // the accel sample rate
+    int m_GD20HM303DAccelFsr;                               // the accel full scale range
+    int m_GD20HM303DAccelLpf;                               // the accel low pass filter
+
+    int m_GD20HM303DCompassSampleRate;                      // the compass sample rate
+    int m_GD20HM303DCompassFsr;                             // the compass full scale range
+
+    //  GD20M303DLHC
+
+    int m_GD20M303DLHCGyroSampleRate;                       // the gyro sample rate
+    int m_GD20M303DLHCGyroBW;                               // the gyro bandwidth code
+    int m_GD20M303DLHCGyroHpf;                              // the gyro high pass filter cutoff code
+    int m_GD20M303DLHCGyroFsr;                              // the gyro full scale range
+
+    int m_GD20M303DLHCAccelSampleRate;                      // the accel sample rate
+    int m_GD20M303DLHCAccelFsr;                             // the accel full scale range
+
+    int m_GD20M303DLHCCompassSampleRate;                    // the compass sample rate
+    int m_GD20M303DLHCCompassFsr;                           // the compass full scale range
+
 
 private:
+    void setBlank();
+    void setComment(const char *comment);
     void setValue(const char *key, const bool val);
     void setValue(const char *key, const int val);
     void setValue(const char *key, const RTFLOAT val);

@@ -117,6 +117,14 @@ void IMUThread::finishThread()
 
 void IMUThread::timerEvent(QTimerEvent * /* event */)
 {
+    //  check for valid IMU
+
+    if (m_imu == NULL)
+        return;
+
+    if (m_imu->IMUType() == RTIMU_TYPE_NULL)
+        return;
+
     //  loop here to clear all samples just in case things aren't keeping up
 
     while (m_imu->IMURead()) {

@@ -181,6 +181,15 @@ void RTIMULibDemo::timerEvent(QTimerEvent *event)
             else
                 m_calStatus->setText("Uncalibrated");
         }
+
+        if (m_imuThread->getIMU() != NULL) {
+            m_imuType->setText(m_imuThread->getIMU()->IMUName());
+
+            if (!m_imuThread->getIMU()->IMUGyroBiasValid())
+                m_biasStatus->setText("Gyro bias being calculated - keep IMU still!");
+            else
+                m_biasStatus->setText("Gyro bias valid");
+        }
     }
 }
 
@@ -189,6 +198,24 @@ void RTIMULibDemo::layoutWindow()
     QVBoxLayout *vLayout = new QVBoxLayout();
     vLayout->setContentsMargins(3, 3, 3, 3);
     vLayout->setSpacing(3);
+
+    QHBoxLayout *imuLayout = new QHBoxLayout();
+    vLayout->addLayout(imuLayout);
+    imuLayout->addWidget(new QLabel("IMU type: "));
+    m_imuType = new QLabel();
+    imuLayout->addWidget(m_imuType);
+    imuLayout->setStretch(1, 1);
+
+    vLayout->addSpacing(10);
+
+    QHBoxLayout *biasLayout = new QHBoxLayout();
+    vLayout->addLayout(biasLayout);
+    biasLayout->addWidget(new QLabel("Gyro bias status: "));
+    m_biasStatus = new QLabel();
+    biasLayout->addWidget(m_biasStatus);
+    biasLayout->setStretch(1, 1);
+
+    vLayout->addSpacing(10);
 
     vLayout->addWidget(new QLabel("Fusion state (quaternion): "));
 
@@ -299,7 +326,7 @@ void RTIMULibDemo::layoutWindow()
     vLayout->addStretch(1);
 
     centralWidget()->setLayout(vLayout);
-    setFixedSize(500, 450);
+    setFixedSize(500, 460);
 
 }
 
