@@ -39,6 +39,7 @@ RTIMUSettings::RTIMUSettings(const char *productType)
 bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
 {
     unsigned char result;
+    unsigned char altResult;
 
     setI2CBus(m_I2CBus);
     if (!I2COpen()) {
@@ -74,11 +75,15 @@ bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
             HAL_INFO("Detected L3GD20H at standard address\n");
             return true;
         } else if (result == LSM9DS0_GYRO_ID) {
-            imuType = RTIMU_TYPE_LSM9DS0;
-            slaveAddress = LSM9DS0_GYRO_ADDRESS0;
-            I2CClose();
-            HAL_INFO("Detected LSM9DS0 at standard address\n");
-            return true;
+            if (I2CRead(LSM9DS0_ACCELMAG_ADDRESS0, LSM9DS0_WHO_AM_I, 1, &altResult, "")) {
+                if (altResult == LSM9DS0_ACCELMAG_ID) {
+                    imuType = RTIMU_TYPE_LSM9DS0;
+                    slaveAddress = LSM9DS0_GYRO_ADDRESS0;
+                    I2CClose();
+                    HAL_INFO("Detected LSM9DS0 at standard address\n");
+                    return true;
+                }
+            }
         }
     }
 
@@ -90,11 +95,15 @@ bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
             HAL_INFO("Detected L3GD20H at option address\n");
             return true;
         } else if (result == LSM9DS0_GYRO_ID) {
-            imuType = RTIMU_TYPE_LSM9DS0;
-            slaveAddress = LSM9DS0_GYRO_ADDRESS1;
-            I2CClose();
-            HAL_INFO("Detected LSM9DS0 at option address\n");
-            return true;
+            if (I2CRead(LSM9DS0_ACCELMAG_ADDRESS1, LSM9DS0_WHO_AM_I, 1, &altResult, "")) {
+                if (altResult == LSM9DS0_ACCELMAG_ID) {
+                    imuType = RTIMU_TYPE_LSM9DS0;
+                    slaveAddress = LSM9DS0_GYRO_ADDRESS1;
+                    I2CClose();
+                    HAL_INFO("Detected LSM9DS0 at standard address\n");
+                    return true;
+                }
+            }
         }
     }
 
