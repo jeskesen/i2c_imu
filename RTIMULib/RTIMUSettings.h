@@ -67,6 +67,20 @@
 #define RTIMULIB_GD20M303DLHC_COMPASS_FSR       "GD20M303DLHCCompassFsr"
 
 
+//  LSM9DS0 settings keys
+
+#define RTIMULIB_LSM9DS0_GYRO_SAMPLERATE   "LSM9DS0GyroSampleRate"
+#define RTIMULIB_LSM9DS0_GYRO_BW           "LSM9DS0GyroBW"
+#define RTIMULIB_LSM9DS0_GYRO_HPF          "LSM9DS0GyroHpf"
+#define RTIMULIB_LSM9DS0_GYRO_FSR          "LSM9DS0GyroFsr"
+
+#define RTIMULIB_LSM9DS0_ACCEL_SAMPLERATE  "LSM9DS0AccelSampleRate"
+#define RTIMULIB_LSM9DS0_ACCEL_FSR         "LSM9DS0AccelFsr"
+#define RTIMULIB_LSM9DS0_ACCEL_LPF         "LSM9DS0AccelLpf"
+
+#define RTIMULIB_LSM9DS0_COMPASS_SAMPLERATE "LSM9DS0CompassSampleRate"
+#define RTIMULIB_LSM9DS0_COMPASS_FSR       "LSM9DS0CompassFsr"
+
 //  Compass calibration settings keys
 
 #define RTIMULIB_COMPASSCAL_VALID           "CompassCalValid"
@@ -144,6 +158,19 @@ public:
     int m_GD20M303DLHCCompassSampleRate;                    // the compass sample rate
     int m_GD20M303DLHCCompassFsr;                           // the compass full scale range
 
+    //  LSM9DS0
+
+    int m_LSM9DS0GyroSampleRate;                            // the gyro sample rate
+    int m_LSM9DS0GyroBW;                                    // the gyro bandwidth code
+    int m_LSM9DS0GyroHpf;                                   // the gyro high pass filter cutoff code
+    int m_LSM9DS0GyroFsr;                                   // the gyro full scale range
+
+    int m_LSM9DS0AccelSampleRate;                           // the accel sample rate
+    int m_LSM9DS0AccelFsr;                                  // the accel full scale range
+    int m_LSM9DS0AccelLpf;                                  // the accel low pass filter
+
+    int m_LSM9DS0CompassSampleRate;                         // the compass sample rate
+    int m_LSM9DS0CompassFsr;                                // the compass full scale range
 
 private:
     void setBlank();

@@ -74,11 +74,11 @@ bool RTIMUGD20M303DLHC::IMUInit()
     if (!I2CWrite(m_gyroSlaveAddr, L3GD20_CTRL5, 0x80, "Failed to boot L3GD20"))
         return false;
 
-    if (!I2CRead(m_gyroSlaveAddr, L3GD20_WHO_AM_I, 1, &result, "Failed to read L3GD20H id"))
+    if (!I2CRead(m_gyroSlaveAddr, L3GD20_WHO_AM_I, 1, &result, "Failed to read L3GD20 id"))
         return false;
 
     if (result != L3GD20_ID) {
-        HAL_ERROR1("Incorrect L3GD20H id %d\n", result);
+        HAL_ERROR1("Incorrect L3GD20 id %d\n", result);
         return false;
     }
 
@@ -114,7 +114,7 @@ bool RTIMUGD20M303DLHC::IMUInit()
 
     //  turn on gyro fifo
 
-    if (!I2CWrite(m_gyroSlaveAddr, L3GD20H_FIFO_CTRL, 0x3f, "Failed to set L3GD20 FIFO mode"))
+    if (!I2CWrite(m_gyroSlaveAddr, L3GD20_FIFO_CTRL, 0x3f, "Failed to set L3GD20 FIFO mode"))
         return false;
 #endif
 
@@ -378,18 +378,18 @@ bool RTIMUGD20M303DLHC::IMURead()
 #ifdef GD20M303DLHC_CACHE_MODE
     int count;
 
-    if (!I2CRead(m_gyroSlaveAddr, L3GD20H_FIFO_SRC, 1, &status, "Failed to read L3GD20H fifo status"))
+    if (!I2CRead(m_gyroSlaveAddr, L3GD20_FIFO_SRC, 1, &status, "Failed to read L3GD20 fifo status"))
         return false;
 
     if ((status & 0x40) != 0) {
-        HAL_INFO("L3GD20H fifo overrun\n");
-        if (!I2CWrite(m_gyroSlaveAddr, L3GD20H_CTRL5, 0x10, "Failed to set L3GD20 CTRL5"))
+        HAL_INFO("L3GD20 fifo overrun\n");
+        if (!I2CWrite(m_gyroSlaveAddr, L3GD20_CTRL5, 0x10, "Failed to set L3GD20 CTRL5"))
             return false;
 
-        if (!I2CWrite(m_gyroSlaveAddr, L3GD20H_FIFO_CTRL, 0x0, "Failed to set L3GD20 FIFO mode"))
+        if (!I2CWrite(m_gyroSlaveAddr, L3GD20_FIFO_CTRL, 0x0, "Failed to set L3GD20 FIFO mode"))
             return false;
 
-        if (!I2CWrite(m_gyroSlaveAddr, L3GD20H_FIFO_CTRL, 0x3f, "Failed to set L3GD20 FIFO mode"))
+        if (!I2CWrite(m_gyroSlaveAddr, L3GD20_FIFO_CTRL, 0x3f, "Failed to set L3GD20 FIFO mode"))
             return false;
 
         if (!setGyroCTRL5())
@@ -405,16 +405,21 @@ bool RTIMUGD20M303DLHC::IMURead()
     if ((m_cacheCount == 0) && (count > 0) && (count < GD20M303DLHC_FIFO_THRESH)) {
         // special case of a small fifo and nothing cached - just handle as simple read
 
-        if (!I2CRead(m_gyroSlaveAddr, 0x80 | L3GD20H_OUT_X_L, 6, gyroData, "Failed to read L3GD20H data"))
+        if (!I2CRead(m_gyroSlaveAddr, 0x80 | L3GD20_OUT_X_L, 6, gyroData, "Failed to read L3GD20 data"))
             return false;
 
-        if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM303D_OUT_X_L_A, 6, accelData, "Failed to read LSM303D accel data"))
+        if (!I2CRead(m_accelSlaveAddr, 0x80 | LSM303DLHC_OUT_X_L_A, 6, accelData, "Failed to read LSM303DLHC accel data"))
             return false;
 
-        if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM303D_OUT_X_H_M, 6, compassData, "Failed to read LSM303D compass data"))
+        if (!I2CRead(m_compassSlaveAddr, 0x80 | LSM303DLHC_OUT_X_H_M, 6, compassData, "Failed to read LSM303DLHC compass data"))
             return false;
 
-        m_imuData.timestamp += m_sampleInterval;
+        if (m_firstTime)
+            m_imuData.timestamp = RTMath::currentUSecsSinceEpoch();
+        else
+            m_imuData.timestamp += m_sampleInterval;
+
+        m_firstTime = false;
     } else {
         if (count >=  GD20M303DLHC_FIFO_THRESH) {
             // need to create a cache block
@@ -427,16 +432,16 @@ bool RTIMUGD20M303DLHC::IMURead()
                 m_cacheCount--;
             }
 
-            if (!I2CRead(m_gyroSlaveAddr, 0x80 | L3GD20H_OUT_X_L, GD20M303DLHC_FIFO_CHUNK_SIZE * GD20M303DLHC_FIFO_THRESH,
-                         m_cache[m_cacheIn].data, "Failed to read L3GD20H fifo data"))
+            if (!I2CRead(m_gyroSlaveAddr, 0x80 | L3GD20_OUT_X_L, GD20M303DLHC_FIFO_CHUNK_SIZE * GD20M303DLHC_FIFO_THRESH,
+                         m_cache[m_cacheIn].data, "Failed to read L3GD20 fifo data"))
                 return false;
 
-            if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM303D_OUT_X_L_A, 6,
-                         m_cache[m_cacheIn].accel, "Failed to read LSM303D accel data"))
+            if (!I2CRead(m_accelSlaveAddr, 0x80 | LSM303DLHC_OUT_X_L_A, 6,
+                         m_cache[m_cacheIn].accel, "Failed to read LSM303DLHC accel data"))
                 return false;
 
-            if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM303D_OUT_X_H_M, 6,
-                         m_cache[m_cacheIn].compass, "Failed to read LSM303D compass data"))
+            if (!I2CRead(m_compassSlaveAddr, 0x80 | LSM303DLHC_OUT_X_H_M, 6,
+                         m_cache[m_cacheIn].compass, "Failed to read LSM303DLHC compass data"))
                 return false;
 
             m_cache[m_cacheIn].count = GD20M303DLHC_FIFO_THRESH;

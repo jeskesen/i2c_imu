@@ -14,13 +14,19 @@ Check out www.richards-tech.com for more details, updates and news.
 
 ## Release history
 
+### April 10 2014 - 0.9.3
+
+#### STM LSM9DS0 IMU Implementation now working
+
+The single chip IMU LSM9DS0 is now working with RTIMULib. An example breakout is availabel from Sparkfun - https://www.sparkfun.com/products/12636.
+
 ### April 9 2014 - 0.9.2
 
-### STM L3GD20H + LSM303D IMU Implementation now working
+#### STM L3GD20H + LSM303D IMU Implementation now working
 
 The combination of the L3GD20H gyro and LSM303D accel/mag chip is now working. The physical configuration supported is as used on the Pololu Altimu V3 - http://www.pololu.com/product/2469. The pressure chip on the 10-dof version will be supported shortly but 9-dof is working now.
 
-### STM L3GD20 + LSM303DLHC IMU Implementation now working
+#### STM L3GD20 + LSM303DLHC IMU Implementation now working
 
 The combination of the L3GD20 and LSM303DLHC accel/mag chip is now working. The physical configuration supported is as used on the Adafruit 9-dof IMU - http://www.adafruit.com/products/1714.
 
@@ -144,7 +150,7 @@ At the moment, gyro bias is calculated during the first 5 seconds of operation. 
 
 ## .ini File Settings
 
-By default, RTIMULib.ini is created in the working directory. This can be easily edited and the file contains extensive comments for the settigns of every supported IMU type.
+By default, RTIMULib.ini is created in the working directory. This can be easily edited and the file contains extensive comments for the settings of every supported IMU type.
 
 ## The RTIMULib Hardware Abstraction Layer
 

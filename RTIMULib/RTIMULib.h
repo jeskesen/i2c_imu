@@ -33,6 +33,7 @@
 #include "RTIMUMPU9150.h"
 #include "RTIMUGD20HM303D.h"
 #include "RTIMUGD20M303DLHC.h"
+#include "RTIMULSM9DS0.h"
 
 #include "RTIMUSettings.h"
 

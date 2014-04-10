@@ -21,6 +21,7 @@
 #include "RTIMUMPU9150.h"
 #include "RTIMUGD20HM303D.h"
 #include "RTIMUGD20M303DLHC.h"
+#include "RTIMULSM9DS0.h"
 
 #define RATE_TIMER_INTERVAL 2
 
@@ -46,7 +47,7 @@ bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
     }
 
     if (I2CRead(MPU9150_ADDRESS0, MPU9150_WHO_AM_I, 1, &result, "")) {
-        if (result == 0x68) {
+        if (result == MPU9150_ID) {
             imuType = RTIMU_TYPE_MPU9150;
             slaveAddress = MPU9150_ADDRESS0;
             I2CClose();
@@ -56,7 +57,7 @@ bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
     }
 
     if (I2CRead(MPU9150_ADDRESS1, MPU9150_WHO_AM_I, 1, &result, "")) {
-        if (result == 0x68) {
+        if (result == MPU9150_ID) {
             imuType = RTIMU_TYPE_MPU9150;
             slaveAddress = MPU9150_ADDRESS1;
             I2CClose();
@@ -72,6 +73,12 @@ bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
             I2CClose();
             HAL_INFO("Detected L3GD20H at standard address\n");
             return true;
+        } else if (result == LSM9DS0_GYRO_ID) {
+            imuType = RTIMU_TYPE_LSM9DS0;
+            slaveAddress = LSM9DS0_GYRO_ADDRESS0;
+            I2CClose();
+            HAL_INFO("Detected LSM9DS0 at standard address\n");
+            return true;
         }
     }
 
@@ -81,6 +88,12 @@ bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
             slaveAddress = L3GD20H_ADDRESS1;
             I2CClose();
             HAL_INFO("Detected L3GD20H at option address\n");
+            return true;
+        } else if (result == LSM9DS0_GYRO_ID) {
+            imuType = RTIMU_TYPE_LSM9DS0;
+            slaveAddress = LSM9DS0_GYRO_ADDRESS1;
+            I2CClose();
+            HAL_INFO("Detected LSM9DS0 at option address\n");
             return true;
         }
     }
@@ -161,6 +174,19 @@ bool RTIMUSettings::loadSettings()
     m_GD20M303DLHCCompassSampleRate = LSM303DLHC_COMPASS_SAMPLERATE_30;
     m_GD20M303DLHCCompassFsr = LSM303DLHC_COMPASS_FSR_1_3;
 
+    //  LSM9DS0 defaults
+
+    m_LSM9DS0GyroSampleRate = LSM9DS0_GYRO_SAMPLERATE_95;
+    m_LSM9DS0GyroBW = LSM9DS0_GYRO_BANDWIDTH_1;
+    m_LSM9DS0GyroHpf = LSM9DS0_GYRO_HPF_4;
+    m_LSM9DS0GyroFsr = LSM9DS0_GYRO_FSR_500;
+
+    m_LSM9DS0AccelSampleRate = LSM9DS0_ACCEL_SAMPLERATE_50;
+    m_LSM9DS0AccelFsr = LSM9DS0_ACCEL_FSR_8;
+    m_LSM9DS0AccelLpf = LSM9DS0_ACCEL_LPF_50;
+
+    m_LSM9DS0CompassSampleRate = LSM9DS0_COMPASS_SAMPLERATE_50;
+    m_LSM9DS0CompassFsr = LSM9DS0_COMPASS_FSR_2;
 
     //  check to see if settings file exists
 
@@ -269,6 +295,27 @@ bool RTIMUSettings::loadSettings()
         } else if (strcmp(key, RTIMULIB_GD20M303DLHC_COMPASS_FSR) == 0) {
             m_GD20M303DLHCCompassFsr = atoi(val);
 
+        //  LSM9DS0 settings
+
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_GYRO_SAMPLERATE) == 0) {
+            m_LSM9DS0GyroSampleRate = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_GYRO_FSR) == 0) {
+            m_LSM9DS0GyroFsr = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_GYRO_HPF) == 0) {
+            m_LSM9DS0GyroHpf = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_GYRO_BW) == 0) {
+            m_LSM9DS0GyroBW = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_ACCEL_SAMPLERATE) == 0) {
+            m_LSM9DS0AccelSampleRate = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_ACCEL_FSR) == 0) {
+            m_LSM9DS0AccelFsr = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_ACCEL_LPF) == 0) {
+            m_LSM9DS0AccelLpf = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_COMPASS_SAMPLERATE) == 0) {
+            m_LSM9DS0CompassSampleRate = atoi(val);
+        } else if (strcmp(key, RTIMULIB_LSM9DS0_COMPASS_FSR) == 0) {
+            m_LSM9DS0CompassFsr = atoi(val);
+
         //  Handle unrecognized key
 
         } else {
@@ -303,6 +350,7 @@ bool RTIMUSettings::saveSettings()
     setComment("  2 = InvenSense MPU-9150");
     setComment("  3 = STM L3GD20H + LSM303D");
     setComment("  4 = STM L3GD20 + LSM303DLHC");
+    setComment("  5 = STM LSM9DS0");
     setValue(RTIMULIB_IMU_TYPE, m_imuType);
 
     setBlank();
@@ -558,6 +606,95 @@ bool RTIMUSettings::saveSettings()
     setComment("  7 = +/- 810 uT ");
     setValue(RTIMULIB_GD20M303DLHC_COMPASS_FSR, m_GD20M303DLHCCompassFsr);
 
+    //  LSM9DS0 settings
+
+    setBlank();
+    setComment("#####################################################################");
+    setComment("");
+    setComment("LSM9DS0 settings");
+    setComment("");
+
+    setBlank();
+    setComment("Gyro sample rate - ");
+    setComment("  0 = 95z ");
+    setComment("  1 = 190Hz ");
+    setComment("  2 = 380Hz ");
+    setComment("  3 = 760Hz ");
+    setValue(RTIMULIB_LSM9DS0_GYRO_SAMPLERATE, m_LSM9DS0GyroSampleRate);
+
+    setBlank();
+    setComment("");
+    setComment("Gyro full scale range - ");
+    setComment("  0 = 250 degrees per second ");
+    setComment("  1 = 500 degrees per second ");
+    setComment("  2 = 2000 degrees per second ");
+    setValue(RTIMULIB_LSM9DS0_GYRO_FSR, m_LSM9DS0GyroFsr);
+
+    setBlank();
+    setComment("");
+    setComment("Gyro high pass filter - ");
+    setComment("  0 - 9 but see the LSM9DS0 manual for details");
+    setValue(RTIMULIB_LSM9DS0_GYRO_HPF, m_LSM9DS0GyroHpf);
+
+    setBlank();
+    setComment("");
+    setComment("Gyro bandwidth - ");
+    setComment("  0 - 3 but see the LSM9DS0 manual for details");
+    setValue(RTIMULIB_LSM9DS0_GYRO_BW, m_LSM9DS0GyroBW);
+
+    setBlank();
+    setComment("Accel sample rate - ");
+    setComment("  1 = 3.125Hz ");
+    setComment("  2 = 6.25Hz ");
+    setComment("  3 = 12.5Hz ");
+    setComment("  4 = 25Hz ");
+    setComment("  5 = 50Hz ");
+    setComment("  6 = 100Hz ");
+    setComment("  7 = 200Hz ");
+    setComment("  8 = 400Hz ");
+    setComment("  9 = 800Hz ");
+    setComment("  10 = 1600Hz ");
+    setValue(RTIMULIB_LSM9DS0_ACCEL_SAMPLERATE, m_LSM9DS0AccelSampleRate);
+
+    setBlank();
+    setComment("");
+    setComment("Accel full scale range - ");
+    setComment("  0 = +/- 2g ");
+    setComment("  1 = +/- 4g ");
+    setComment("  2 = +/- 6g ");
+    setComment("  3 = +/- 8g ");
+    setComment("  4 = +/- 16g ");
+    setValue(RTIMULIB_LSM9DS0_ACCEL_FSR, m_LSM9DS0AccelFsr);
+
+    setBlank();
+    setComment("");
+    setComment("Accel low pass filter - ");
+    setComment("  0 = 773Hz");
+    setComment("  1 = 194Hz");
+    setComment("  2 = 362Hz");
+    setComment("  3 = 50Hz");
+    setValue(RTIMULIB_LSM9DS0_ACCEL_LPF, m_LSM9DS0AccelLpf);
+
+    setBlank();
+    setComment("");
+    setComment("Compass sample rate - ");
+    setComment("  0 = 3.125Hz ");
+    setComment("  1 = 6.25Hz ");
+    setComment("  2 = 12.5Hz ");
+    setComment("  3 = 25Hz ");
+    setComment("  4 = 50Hz ");
+    setComment("  5 = 100Hz ");
+    setValue(RTIMULIB_LSM9DS0_COMPASS_SAMPLERATE, m_LSM9DS0CompassSampleRate);
+
+
+    setBlank();
+    setComment("");
+    setComment("Compass full scale range - ");
+    setComment("  0 = +/- 200 uT ");
+    setComment("  1 = +/- 400 uT ");
+    setComment("  2 = +/- 800 uT ");
+    setComment("  3 = +/- 1200 uT ");
+    setValue(RTIMULIB_LSM9DS0_COMPASS_FSR, m_LSM9DS0CompassFsr);
     fclose(m_fd);
     return true;
 }

@@ -29,6 +29,7 @@
 #define RTIMU_TYPE_MPU9150                  2                   // InvenSense MPU9150
 #define RTIMU_TYPE_GD20HM303D               3                   // STM L3GD20H/LSM303D (Pololu Altimu)
 #define RTIMU_TYPE_GD20M303DLHC             4                   // STM L3GD20/LSM303DHLC (Adafruit IMU)
+#define RTIMU_TYPE_LSM9DS0                  5                   // STM LSM9DS0 (eg Sparkfun IMU)
 
 //  these defines describe the various fusion filter options
 

@@ -22,6 +22,7 @@
 #include "RTIMUMPU9150.h"
 #include "RTIMUGD20HM303D.h"
 #include "RTIMUGD20M303DLHC.h"
+#include "RTIMULSM9DS0.h"
 
 #include <QFormLayout>
 #include <QLabel>
@@ -77,6 +78,7 @@ void SelectIMUDlg::layoutWindow()
     m_selectIMU->addItem("InvenSense MPU9150");
     m_selectIMU->addItem("STM L3GD20H/LSM303D");
     m_selectIMU->addItem("STM L3GD20/LSM303DLHC");
+    m_selectIMU->addItem("STM LSM9DS0");
 
     m_selectIMU->setCurrentIndex(m_settings->m_imuType);
 
@@ -126,6 +128,15 @@ void SelectIMUDlg::setSelectAddress(int imuType, int slaveAddress)
         m_selectAddress->addItem("Standard (0x6a)", L3GD20_ADDRESS0);
         m_selectAddress->addItem("Option (0x6b)", L3GD20_ADDRESS1);
         if (slaveAddress == L3GD20_ADDRESS1)
+            m_selectAddress->setCurrentIndex(1);
+        else
+            m_selectAddress->setCurrentIndex(0);
+        break;
+
+    case RTIMU_TYPE_LSM9DS0:
+        m_selectAddress->addItem("Standard (0x6a)", LSM9DS0_GYRO_ADDRESS0);
+        m_selectAddress->addItem("Option (0x6b)", LSM9DS0_GYRO_ADDRESS1);
+        if (slaveAddress == LSM9DS0_GYRO_ADDRESS1)
             m_selectAddress->setCurrentIndex(1);
         else
             m_selectAddress->setCurrentIndex(0);

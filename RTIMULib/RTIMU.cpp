@@ -25,6 +25,7 @@
 #include "RTIMUMPU9150.h"
 #include "RTIMUGD20HM303D.h"
 #include "RTIMUGD20M303DLHC.h"
+#include "RTIMULSM9DS0.h"
 
 RTIMU *RTIMU::createIMU(RTIMUSettings *settings)
 {
@@ -37,6 +38,9 @@ RTIMU *RTIMU::createIMU(RTIMUSettings *settings)
 
     case RTIMU_TYPE_GD20M303DLHC:
         return new RTIMUGD20M303DLHC(settings);
+
+    case RTIMU_TYPE_LSM9DS0:
+        return new RTIMULSM9DS0(settings);
 
     case RTIMU_TYPE_AUTODISCOVER:
         if (settings->discoverIMU(settings->m_imuType, settings->m_I2CSlaveAddress)) {

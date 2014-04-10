@@ -30,6 +30,7 @@
 
 #define MPU9150_ADDRESS0            0x68
 #define MPU9150_ADDRESS1            0x69
+#define MPU9150_ID                  0x68
 
 #define AK8975_ADDRESS              0x0c
 
