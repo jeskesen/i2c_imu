@@ -20,6 +20,12 @@
 #include "RTFusion.h"
 #include "RTIMUHal.h"
 
+const char *RTFusion::m_fusionNameMap[] = {
+    "NULL",
+    "Kalman STATE4",
+    "RTQF",
+    "Kalman STATE7"};
+
 RTFusion::RTFusion()
 {
     m_debug = false;
@@ -31,11 +37,6 @@ RTFusion::RTFusion()
 
 RTFusion::~RTFusion()
 {
-}
-
-void RTFusion::newIMUData(RTIMU_DATA& )
-{
-    HAL_ERROR("No implementation of newIMUData() supplied!\n");
 }
 
 void RTFusion::calculatePose(const RTVector3& accel, const RTVector3& mag)

@@ -31,9 +31,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define HAL_INFO(m) { puts(m); fflush(stdout); }
+#define HAL_INFO(m) { printf("%s", m); fflush(stdout); }
 #define HAL_INFO1(m, x) { printf(m, x); fflush(stdout); }
-#define HAL_INFO2(m, x, y) { printf(m, x, y) fflush(stdout); }
+#define HAL_INFO2(m, x, y) { printf(m, x, y); fflush(stdout); }
 #define HAL_INFO3(m, x, y, z) { printf(m, x, y, z); fflush(stdout); }
 #define HAL_INFO4(m, x, y, z, a) { printf(m, x, y, z, a); fflush(stdout); }
 #define HAL_INFO5(m, x, y, z, a, b) { printf(m, x, y, z, a, b); fflush(stdout); }

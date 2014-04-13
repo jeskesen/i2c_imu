@@ -62,6 +62,7 @@ DEPS          = $(RTIMULIBPATH)/RTMath.h \
 		$(RTIMULIBPATH)/RTIMULSM9DS0.h \
 		$(RTIMULIBPATH)/RTFusion.h \
 		$(RTIMULIBPATH)/RTFusionKalman4.h \
+		$(RTIMULIBPATH)/RTFusionRTQF.h \
 		$(RTIMULIBPATH)/RTIMUSettings.h
 
 OBJECTS       = objects/RTIMULibDrive.o \
@@ -75,6 +76,7 @@ OBJECTS       = objects/RTIMULibDrive.o \
 		objects/RTIMULSM9DS0.o \
 		objects/RTFusion.o \
 		objects/RTFusionKalman4.o \
+		objects/RTFusionRTQF.o \
 		objects/RTIMUSettings.o 
 
 MAKE_TARGET   = RTIMULibDrive

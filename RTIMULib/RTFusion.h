@@ -29,6 +29,10 @@ public:
     RTFusion();
     virtual ~RTFusion();
 
+    //  fusionType returns the type code of the fusion algorithm
+
+    virtual int fusionType() { return RTFUSION_TYPE_NULL; }
+
     //  reset() resets the fusion state but keeps any setting changes (such as enables)
 
     virtual void reset() {}
@@ -36,7 +40,11 @@ public:
     //  newIMUData() should be called for subsequent updates
     //  the fusion fields are updated with the results
 
-    virtual void newIMUData(RTIMU_DATA& data);
+    virtual void newIMUData(RTIMU_DATA& /* data */) {}
+
+    //  This static function returns performs the type to name mapping
+
+    static const char *fusionName(int fusionType) { return m_fusionNameMap[fusionType]; }
 
     //  the following three functions control the influence of the gyro, accel and compass sensors
 
@@ -68,6 +76,8 @@ protected:
 
     bool m_firstTime;                                       // if first time after reset
     uint64_t m_lastFusionTime;                              // for delta time calculation
+
+    static const char *m_fusionNameMap[];                     // the fusion name array
 };
 
 #endif // _RTFUSION_H

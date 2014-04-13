@@ -22,15 +22,15 @@
 
 #include "RTFusion.h"
 
-#define KALMAN_QUATERNION_LENGTH	4
-
-#define	KALMAN_STATE_LENGTH	4								// just the quaternion for the moment
-
 class RTFusionKalman4 : public RTFusion
 {
 public:
     RTFusionKalman4();
     ~RTFusionKalman4();
+
+    //  fusionType returns the type code of the fusion algorithm
+
+    virtual int fusionType() { return RTFUSION_TYPE_KALMANSTATE4; }
 
     //  reset() resets the kalman state but keeps any setting changes (such as enables)
 
@@ -41,7 +41,7 @@ public:
 
     void newIMUData(RTIMU_DATA& data);
 
-    //  the following two functions can be called before initKalman to customize the covariance matrices
+    //  the following two functions can be called to customize the covariance matrices
 
     void setQMatrix(RTMatrix4x4 Q) {  m_Q = Q; reset();}
     void setRkMatrix(RTMatrix4x4 Rk) { m_Rk = Rk; reset();}

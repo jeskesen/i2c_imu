@@ -19,6 +19,7 @@
 
 #include "RTIMU.h"
 #include "RTFusionKalman4.h"
+#include "RTFusionRTQF.h"
 #include "RTIMUSettings.h"
 
 #include "RTIMUNull.h"
@@ -68,14 +69,17 @@ RTIMU::RTIMU(RTIMUSettings *settings)
     switch (m_settings->m_fusionType) {
     case RTFUSION_TYPE_KALMANSTATE4:
         m_fusion = new RTFusionKalman4();
-        HAL_INFO("Using Kalman STATE4\n");
+        break;
+
+    case RTFUSION_TYPE_RTQF:
+        m_fusion = new RTFusionRTQF();
         break;
 
     default:
         m_fusion = new RTFusion();
-        HAL_INFO("Using Kalman NULL\n");
         break;
     }
+    HAL_INFO1("Using fusion algorithm %s\n", RTFusion::fusionName(m_settings->m_fusionType));
 }
 
 RTIMU::~RTIMU()

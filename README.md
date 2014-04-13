@@ -14,6 +14,12 @@ Check out www.richards-tech.com for more details, updates and news.
 
 ## Release history
 
+### April 13 2014 - 0.9.4
+
+#### Added new RTQF fusion filter
+
+RTQF is a very highly stripped down Kalman filter that avoids matrix inversion and lot of other matrix operations. It makes a small performance difference on the Raspberry Pi but would have more impact on lower powered processors.
+
 ### April 10 2014 - 0.9.3
 
 #### STM LSM9DS0 IMU Implementation now working

@@ -24,6 +24,7 @@
 #include "RTIMULibDemo.h"
 #include "CompassCalDlg.h"
 #include "SelectIMUDlg.h"
+#include "SelectFusionDlg.h"
 #include "IMUThread.h"
 
 #define RATE_TIMER_INTERVAL 2
@@ -42,6 +43,7 @@ RTIMULibDemo::RTIMULibDemo()
 
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui.actionCalibrateCompass, SIGNAL(triggered()), this, SLOT(onCalibrateCompass()));
+    connect(ui.actionSelectFusionAlgorithm, SIGNAL(triggered()), this, SLOT(onSelectFusionAlgorithm()));
     connect(ui.actionSelectIMU, SIGNAL(triggered()), this, SLOT(onSelectIMU()));
     connect(m_enableGyro, SIGNAL(stateChanged(int)), this, SLOT(onEnableGyro(int)));
     connect(m_enableAccel, SIGNAL(stateChanged(int)), this, SLOT(onEnableAccel(int)));
@@ -70,10 +72,22 @@ RTIMULibDemo::RTIMULibDemo()
     //  Only update the display 10 times per second to keep CPU reasonable
 
     m_displayTimer = startTimer(100);
+
+    m_fusionType->setText(RTFusion::fusionName(m_imuThread->getSettings()->m_fusionType));
 }
 
 RTIMULibDemo::~RTIMULibDemo()
 {
+}
+
+void RTIMULibDemo::onSelectFusionAlgorithm()
+{
+    SelectFusionDlg dlg(m_imuThread->getSettings(), this);
+
+    if (dlg.exec() == QDialog::Accepted) {
+        emit newIMU();
+        m_fusionType->setText(RTFusion::fusionName(m_imuThread->getSettings()->m_fusionType));
+    }
 }
 
 void RTIMULibDemo::onSelectIMU()
@@ -305,6 +319,17 @@ void RTIMULibDemo::layoutWindow()
     vLayout->addLayout(dataLayout);
 
     vLayout->addSpacing(10);
+
+    QHBoxLayout *fusionBox = new QHBoxLayout();
+    QLabel *fusionTypeLabel = new QLabel("Fusion algorithm: ");
+    fusionBox->addWidget(fusionTypeLabel);
+    fusionTypeLabel->setMaximumWidth(150);
+    m_fusionType = new QLabel();
+    fusionBox->addWidget(m_fusionType);
+    vLayout->addLayout(fusionBox);
+
+    vLayout->addSpacing(10);
+
     vLayout->addWidget(new QLabel("Fusion controls: "));
 
     m_enableGyro = new QCheckBox("Enable gyros");
@@ -326,7 +351,7 @@ void RTIMULibDemo::layoutWindow()
     vLayout->addStretch(1);
 
     centralWidget()->setLayout(vLayout);
-    setFixedSize(500, 460);
+    setFixedSize(500, 500);
 
 }
 

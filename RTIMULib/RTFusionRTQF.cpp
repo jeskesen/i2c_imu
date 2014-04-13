@@ -17,32 +17,30 @@
 //  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "RTFusionKalman4.h"
+#include "RTFusionRTQF.h"
 
 //  The QVALUE affects the gyro response.
 
-#define KALMAN_QVALUE	0.001f
+#define RTQF_QVALUE	0.001f
 
 //  The RVALUE controls the influence of the accels and compass.
 //  The bigger the value, the more sluggish the response.
 
-#define KALMAN_RVALUE	0.0005f
-
-#define KALMAN_QUATERNION_LENGTH	4
-
-#define	KALMAN_STATE_LENGTH	4								// just the quaternion for the moment
+#define RTQF_RVALUE	0.0005f
 
 
-RTFusionKalman4::RTFusionKalman4()
+RTFusionRTQF::RTFusionRTQF()
 {
+    m_Q = RTQF_QVALUE;
+    m_R = RTQF_RVALUE;
     reset();
 }
 
-RTFusionKalman4::~RTFusionKalman4()
+RTFusionRTQF::~RTFusionRTQF()
 {
 }
 
-void RTFusionKalman4::reset()
+void RTFusionRTQF::reset()
 {
     m_firstTime = true;
     m_fusionPose = RTVector3();
@@ -52,26 +50,11 @@ void RTFusionKalman4::reset()
     m_compass = RTVector3();
     m_measuredPose = RTVector3();
     m_measuredQPose.fromEuler(m_measuredPose);
-    m_Rk.fill(0);
-    m_Q.fill(0);
-
-    // initialize process noise covariance matrix
-
-    for (int i = 0; i < KALMAN_STATE_LENGTH; i++)
-        for (int j = 0; j < KALMAN_STATE_LENGTH; j++)
-            m_Q.setVal(i, i, KALMAN_QVALUE);
-
-    // initialize observation noise covariance matrix
-
-
-    for (int i = 0; i < KALMAN_STATE_LENGTH; i++)
-        for (int j = 0; j < KALMAN_STATE_LENGTH; j++)
-            m_Rk.setVal(i, i, KALMAN_RVALUE);
+    m_sampleNumber = 0;
  }
 
-void RTFusionKalman4::predict()
+void RTFusionRTQF::predict()
 {
-    RTMatrix4x4 mat;
     RTQuaternion tQuat;
     RTFLOAT x2, y2, z2;
 
@@ -97,79 +80,39 @@ void RTFusionKalman4::predict()
     m_Fk.setVal(3, 1, y2);
     m_Fk.setVal(3, 2, -x2);
 
-    m_FkTranspose = m_Fk.transposed();
-
-	// Predict new state estimate Xkk_1 = Fk * Xk_1k_1
+    // Predict new state
 
     tQuat = m_Fk * m_stateQ;
     tQuat *= m_timeDelta;
     m_stateQ += tQuat;
-
-//    m_stateQ.normalize();
-
-    // Compute PDot = Fk * Pk_1k_1 + Pk_1k_1 * FkTranspose (note Pkk == Pk_1k_1 at this stage)
-
-    m_PDot = m_Fk * m_Pkk;
-    mat = m_Pkk * m_FkTranspose;
-    m_PDot += mat;
-
-    // add in Q to get the new prediction
-
-    m_Pkk_1 = m_PDot + m_Q;
-
-    //  multiply by deltaTime (variable name is now misleading though)
-
-    m_Pkk_1 *= m_timeDelta;
 }
 
 
-void RTFusionKalman4::update()
+void RTFusionRTQF::update()
 {
-    RTQuaternion delta;
-    RTMatrix4x4 Sk, SkInverse;
-
     if (m_enableCompass || m_enableAccel) {
         m_stateQError = m_measuredQPose - m_stateQ;
     } else {
         m_stateQError = RTQuaternion();
     }
 
-    //	Compute residual covariance Sk = Hk * Pkk_1 * HkTranspose + Rk
-    //  Note: since Hk is the identity matrix, this has been simplified
-
-    Sk = m_Pkk_1 + m_Rk;
-
-    //	Compute Kalman gain Kk = Pkk_1 * HkTranspose * SkInverse
-    //  Note: again, the HkTranspose part is omitted
-
-    SkInverse = Sk.inverted();
-
-    m_Kk = m_Pkk_1 * SkInverse;
-
-    if (m_debug)
-        HAL_INFO(RTMath::display("Gain", m_Kk));
-
     // make new state estimate
 
-    delta = m_Kk * m_stateQError;
+    RTFLOAT qt = m_Q * m_timeDelta;
 
-    m_stateQ += delta;
+    m_stateQ += m_stateQError * (qt / (qt + m_R));
 
     m_stateQ.normalize();
-
-    //  produce new estimate covariance Pkk = (I - Kk * Hk) * Pkk_1
-    //  Note: since Hk is the identity matrix, it is omitted
-
-    m_Pkk.setToIdentity();
-    m_Pkk -= m_Kk;
-    m_Pkk = m_Pkk * m_Pkk_1;
-
-    if (m_debug)
-        HAL_INFO(RTMath::display("Cov", m_Pkk));
 }
 
-void RTFusionKalman4::newIMUData(RTIMU_DATA& data)
+void RTFusionRTQF::newIMUData(RTIMU_DATA& data)
 {
+    if (m_debug) {
+        HAL_INFO("\n------\n");
+        HAL_INFO2("IMU update delta time: %f, sample %d\n", m_timeDelta, m_sampleNumber++);
+    }
+    m_sampleNumber++;
+
     if (m_enableGyro)
         m_gyro = data.gyro;
     else
@@ -181,16 +124,6 @@ void RTFusionKalman4::newIMUData(RTIMU_DATA& data)
         m_lastFusionTime = data.timestamp;
         calculatePose(m_accel, m_compass);
         m_Fk.fill(0);
-
-        //  init covariance matrix to something
-
-        m_Pkk.fill(0);
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                m_Pkk.setVal(i,j, 0.5);
-
-        // initialize the observation model Hk
-        // Note: since the model is the state vector, this is an identity matrix so it won't be used
 
         //  initialize the poses
 
@@ -204,11 +137,6 @@ void RTFusionKalman4::newIMUData(RTIMU_DATA& data)
         if (m_timeDelta <= 0)
             return;
 
-        if (m_debug) {
-            HAL_INFO("\n------\n");
-            HAL_INFO1("IMU update delta time: %f\n", m_timeDelta);
-        }
-
         calculatePose(data.accel, data.compass);
 
         predict();
@@ -218,9 +146,9 @@ void RTFusionKalman4::newIMUData(RTIMU_DATA& data)
 
         if (m_debug) {
             HAL_INFO(RTMath::displayRadians("Measured pose", m_measuredPose));
-            HAL_INFO(RTMath::displayRadians("Kalman pose", m_fusionPose));
+            HAL_INFO(RTMath::displayRadians("RTQF pose", m_fusionPose));
             HAL_INFO(RTMath::displayRadians("Measured quat", m_measuredPose));
-            HAL_INFO(RTMath::display("Kalman quat", m_stateQ));
+            HAL_INFO(RTMath::display("RTQF quat", m_stateQ));
             HAL_INFO(RTMath::display("Error quat", m_stateQError));
          }
     }

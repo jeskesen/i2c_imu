@@ -48,6 +48,7 @@
     </property>
     <addaction name="actionBasicSetup"/>
     <addaction name="actionCalibrateCompass"/>
+    <addaction name="actionSelectFusionAlgorithm"/>
     <addaction name="actionSelectIMU"/>
     <addaction name="actionExit"/>
    </widget>
@@ -66,6 +67,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionSelectIMU"/>
+   <addaction name="separator"/>
+   <addaction name="actionSelectFusionAlgorithm"/>
    <addaction name="separator"/>
    <addaction name="actionCalibrateCompass"/>
    <addaction name="separator"/>
@@ -172,6 +175,11 @@
   <action name="actionSelectIMU">
    <property name="text">
     <string>Select IMU</string>
+   </property>
+  </action>
+  <action name="actionSelectFusionAlgorithm">
+   <property name="text">
+    <string>Select fusion algorithm</string>
    </property>
   </action>
  </widget>

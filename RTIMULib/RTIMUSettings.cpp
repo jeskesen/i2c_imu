@@ -145,7 +145,7 @@ bool RTIMUSettings::loadSettings()
     m_imuType = RTIMU_TYPE_AUTODISCOVER;
     m_I2CSlaveAddress = 0;
     m_I2CBus = 1;
-    m_fusionType = RTFUSION_TYPE_KALMANSTATE4;
+    m_fusionType = RTFUSION_TYPE_RTQF;
     m_compassCalValid = false;
 
     //  MPU9150 defaults
@@ -367,6 +367,8 @@ bool RTIMUSettings::saveSettings()
     setComment("Fusion type type - ");
     setComment("  0 - Null. Use if only sensor data required without fusion");
     setComment("  1 - Kalman STATE4");
+    setComment("  2 - RTQF");
+    setComment("  3 - Kalman STATE7");
     setValue(RTIMULIB_FUSION_TYPE, m_fusionType);
 
     setBlank();

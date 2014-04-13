@@ -120,6 +120,7 @@ public:
 
     RTQuaternion& operator =(const RTQuaternion& quat);
     const RTQuaternion operator *(const RTQuaternion& qb) const;
+    const RTQuaternion operator *(const RTFLOAT val) const;
     const RTQuaternion operator -(const RTQuaternion& qb) const;
     const RTQuaternion operator -(const RTFLOAT val) const;
 
@@ -160,6 +161,7 @@ public:
 
     RTMatrix4x4& operator =(const RTMatrix4x4& vec);
     const RTQuaternion operator *(const RTQuaternion& q) const;
+    const RTMatrix4x4 operator *(const RTFLOAT val) const;
     const RTMatrix4x4 operator *(const RTMatrix4x4& mat) const;
     const RTMatrix4x4 operator +(const RTMatrix4x4& mat) const;
 

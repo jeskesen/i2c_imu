@@ -33,7 +33,7 @@ uint64_t RTMath::currentUSecsSinceEpoch()
 
 const char *RTMath::displayRadians(const char *label, RTVector3& vec)
 {
-    sprintf(m_string, "%s: x:%f, y:%f, z:%f", label, vec.x(), vec.y(), vec.z());
+    sprintf(m_string, "%s: x:%f, y:%f, z:%f\n", label, vec.x(), vec.y(), vec.z());
     return m_string;
 }
 
@@ -46,7 +46,7 @@ const char *RTMath::displayDegrees(const char *label, RTVector3& vec)
 
 const char *RTMath::display(const char *label, RTQuaternion& quat)
 {
-    sprintf(m_string, "%s: scalar: %f, x:%f, y:%f, z:%f", label, quat.scalar(), quat.x(), quat.y(), quat.z());
+    sprintf(m_string, "%s: scalar: %f, x:%f, y:%f, z:%f\n", label, quat.scalar(), quat.x(), quat.y(), quat.z());
     return m_string;
 }
 
@@ -68,7 +68,20 @@ RTVector3 RTMath::poseFromAccelMag(const RTVector3& accel, const RTVector3& mag)
 
     accel.accelToEuler(result);
 
-    q.fromEuler(result);
+//  q.fromEuler(result);
+//  since result.z() is always 0, this can be optimized a little
+
+    RTFLOAT cosX2 = cos(result.x() / 2.0f);
+    RTFLOAT sinX2 = sin(result.x() / 2.0f);
+    RTFLOAT cosY2 = cos(result.y() / 2.0f);
+    RTFLOAT sinY2 = sin(result.y() / 2.0f);
+
+    q.setScalar(cosX2 * cosY2);
+    q.setX(sinX2 * cosY2);
+    q.setY(cosX2 * sinY2);
+    q.setZ(-sinX2 * sinY2);
+//    q.normalize();
+
     m.setScalar(0);
     m.setX(mag.x());
     m.setY(mag.y());
@@ -297,6 +310,13 @@ const RTQuaternion RTQuaternion::operator *(const RTQuaternion& qb) const
     return result;
 }
 
+const RTQuaternion RTQuaternion::operator *(const RTFLOAT val) const
+{
+    RTQuaternion result = *this;
+    result *= val;
+    return result;
+}
+
 
 const RTQuaternion RTQuaternion::operator -(const RTQuaternion& qb) const
 {
@@ -324,7 +344,7 @@ void RTQuaternion::normalize()
     RTFLOAT length = sqrt(m_data[0] * m_data[0] + m_data[1] * m_data[1] +
             m_data[2] * m_data[2] + m_data[3] * m_data[3]);
 
-    if (length == 0)
+    if ((length == 0) || (length == 1))
         return;
 
     m_data[0] /= length;
@@ -462,6 +482,13 @@ const RTMatrix4x4 RTMatrix4x4::operator +(const RTMatrix4x4& mat) const
 {
     RTMatrix4x4 result = *this;
     result += mat;
+    return result;
+}
+
+const RTMatrix4x4 RTMatrix4x4::operator *(const RTFLOAT val) const
+{
+    RTMatrix4x4 result = *this;
+    result *= val;
     return result;
 }
 

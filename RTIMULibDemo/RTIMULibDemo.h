@@ -40,6 +40,7 @@ public:
 
 public slots:
     void onCalibrateCompass();
+    void onSelectFusionAlgorithm();
     void onSelectIMU();
     void onEnableGyro(int);
     void onEnableAccel(int);
@@ -87,6 +88,7 @@ private:
     QLabel *m_compassY;
     QLabel *m_compassZ;
 
+    QLabel *m_fusionType;
     QCheckBox *m_enableGyro;
     QCheckBox *m_enableAccel;
     QCheckBox *m_enableCompass;
