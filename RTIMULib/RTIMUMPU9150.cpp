@@ -136,7 +136,6 @@ bool RTIMUMPU9150::setAccelFsr(unsigned char fsr)
 bool RTIMUMPU9150::IMUInit()
 {
     unsigned char result;
-    int loop;
     unsigned char asa[3];
 
     m_firstTime = true;
@@ -181,19 +180,7 @@ bool RTIMUMPU9150::IMUInit()
     if (!I2CWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 0x80, "Failed to initiate MPU9150 reset"))
         return false;
 
-    for (loop = 0; loop < 10; loop++) {
-        if (!I2CRead(m_slaveAddr, MPU9150_PWR_MGMT_1, 1, &result,
-                     "Failed to read back MPU9150 power management register"))
-            return false;
-
-        if ((result & 0x80) == 0)
-            break;                                          // reset complete
-        delayMs(50);
-    }
-    if (loop == 10) {
-        HAL_ERROR("MPU9150 never came out of reset\n");
-        return false;
-    }
+    delayMs(100);
 
     if (!I2CWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 0x00, "Failed to stop MPU9150 reset"))
         return false;
