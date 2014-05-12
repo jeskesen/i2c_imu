@@ -19,7 +19,9 @@ RTIMU_sourcedir = "../RTIMULib"
 
 mod = Extension('RTIMU',
                 sources = ['RTIMU.cpp'] + [ os.path.join(RTIMU_sourcedir, sr) for sr in RTIMU_sources],
-                include_dirs = [RTIMU_sourcedir])
+                include_dirs = [RTIMU_sourcedir],
+                extra_compile_args = ['-std=c++0x']
+                )
 
 setup (name = 'RTIMULib',
        version = '1.0',
