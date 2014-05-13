@@ -2,12 +2,9 @@
 ////////////////////////////////////
 
 #include <Python.h>
-#include "RTIMULib.h"
 #include "structmember.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include <functional>
-#include <map>
+#include "RTIMULib.h"
 
 // Forwards
 ///////////
@@ -19,7 +16,7 @@ static PyObject* RTIMU_Settings_new(PyTypeObject *type, PyObject *args, PyObject
 static int RTIMU_Settings_init(RTIMU_Settings *self, PyObject *args, PyObject *kwds);
 static PyObject* RTIMU_Settings_load(RTIMU_Settings* self);
 static PyObject* RTIMU_Settings_save(RTIMU_Settings* self);
-static PyObject* RTIMU_Settings_discover(RTIMU_Settings* self);
+static PyObject* RTIMU_Settings_discover(RTIMU_Settings* self, PyObject *args, PyObject *keywds);
 static PyObject* RTIMU_Settings_getter(RTIMU_Settings* self, void* closure);
 static int RTIMU_Settings_setter(RTIMU_Settings *self, PyObject *value, void *closure);
 
@@ -40,7 +37,7 @@ static PyMethodDef RTIMU_Settings_methods[] = {
 
 
 #define RTIMU_PARAM_INT(name, member) \
-  {#name,                                                               \ 
+  {(char*)#name,                                                               \ 
    (getter)([] (_object* self, void* closure) {                         \
        return Py_BuildValue("i", ((RTIMU_Settings*)self)->val->member); \
    }),                                                                  \
@@ -54,7 +51,7 @@ static PyMethodDef RTIMU_Settings_methods[] = {
    NULL}
 
 #define RTIMU_PARAM_VEC3(name, member)                                      \
-  {#name,                                                                   \
+  {(char*)#name,							\
    (getter)([] (_object* self, void* closure) -> PyObject* {                \
        return Py_BuildValue("(ddd)",                                        \
 			    ((RTIMU_Settings*)self)->val->member.x(),       \
@@ -75,13 +72,13 @@ int Unpack_VEC3(const PyObject* val, RTVector3& dest)
 
   // First of all check that the argument is a tuple
   if (!PyTuple_Check(val)) {
-    PyErr_SetString(PyExc_ValueError, Unpack_VEC3_ValueError);
+    PyErr_SetString(PyExc_ValueError, (char*)Unpack_VEC3_ValueError);
     return -1;
   }
 
   // Make sure the tuple has exactly 3 elements
   if (!(PyTuple_GET_SIZE(val) == 3)) {
-    PyErr_SetString(PyExc_ValueError, Unpack_VEC3_ValueError);
+    PyErr_SetString(PyExc_ValueError, (char*)Unpack_VEC3_ValueError);
     return -1;
   }
 
@@ -91,7 +88,7 @@ int Unpack_VEC3(const PyObject* val, RTVector3& dest)
     PyObject* item = PyTuple_GET_ITEM(val, i);
     double val = PyFloat_AsDouble(item);
     if (PyErr_Occurred()) {
-      PyErr_SetString(PyExc_ValueError, Unpack_VEC3_ValueError);
+      PyErr_SetString(PyExc_ValueError, (char*)Unpack_VEC3_ValueError);
       return -1;
     }
     dest.setData(i, val);
@@ -243,12 +240,12 @@ static PyObject* RTIMU_Settings_save(RTIMU_Settings* self)
 
 static PyObject* RTIMU_Settings_discover(RTIMU_Settings* self, PyObject *args, PyObject *keywds)
 {
-  static char* kwlist[] = { "IMUType", "SlaveAddress", NULL};
+  static char* kwlist[] = { (char*)"IMUType", (char*)"SlaveAddress", NULL};
   int imu_type = self->val->m_imuType;
   int slave_addr = self->val->m_I2CSlaveAddress;
 
   // Parse the (optional) arguments
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "ii", kwlist,
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "|ii", kwlist,
 				   &imu_type, &slave_addr))
     return NULL;
 
