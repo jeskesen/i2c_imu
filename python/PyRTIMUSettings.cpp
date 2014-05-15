@@ -1,5 +1,5 @@
-// RTIUMULib Python Module main file
-////////////////////////////////////
+// RTIUMULib Python Module - RTIMUSettings type implementation
+///////////////////////////////////////////////////////////////
 
 #include "PyRTIMU.h"
 #include <functional>
@@ -52,8 +52,6 @@ static PyMethodDef RTIMU_Settings_methods[] = {
        return (Unpack_VEC3(value, ((RTIMU_Settings*)self)->val->member));   \
     }),                                                                     \
    NULL}
-
-
 
 
 int Unpack_VEC3(const PyObject* val, RTVector3& dest)
@@ -263,3 +261,9 @@ int RTIMU_Settings_create(PyObject* module)
   PyModule_AddObject(module, "Settings", (PyObject*)&RTIMU_SettingsType);
   return 0;
 }
+
+bool RTIMU_Settings_typecheck(PyObject* obj)
+{
+  return PyObject_TypeCheck(obj, (PyTypeObject*)&RTIMU_SettingsType);
+}
+

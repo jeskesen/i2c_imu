@@ -28,6 +28,9 @@ PyMODINIT_FUNC initRTIMU()
   // Insert types
   if (RTIMU_Settings_create(m) < 0)
     return;
+  if (RTIMU_RTIMU_create(m) < 0)
+    return;
+
 }
 
 static PyObject* RTIMULIB_createIMU(PyObject *self, PyObject *args)

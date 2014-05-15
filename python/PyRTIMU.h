@@ -10,5 +10,18 @@ struct RTIMU_Settings {
     RTIMUSettings* val;
 };
 
+// RTIMU Type
+struct RTIMU_RTIMU {
+  PyObject_HEAD
+  RTIMU* val;
+};
+
+// Create the RTIMU_Settings type
 int RTIMU_Settings_create(PyObject* module);
+
+// Check if the given object is of RTIMU_Settings type
+bool RTIMU_Settings_typecheck(PyObject* obj);
+
+// Create the RTIMU type
+int RTIMU_RTIMU_create(PyObject* module);
 
