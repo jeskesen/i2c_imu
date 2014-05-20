@@ -128,7 +128,7 @@ static PyGetSetDef RTIMU_Settings_getset[] = {
 };
 
 
-static PyTypeObject RTIMU_SettingsType = {
+static PyTypeObject RTIMU_Settings_type = {
   PyObject_HEAD_INIT(NULL)
   0,                         /*ob_size*/
   "RTIMU.Settings",          /*tp_name*/
@@ -253,17 +253,17 @@ static PyObject* RTIMU_Settings_discover(RTIMU_Settings* self, PyObject *args, P
 int RTIMU_Settings_create(PyObject* module)
 {
   // Prepare the type structure
-  if (PyType_Ready(&RTIMU_SettingsType) < 0)
+  if (PyType_Ready(&RTIMU_Settings_type) < 0)
     return -1;
 
   // Insert it into the module
-  Py_INCREF(&RTIMU_SettingsType);
-  PyModule_AddObject(module, "Settings", (PyObject*)&RTIMU_SettingsType);
+  Py_INCREF(&RTIMU_Settings_type);
+  PyModule_AddObject(module, "Settings", (PyObject*)&RTIMU_Settings_type);
   return 0;
 }
 
 bool RTIMU_Settings_typecheck(PyObject* obj)
 {
-  return PyObject_TypeCheck(obj, (PyTypeObject*)&RTIMU_SettingsType);
+  return PyObject_TypeCheck(obj, (PyTypeObject*)&RTIMU_Settings_type);
 }
 
