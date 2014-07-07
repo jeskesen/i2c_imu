@@ -105,7 +105,7 @@ static PyMethodDef RTIMU_RTIMU_methods[] = {
 	const RTIMU_DATA& data = ((RTIMU_RTIMU*)self)->val->getIMUData();
 	Py_RETURN_NONE;
 	// TODO: Fix the implementation of this function
-	return Py_BuildValue("{s:l,s:O,s:(d,d,d),s:O,s:(d,d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:d,s:O,s:d,s:O,s:d}",
+	return Py_BuildValue("{s:K,s:O,s:(d,d,d),s:O,s:(d,d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:d,s:O,s:d,s:O,s:d}",
 			     "timestamp", data.timestamp,
 			     "fusionPoseValid", PyBool_FromLong(data.fusionPoseValid),
 			     "fusionPose", data.fusionPose.x(), data.fusionPose.y(), data.fusionPose.z(),
