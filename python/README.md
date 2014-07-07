@@ -8,6 +8,13 @@ from Python code.
 
 Installation
 ------------
+
+python-dev is needed for the compilation. Use:
+
+sudo apt-get install python-dev
+
+if it is not already installed.
+
 The module is built and installed using distutils:
 ```python
 python setup.py build
@@ -42,8 +49,6 @@ As in the C library, the usage of RTIMULib comprises of three major steps:
    successful initialization.
    
 4. Call the `IMURead()` method in regular intervals to retrieve data from the IMU. When the function returns
-   true, the `getFusionData()` method can be used to retrieve the calculated angles.
-   
-**NOTE:** The `getIMUData()` method (which is used in the C example, RTIMULibDrive) is not currently functional.
-         It should not be called
+   true, the `getFusionData()` method can be used to retrieve the calculated angles. `getIMUData()` can be called
+   to get the complete set of data including quaternions and individual sensor data.
 
