@@ -14,6 +14,12 @@ Check out www.richards-tech.com for more details, updates and news.
 
 ## Release history
 
+### July 7 2014 - 1.0.0
+
+#### Added python bindings
+
+Thanks to avishorp for the python code and Luke Heidelberger for a bug fix.
+
 ### April 13 2014 - 0.9.4
 
 #### Added new RTQF fusion filter
