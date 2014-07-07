@@ -10,8 +10,9 @@ Installation
 ------------
 
 python-dev is needed for the compilation. Use:
-
+```
 sudo apt-get install python-dev
+```
 
 if it is not already installed.
 
