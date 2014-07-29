@@ -15,152 +15,150 @@ static int RTIMU_RTIMU_init(RTIMU_RTIMU *self, PyObject *args, PyObject *kwds);
 static PyMethodDef RTIMU_RTIMU_methods[] = {
   //////// IMUName
   {"IMUName", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	return PyString_FromString(((RTIMU_RTIMU*)self)->val->IMUName());
-      }), 
-  METH_NOARGS, 
+    return PyString_FromString(((RTIMU_RTIMU*)self)->val->IMUName());
+      }),
+  METH_NOARGS,
   "Get the name of the IMU" },
 
   //////// IMUType
   {"IMUType", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	return PyInt_FromLong(((RTIMU_RTIMU*)self)->val->IMUType());
-      }), 
-  METH_NOARGS, 
+    return PyInt_FromLong(((RTIMU_RTIMU*)self)->val->IMUType());
+      }),
+  METH_NOARGS,
   "Get the type code of the IMU" },
 
   //////// IMUInit
   {"IMUInit", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMUInit());
-      }), 
-  METH_NOARGS, 
+    return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMUInit());
+      }),
+  METH_NOARGS,
   "Set up the IMU" },
 
   //////// IMUGetPollInterval
   {"IMUGetPollInterval", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	return PyInt_FromLong(((RTIMU_RTIMU*)self)->val->IMUGetPollInterval());
-      }), 
-  METH_NOARGS, 
+    return PyInt_FromLong(((RTIMU_RTIMU*)self)->val->IMUGetPollInterval());
+      }),
+  METH_NOARGS,
   "Get the recommended poll interval in mS" },
 
   //////// IMURead
   {"IMURead", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMURead());
-      }), 
-  METH_NOARGS, 
+    return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMURead());
+      }),
+  METH_NOARGS,
   "Get a sample" },
 
   //////// IMUGyroBiasValid
   {"IMUGyroBiasValid", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMUGyroBiasValid());
-      }), 
-  METH_NOARGS, 
+    return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMUGyroBiasValid());
+      }),
+  METH_NOARGS,
   "Return true if valid bias" },
 
   //////// IMUCompassCalValid
   {"IMUCompassCalValid", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMUCompassCalValid());
-      }), 
-  METH_NOARGS, 
+    return PyBool_FromLong(((RTIMU_RTIMU*)self)->val->IMUCompassCalValid());
+      }),
+  METH_NOARGS,
   "Return true if the compass is calibrated" },
 
   //////// resetFusion
   {"resetFusion", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	((RTIMU_RTIMU*)self)->val->resetFusion();
-	Py_RETURN_NONE;
-      }), 
-  METH_NOARGS, 
+    ((RTIMU_RTIMU*)self)->val->resetFusion();
+    Py_RETURN_NONE;
+      }),
+  METH_NOARGS,
   "Return true if valid bias" },
 
   //////// setGyroEnable
   {"setGyroEnable", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	int en;
-	PyArg_ParseTuple(args, "i", &en); 
+    int en;
+    PyArg_ParseTuple(args, "i", &en);
         ((RTIMU_RTIMU*)self)->val->setGyroEnable(en > 0);
-	Py_RETURN_NONE;
-      }), 
-  METH_VARARGS, 
+    Py_RETURN_NONE;
+      }),
+  METH_VARARGS,
   "Enable or disable Gyro reading" },
 
   //////// setAccelEnable
   {"setAccelEnable", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	int en;
-	PyArg_ParseTuple(args, "i", &en); 
+    int en;
+    PyArg_ParseTuple(args, "i", &en);
         ((RTIMU_RTIMU*)self)->val->setAccelEnable(en > 0);
-	Py_RETURN_NONE;
-      }), 
-  METH_VARARGS, 
+    Py_RETURN_NONE;
+      }),
+  METH_VARARGS,
   "Enable or disable the Accelerometer reading" },
 
   //////// setCompassEnable
   {"setCompassEnable", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	int en;
-	PyArg_ParseTuple(args, "i", &en); 
+    int en;
+    PyArg_ParseTuple(args, "i", &en);
         ((RTIMU_RTIMU*)self)->val->setCompassEnable(en > 0);
-	Py_RETURN_NONE;
-      }), 
-  METH_VARARGS, 
+    Py_RETURN_NONE;
+      }),
+  METH_VARARGS,
   "Enable or disable the Compass reading" },
 
   //////// getIMUData
   {"getIMUData", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	const RTIMU_DATA& data = ((RTIMU_RTIMU*)self)->val->getIMUData();
-	Py_RETURN_NONE;
-	// TODO: Fix the implementation of this function
-	return Py_BuildValue("{s:K,s:O,s:(d,d,d),s:O,s:(d,d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:d,s:O,s:d,s:O,s:d}",
-			     "timestamp", data.timestamp,
-			     "fusionPoseValid", PyBool_FromLong(data.fusionPoseValid),
-			     "fusionPose", data.fusionPose.x(), data.fusionPose.y(), data.fusionPose.z(),
-			     "fusionQPoseValid", PyBool_FromLong(data.fusionQPoseValid),
-			     "fusionQPose", data.fusionQPose.scalar(), data.fusionQPose.x(), data.fusionQPose.y(), data.fusionQPose.z(),
-			     "gyroValid", PyBool_FromLong(data.gyroValid),
-			     "gyro", data.gyro.x(), data.gyro.y(), data.gyro.z(),
-			     "accelValid", PyBool_FromLong(data.accelValid),
-			     "accel", data.accel.x(), data.accel.y(), data.accel.z(),
-			     "compassValid", PyBool_FromLong(data.compassValid),
-			     "compass", data.compass.x(), data.compass.y(), data.compass.z(),
-			     "pressureValid", PyBool_FromLong(data.pressureValid),
-			     "pressure", data.pressure,
-			     "temperatureValid", PyBool_FromLong(data.temperatureValid),
-			     "temperature", data.temperature,
-			     "humidityValid", PyBool_FromLong(data.humidityValid),
-			     "humidity", data.humidity);
+    const RTIMU_DATA& data = ((RTIMU_RTIMU*)self)->val->getIMUData();
+    return Py_BuildValue("{s:K,s:O,s:(d,d,d),s:O,s:(d,d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:(d,d,d),s:O,s:d,s:O,s:d,s:O,s:d}",
+                 "timestamp", data.timestamp,
+                 "fusionPoseValid", PyBool_FromLong(data.fusionPoseValid),
+                 "fusionPose", data.fusionPose.x(), data.fusionPose.y(), data.fusionPose.z(),
+                 "fusionQPoseValid", PyBool_FromLong(data.fusionQPoseValid),
+                 "fusionQPose", data.fusionQPose.scalar(), data.fusionQPose.x(), data.fusionQPose.y(), data.fusionQPose.z(),
+                 "gyroValid", PyBool_FromLong(data.gyroValid),
+                 "gyro", data.gyro.x(), data.gyro.y(), data.gyro.z(),
+                 "accelValid", PyBool_FromLong(data.accelValid),
+                 "accel", data.accel.x(), data.accel.y(), data.accel.z(),
+                 "compassValid", PyBool_FromLong(data.compassValid),
+                 "compass", data.compass.x(), data.compass.y(), data.compass.z(),
+                 "pressureValid", PyBool_FromLong(data.pressureValid),
+                 "pressure", data.pressure,
+                 "temperatureValid", PyBool_FromLong(data.temperatureValid),
+                 "temperature", data.temperature,
+                 "humidityValid", PyBool_FromLong(data.humidityValid),
+                 "humidity", data.humidity);
 
-      }), 
-  METH_NOARGS, 
+      }),
+  METH_NOARGS,
   "Return true if valid bias" },
 
   //////// getMeasuredPose
   {"getMeasuredPose", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	const RTVector3& r = ((RTIMU_RTIMU*)self)->val->getMeasuredPose();
-	return Py_BuildValue("(d,d,d)", r.x(), r.y(), r.z());
-      }), 
-  METH_NOARGS, 
+    const RTVector3& r = ((RTIMU_RTIMU*)self)->val->getMeasuredPose();
+    return Py_BuildValue("(d,d,d)", r.x(), r.y(), r.z());
+      }),
+  METH_NOARGS,
   "Return the measured pose" },
 
   //////// getMeasuredQPose
   {"getMeasuredQPose", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	const RTQuaternion& r = ((RTIMU_RTIMU*)self)->val->getMeasuredQPose();
-	return Py_BuildValue("(d,d,d,d)", r.scalar(), r.x(), r.y(), r.z());
-      }), 
-  METH_NOARGS, 
+    const RTQuaternion& r = ((RTIMU_RTIMU*)self)->val->getMeasuredQPose();
+    return Py_BuildValue("(d,d,d,d)", r.scalar(), r.x(), r.y(), r.z());
+      }),
+  METH_NOARGS,
   "Return the measured QPose" },
 
   //////// setCalibrationMode
   {"setCalibrationMode", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	int en;
-	PyArg_ParseTuple(args, "i", &en); 
+    int en;
+    PyArg_ParseTuple(args, "i", &en);
         ((RTIMU_RTIMU*)self)->val->setCalibrationMode(en > 0);
-	Py_RETURN_NONE;
-      }), 
-  METH_VARARGS, 
+    Py_RETURN_NONE;
+      }),
+  METH_VARARGS,
   "Turn on calibration mode" },
 
   //////// getFusionData
   {"getFusionData", (PyCFunction)([] (PyObject *self, PyObject* args) -> PyObject* {
-	const RTIMU_DATA& data = ((RTIMU_RTIMU*)self)->val->getIMUData();
-	return Py_BuildValue("(d,d,d)", data.fusionPose.x(), data.fusionPose.y(),
-			     data.fusionPose.z());
-      }), 
-  METH_NOARGS, 
+    const RTIMU_DATA& data = ((RTIMU_RTIMU*)self)->val->getIMUData();
+    return Py_BuildValue("(d,d,d)", data.fusionPose.x(), data.fusionPose.y(),
+                 data.fusionPose.z());
+      }),
+  METH_NOARGS,
   "Return true if valid bias" },
 
 
@@ -223,7 +221,7 @@ static PyObject* RTIMU_RTIMU_new(PyTypeObject *type, PyObject *args, PyObject *k
 
   // Allocate the object memory
   self = (RTIMU_RTIMU*)type->tp_alloc(type, 0);
-  
+
   if (self != NULL) {
     // Set the value field to NULL. The RTIMU Settings object
     // creation is deferred to init

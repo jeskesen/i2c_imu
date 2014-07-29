@@ -4,6 +4,7 @@ sys.path.append('.')
 import RTIMU
 import os.path
 import time
+import math
 
 SETTINGS_FILE = "RTIMU"
 
@@ -27,7 +28,11 @@ print("Recommended Poll Interval: %dmS\n" % poll_interval)
 
 while True:
   if imu.IMURead():
-    x, y, z = imu.getFusionData()
-    print("%f %f %f" % (x,y,z))
+    # x, y, z = imu.getFusionData()
+    # print("%f %f %f" % (x,y,z))
+    data = imu.getIMUData()
+    fusionPose = data["fusionPose"]
+    print("r: %f p: %f y: %f" % (math.degrees(fusionPose[0]), 
+        math.degrees(fusionPose[1]), math.degrees(fusionPose[2])))
     time.sleep(poll_interval*1.0/1000.0)
 

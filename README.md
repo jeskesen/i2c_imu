@@ -14,6 +14,10 @@ Check out www.richards-tech.com for more details, updates and news.
 
 ## Release history
 
+### July 29 2014 - 1.0.1
+
+Fixed the python getIMUData function.
+
 ### July 7 2014 - 1.0.0
 
 #### Added python bindings
