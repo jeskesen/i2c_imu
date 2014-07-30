@@ -12,6 +12,8 @@ The instructions here are for the Raspberry Pi but RTIMULib can be use easily wi
 
 Check out www.richards-tech.com for more details, updates and news.
 
+RTIMULib is licensed under GPLv3.
+
 ## Release history
 
 ### July 29 2014 - 1.0.1
@@ -34,7 +36,7 @@ RTQF is a very highly stripped down Kalman filter that avoids matrix inversion a
 
 #### STM LSM9DS0 IMU Implementation now working
 
-The single chip IMU LSM9DS0 is now working with RTIMULib. An example breakout is availabel from Sparkfun - https://www.sparkfun.com/products/12636.
+The single chip IMU LSM9DS0 is now working with RTIMULib. An example breakout is available from Sparkfun - https://www.sparkfun.com/products/12636.
 
 ### April 9 2014 - 0.9.2
 

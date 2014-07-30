@@ -27,7 +27,7 @@ python setup.py install
 ```
 
 The last command should be run as super-user if system-wide installation is required. All the
-setup.py options are availabe. For more information type:
+setup.py options are available. For more information type:
 ```python
 python setup.py --help
 ```
@@ -39,7 +39,7 @@ As in the C library, the usage of RTIMULib comprises of three major steps:
 
 1. Creating an `RTIMU.Settings` object. The class constructor receives a "product name" which is
    actually used as the ini filename (without the ".ini" extension). The file will be
-   created if it does'nt already exists. After creating the `RTIMU.Settings` object, the various
+   created if it doesn't already exist. After creating the `RTIMU.Settings` object, the various
    parameters appear as the object attributes and can be examined and changed. 
    The settings can also be saved back to the ini file using the `save()` method.
    
