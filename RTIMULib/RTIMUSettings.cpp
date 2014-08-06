@@ -602,6 +602,8 @@ bool RTIMUSettings::saveSettings()
     setComment("  3 = 7.5Hz ");
     setComment("  4 = 15Hz ");
     setComment("  5 = 30Hz ");
+    setComment("  6 = 75Hz ");
+    setComment("  7 = 220Hz ");
     setValue(RTIMULIB_GD20M303DLHC_COMPASS_SAMPLERATE, m_GD20M303DLHCCompassSampleRate);
 
 

@@ -16,6 +16,10 @@ RTIMULib is licensed under GPLv3.
 
 ## Release history
 
+### August 6 2014 - 1.0.2
+
+Added missing compass sample rate defines for LSM303DLHC and updated settings comments.
+
 ### July 29 2014 - 1.0.1
 
 Fixed the python getIMUData function.
