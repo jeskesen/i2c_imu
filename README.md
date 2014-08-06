@@ -18,7 +18,7 @@ RTIMULib is licensed under GPLv3.
 
 ### August 6 2014 - 1.0.2
 
-Added missing compass sample rate defines for LSM303DLHC and updated settings comments.
+Added missing compass sample rate defines for LSM303DLHC and updated settings comments. Thanks to Bill Robertson (broberts4) for spotting that!
 
 ### July 29 2014 - 1.0.1
 
