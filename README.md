@@ -16,6 +16,10 @@ RTIMULib is licensed under GPLv3.
 
 ## Release history
 
+### September 2 2014 - 1.0.3
+
+CompassCalMax was returning m_compassCalMin in PyRTIMU_settings.cpp - changed to max instead. Thanks to Stefan Grufman for finding that.
+
 ### August 6 2014 - 1.0.2
 
 Added missing compass sample rate defines for LSM303DLHC and updated settings comments. Thanks to Bill Robertson (broberts4) for spotting that!

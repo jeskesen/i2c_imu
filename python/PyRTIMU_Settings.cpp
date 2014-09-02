@@ -91,7 +91,7 @@ static PyGetSetDef RTIMU_Settings_getset[] = {
   RTIMU_PARAM_INT(I2CBus, m_I2CBus),
   // m_compassCalValid
   RTIMU_PARAM_VEC3(CompassCalMin, m_compassCalMin),
-  RTIMU_PARAM_VEC3(CompassCalMax, m_compassCalMin),
+  RTIMU_PARAM_VEC3(CompassCalMax, m_compassCalMax),
   RTIMU_PARAM_INT(MPU9150GyroAccelSampleRate, m_MPU9150GyroAccelSampleRate),
   RTIMU_PARAM_INT(MPU9150CompassSampleRate,m_MPU9150CompassSampleRate),
   RTIMU_PARAM_INT(MPU9150GyroAccelLpf, m_MPU9150GyroAccelLpf),
