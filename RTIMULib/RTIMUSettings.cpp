@@ -100,7 +100,7 @@ bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
                     imuType = RTIMU_TYPE_LSM9DS0;
                     slaveAddress = LSM9DS0_GYRO_ADDRESS1;
                     I2CClose();
-                    HAL_INFO("Detected LSM9DS0 at standard address\n");
+                    HAL_INFO("Detected LSM9DS0 at option address\n");
                     return true;
                 }
             }

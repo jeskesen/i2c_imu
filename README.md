@@ -16,6 +16,10 @@ RTIMULib is licensed under GPLv3.
 
 ## Release history
 
+### September 3 2014 - 1.0.4
+
+Fixed message error in RTIMUSettings.
+
 ### September 2 2014 - 1.0.3
 
 CompassCalMax was returning m_compassCalMin in PyRTIMU_settings.cpp - changed to max instead. Thanks to Stefan Grufman for finding that.
