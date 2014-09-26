@@ -54,11 +54,13 @@ I2cImu::I2cImu() : nh_(), private_nh_("~")
     private_nh_.param<std::string>("imu_frame_id", imu_frame_id_, "imu_link");
 
     private_nh_.param<int>("imu_type", imu_settings_.m_imuType, RTIMU_TYPE_AUTODISCOVER);
+
     private_nh_.param<int>("fusion_type", imu_settings_.m_fusionType, RTFUSION_TYPE_RTQF);
-    //private_nh_.param<int>("i2c_bus", imu_settings_.m_I2CBus, 1);
+    int temp_int;
+    private_nh_.param<int>("i2c_bus", temp_int, 1);
+    imu_settings_.m_I2CBus = (unsigned char)temp_int;
     //private_nh_.param<int>("i2c_slave_address", imu_settings_.m_I2CSlaveAddress, 0);
 
-    imu_settings_.m_I2CBus = 1;
     imu_ = RTIMU::createIMU(&imu_settings_);
     if(imu_==NULL)
     {
@@ -66,6 +68,8 @@ I2cImu::I2cImu() : nh_(), private_nh_("~")
         ROS_BREAK();
     }
 
+    imu_->IMUInit();
+ 
     imu_pub_ = nh_.advertise<sensor_msgs::Imu>("/imu", 50);
 
 }
@@ -78,10 +82,13 @@ void I2cImu::update()
         RTIMU_DATA imuData = imu_->getIMUData();
 
         sensor_msgs::Imu imu_msg;
+
+	imu_msg.header.stamp = ros::Time::now();
         imu_msg.orientation.x = imuData.fusionQPose.x();
         imu_msg.orientation.y = imuData.fusionQPose.y();
         imu_msg.orientation.z = imuData.fusionQPose.z();
         imu_msg.orientation.w = imuData.fusionQPose.scalar();
+	imu_pub_.publish(imu_msg);
     }
 
 }
