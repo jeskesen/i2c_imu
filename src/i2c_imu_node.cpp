@@ -23,6 +23,9 @@
 
 #include "RTIMU.h"
 #include "RTIMUSettings.h"
+
+#define G_2_MPSS 9.80665
+
 class I2cImu
 {
 public:
@@ -81,21 +84,31 @@ void I2cImu::update()
     {
         RTIMU_DATA imuData = imu_->getIMUData();
 
+
         sensor_msgs::Imu imu_msg;
 
-	imu_msg.header.stamp = ros::Time::now();
+        imu_msg.header.stamp = ros::Time::now();
         imu_msg.orientation.x = imuData.fusionQPose.x();
         imu_msg.orientation.y = imuData.fusionQPose.y();
         imu_msg.orientation.z = imuData.fusionQPose.z();
         imu_msg.orientation.w = imuData.fusionQPose.scalar();
-	imu_pub_.publish(imu_msg);
+
+        imu_msg.angular_velocity.x = imuData.gyro.x();
+        imu_msg.angular_velocity.y = imuData.gyro.y();
+        imu_msg.angular_velocity.z = imuData.gyro.z();
+
+        imu_msg.linear_acceleration.x = imuData.accel.x() * G_2_MPSS;
+        imu_msg.linear_acceleration.y = imuData.accel.y() * G_2_MPSS;
+        imu_msg.linear_acceleration.z = imuData.accel.z() * G_2_MPSS;
+
+        imu_pub_.publish(imu_msg);
     }
 
 }
 
 void I2cImu::spin()
 {
-    ros::Rate r(50);
+    ros::Rate r(1.0/(imu_->IMUGetPollInterval()/1000.0));
     while(nh_.ok())
     {
         update();
