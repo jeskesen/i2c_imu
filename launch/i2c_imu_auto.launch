@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	
+	<node name="i2c_imu_node" pkg="i2c_imu" type="i2c_imu_node" output="screen">
+	</node>
+
+</launch>
