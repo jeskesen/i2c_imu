@@ -121,9 +121,7 @@ bool RTIMUGD20M303DLHC::IMUInit()
     if (!setGyroCTRL5())
             return false;
 
-    m_gyroAlpha = 1.0f / m_sampleRate;
-    m_gyroStartTime = RTMath::currentUSecsSinceEpoch();
-    m_gyroLearning = true;
+    gyroBiasInit();
 
     HAL_INFO("GD20M303DLHC init complete\n");
     return true;
@@ -506,22 +504,11 @@ bool RTIMUGD20M303DLHC::IMURead()
     m_imuData.compass.setY((RTFLOAT)((int16_t)(((uint16_t)compassData[2] << 8) | (uint16_t)compassData[3])) * m_compassScaleXY);
     m_imuData.compass.setZ((RTFLOAT)((int16_t)(((uint16_t)compassData[4] << 8) | (uint16_t)compassData[5])) * m_compassScaleZ);
 
-    if (m_gyroLearning) {
-        // update gyro bias
+    //  sort out gyro axes
 
-        m_gyroBias.setX((1.0 - m_gyroAlpha) * m_gyroBias.x() + m_gyroAlpha * m_imuData.gyro.x());
-        m_gyroBias.setY((1.0 - m_gyroAlpha) * m_gyroBias.y() + m_gyroAlpha * m_imuData.gyro.y());
-        m_gyroBias.setZ((1.0 - m_gyroAlpha) * m_gyroBias.z() + m_gyroAlpha * m_imuData.gyro.z());
-
-        if ((RTMath::currentUSecsSinceEpoch() - m_gyroStartTime) > 5000000)
-            m_gyroLearning = false;                     // only do this for 5 seconds
-    }
-
-    //  sort out gyro axes and correct for bias
-
-    m_imuData.gyro.setX(m_imuData.gyro.x() - m_gyroBias.x());
-    m_imuData.gyro.setY(-(m_imuData.gyro.y() - m_gyroBias.y()));
-    m_imuData.gyro.setZ(-(m_imuData.gyro.z() - m_gyroBias.z()));
+    m_imuData.gyro.setX(m_imuData.gyro.x());
+    m_imuData.gyro.setY(-m_imuData.gyro.y());
+    m_imuData.gyro.setZ(-m_imuData.gyro.z());
 
     //  sort out accel data;
 
@@ -535,20 +522,10 @@ bool RTIMUGD20M303DLHC::IMURead()
     m_imuData.compass.setZ(-m_imuData.compass.y());
     m_imuData.compass.setY(-temp);
 
-    //  calibrate if required
+    //  now do standard processing
 
-    if (!m_calibrationMode && m_calibrationValid) {
-        m_imuData.compass.setX((m_imuData.compass.x() - m_compassCalOffset[0]) * m_compassCalScale[0]);
-        m_imuData.compass.setY((m_imuData.compass.y() - m_compassCalOffset[1]) * m_compassCalScale[1]);
-        m_imuData.compass.setZ((m_imuData.compass.z() - m_compassCalOffset[2]) * m_compassCalScale[2]);
-    }
-
-    //  update running average
-
-    m_compassAverage.setX(m_imuData.compass.x() * COMPASS_ALPHA + m_compassAverage.x() * (1.0 - COMPASS_ALPHA));
-    m_compassAverage.setY(m_imuData.compass.y() * COMPASS_ALPHA + m_compassAverage.y() * (1.0 - COMPASS_ALPHA));
-    m_compassAverage.setZ(m_imuData.compass.z() * COMPASS_ALPHA + m_compassAverage.z() * (1.0 - COMPASS_ALPHA));
-    m_imuData.compass = m_compassAverage;
+    handleGyroBias();
+    calibrateAverageCompass();
 
     //  now update the filter
 

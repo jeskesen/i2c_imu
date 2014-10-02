@@ -81,6 +81,13 @@
 #define RTIMULIB_LSM9DS0_COMPASS_SAMPLERATE "LSM9DS0CompassSampleRate"
 #define RTIMULIB_LSM9DS0_COMPASS_FSR       "LSM9DS0CompassFsr"
 
+//  Gyro bias keys
+
+#define RTIMULIB_GYRO_BIAS_VALID            "GyroBiasValid"
+#define RTIMULIB_GYRO_BIAS_X                "GyroBiasX"
+#define RTIMULIB_GYRO_BIAS_Y                "GyroBiasY"
+#define RTIMULIB_GYRO_BIAS_Z                "GyroBiasZ"
+
 //  Compass calibration settings keys
 
 #define RTIMULIB_COMPASSCAL_VALID           "CompassCalValid"
@@ -120,6 +127,9 @@ public:
     bool m_compassCalValid;                                 // true if there is valid compass calibration data
     RTVector3 m_compassCalMin;                              // the minimum values
     RTVector3 m_compassCalMax;                              // the maximum values
+
+    bool m_gyroBiasValid;                                   // true if the recorded gyro bias is valid
+    RTVector3 m_gyroBias;                                   // the recorded gyro bias
 
     //  IMU-specific vars
 

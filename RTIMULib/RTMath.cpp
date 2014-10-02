@@ -211,6 +211,12 @@ void RTVector3::normalize()
     m_data[2] /= length;
 }
 
+RTFLOAT RTVector3::length()
+{
+    return sqrt(m_data[0] * m_data[0] + m_data[1] * m_data[1] +
+            m_data[2] * m_data[2]);
+}
+
 //----------------------------------------------------------
 //
 //  The RTQuaternion class
@@ -420,7 +426,7 @@ void RTQuaternion::fromAngleVector(const RTFLOAT& angle, const RTVector3& vec)
 }
 
 
-	
+
 //----------------------------------------------------------
 //
 //  The RTMatrix4x4 class

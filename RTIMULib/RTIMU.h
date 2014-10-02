@@ -46,11 +46,14 @@ public:
     virtual bool IMUInit() = 0;                             // set up the IMU
     virtual int IMUGetPollInterval() = 0;                   // returns the recommended poll interval in mS
     virtual bool IMURead() = 0;                             // get a sample
-    virtual bool IMUGyroBiasValid() = 0;                    // returns true if valid bias
 
     //  This one wanted a similar name but isn't pure virtual
 
     virtual bool IMUCompassCalValid() { return m_calibrationValid; }
+
+    // returns true if enough samples for valid data
+
+    virtual bool IMUGyroBiasValid();
 
     //  call the following to reset the fusion algorithm
 
@@ -93,6 +96,9 @@ public:
     const RTVector3& getCompass() { return m_imuData.compass; } // gets compass data in uT
 
 protected:
+    void gyroBiasInit();                                    // sets up gyro bias calculation
+    void handleGyroBias();                                  // adjust gyro for bias
+    void calibrateAverageCompass();                         // calibrate and smooth compass
     void updateFusion();                                    // call when new data to update fusion state
 
     bool m_calibrationMode;                                 // true if cal mode so don't use cal data!
@@ -104,8 +110,18 @@ protected:
 
     RTFusion *m_fusion;                                     // the fusion algorithm
 
+    int m_sampleRate;                                       // samples per second
+    uint64_t m_sampleInterval;                              // interval between samples in microseonds
+
+    RTFLOAT m_gyroAlpha;                                    // gyro bias learning rate
+    int m_gyroSampleCount;                                  // number of gyro samples used
+
+    RTVector3 m_previousAccel;                              // previous step accel for gyro learning
+
     float m_compassCalOffset[3];
     float m_compassCalScale[3];
+    RTVector3 m_compassAverage;                             // a running average to smooth the mag outputs
+
  };
 
 #endif // _RTIMU_H

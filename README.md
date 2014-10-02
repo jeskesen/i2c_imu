@@ -6,7 +6,7 @@ Two demo programs are included - RTIMULibDemo is a GUI-based program that shows 
 
 Its prerequisites are very simple - just I2C support on the target system along with the standard build-essential (included in the Raspberry Pi Raspbian distribution by default).
 
-RTIMULib provides a flexible framework for interfacing 9-dof IMUs to embedded Linux systems. RTIMULib currently supports the InvenSense MPU9150 single chip IMU, STM LSM9DS0 single chip IMU, Pololu Altimu and Adafruit 9-dof IMU. Support for others will follow. RTIMULib also supports multiple sensor integration fusion filters such as Kalman filters.
+RTIMULib provides a flexible framework for interfacing 9-dof IMUs to embedded Linux systems. RTIMULib currently supports the InvenSense MPU9150 single chip IMU, STM LSM9DS0 single chip IMU, Pololu Altimu and Adafruit 9-dof IMU. RTIMULib also supports multiple sensor integration fusion filters such as Kalman filters.
 
 The instructions here are for the Raspberry Pi but RTIMULib can be use easily with other embedded systems with minor (or no changes). An abstraction layer allows RTIMULib to be used with non-Linux systems also.
 
@@ -15,6 +15,16 @@ Check out www.richards-tech.com for more details, updates and news.
 RTIMULib is licensed under GPLv3.
 
 ## Release history
+
+### October 2 2014 - 2.0.0
+
+Changed the gyro bias calculation to run automatically when the IMU is detected as being stable. This means
+that the IMU no longer needs to be kept still for 5 seconds after restart and gyro bias is continually tracked. IMUGyroBiasValid can be called to check if enough stable samples have been obtained for a reasonable bias calculation to be made. If the IMU is stable, this will normally occur within 5 seconds. If not stable at the start, it may take longer but it will occur eventually once enough stable samples have been obtained. If RTIMULibDemo never indicates a valid bias, the #defines RTIMU_FUZZY_GYRO_ZERO and/or RTIMU_FUZZY_ACCEL_ZERO may need to be increased if the gyro bias or accelerometer noise is unusually high. These should be set to be greater than the readings observed using RTIMULibDemo when the IMU is completely stable. In the case of the gyros, this should be the absolute values when the IMU isn't being moved. In the case of the accels, this should be the maximum change in values when the IMU isn't being moved.
+
+Stable gyro bias values are saved to the RTIMULib.ini file in order to speed up restarts. The values will once again be 
+updated after enough stable samples have been obtained in order to track long term changes in gyro bias.
+
+If problems are encountered, try version 1.0.4 which is available under the GitHub repo releases tab. Please also report any issues via the GitHub issue system to help improve RTIMULib!
 
 ### September 3 2014 - 1.0.4
 
@@ -176,7 +186,10 @@ The .ini file created by RTIMULibDemo can also be used by RTIMULibDrive - just r
 
 ## Gyro bias compensation
 
-At the moment, gyro bias is calculated during the first 5 seconds of operation. If the IMU chip is moved during this period, the bias may be calculated incorrectly and the app will need to be restarted. The effectiveness of the gyro bias compensation can be monitored using RTIMULibDemo. If the IMU chip is not in motion, the gyro rates should be close to 0 (usually around 0.001 radians per second).
+Prior to Version 2, gyro bias is calculated during the first 5 seconds of operation. If the IMU chip is moved during this period, the bias may be calculated incorrectly and the app will need to be restarted. The effectiveness of the gyro bias compensation can be monitored using RTIMULibDemo. If the IMU chip is not in motion, the gyro rates should be close to 0 (usually around 0.001 radians per second).
+
+For version 2 and above, the gyro bias is continuously updated when the IMU is dteected as being stable. See the V2.0.0 release
+note (above) for more information.
 
 ## .ini File Settings
 

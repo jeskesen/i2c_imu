@@ -80,6 +80,7 @@ public:
 
     RTVector3& operator =(const RTVector3& vec);
 
+    RTFLOAT length();
     void normalize();
     void zero();
     const char *display();

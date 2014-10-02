@@ -147,6 +147,7 @@ bool RTIMUSettings::loadSettings()
     m_I2CBus = 1;
     m_fusionType = RTFUSION_TYPE_RTQF;
     m_compassCalValid = false;
+    m_gyroBiasValid = false;
 
     //  MPU9150 defaults
 
@@ -250,6 +251,20 @@ bool RTIMUSettings::loadSettings()
         } else if (strcmp(key, RTIMULIB_COMPASSCAL_MAXZ) == 0) {
             sscanf(val, "%f", &ftemp);
             m_compassCalMax.setZ(ftemp);
+
+        // gyro bias
+
+        } else if (strcmp(key, RTIMULIB_GYRO_BIAS_VALID) == 0) {
+            m_gyroBiasValid = strcmp(val, "true") == 0;
+        } else if (strcmp(key, RTIMULIB_GYRO_BIAS_X) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_gyroBias.setX(ftemp);
+        } else if (strcmp(key, RTIMULIB_GYRO_BIAS_Y) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_gyroBias.setY(ftemp);
+        } else if (strcmp(key, RTIMULIB_GYRO_BIAS_Z) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_gyroBias.setZ(ftemp);
 
         //  MPU9150 settings
 
@@ -396,6 +411,19 @@ bool RTIMUSettings::saveSettings()
     setValue(RTIMULIB_COMPASSCAL_MAXX, m_compassCalMax.x());
     setValue(RTIMULIB_COMPASSCAL_MAXY, m_compassCalMax.y());
     setValue(RTIMULIB_COMPASSCAL_MAXZ, m_compassCalMax.z());
+
+    //  Gyro bias settings
+
+    setBlank();
+    setComment("#####################################################################");
+    setComment("");
+
+    setBlank();
+    setComment("Saved gyro bias data");
+    setValue(RTIMULIB_GYRO_BIAS_VALID, m_gyroBiasValid);
+    setValue(RTIMULIB_GYRO_BIAS_X, m_gyroBias.x());
+    setValue(RTIMULIB_GYRO_BIAS_Y, m_gyroBias.y());
+    setValue(RTIMULIB_GYRO_BIAS_Z, m_gyroBias.z());
 
     //  MPU-9150 settings
 

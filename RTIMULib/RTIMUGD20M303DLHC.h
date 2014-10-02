@@ -199,7 +199,6 @@ public:
     virtual bool IMUInit();
     virtual int IMUGetPollInterval();
     virtual bool IMURead();
-    virtual bool IMUGyroBiasValid() { return !m_gyroLearning; }
 
 private:
     bool setGyroSampleRate();
@@ -217,20 +216,10 @@ private:
     unsigned char m_compassSlaveAddr;                       // I2C address of LSM303DLHC compass
     unsigned char m_bus;                                    // I2C bus (usually 1 for Raspberry Pi for example)
 
-    int m_sampleRate;                                       // samples per second
-    uint64_t m_sampleInterval;                              // interval between samples in microseonds
-
     RTFLOAT m_gyroScale;
     RTFLOAT m_accelScale;
     RTFLOAT m_compassScaleXY;
     RTFLOAT m_compassScaleZ;
-
-    RTVector3 m_gyroBias;                                   // an accumulated bias for the gyros
-    float m_gyroAlpha;                                      // gyro bias learning rate
-    uint64_t m_gyroStartTime;                               // time at which the learning started
-    bool m_gyroLearning;                                    // if in learning mode
-
-    RTVector3 m_compassAverage;                             // a running average to smooth the mag outputs
 
 #ifdef GD20M303DLHC_CACHE_MODE
     bool m_firstTime;                                       // if first sample
