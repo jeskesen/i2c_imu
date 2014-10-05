@@ -1,4 +1,3 @@
-//
 //  Copyright (c) 2014 Justin Eskesen
 //
 //  This file is part of i2c_imu
@@ -73,7 +72,7 @@ I2cImu::I2cImu() : nh_(), private_nh_("~")
 
     imu_->IMUInit();
  
-    imu_pub_ = nh_.advertise<sensor_msgs::Imu>("/imu", 50);
+    imu_pub_ = nh_.advertise<sensor_msgs::Imu>("/imu", 1.0/(imu_->IMUGetPollInterval()/1000.0));
 
 }
 
@@ -84,10 +83,11 @@ void I2cImu::update()
     {
         RTIMU_DATA imuData = imu_->getIMUData();
 
-
+	// sensor msg topic output
         sensor_msgs::Imu imu_msg;
 
         imu_msg.header.stamp = ros::Time::now();
+        imu_msg.header.frame_id = imu_frame_id_;
         imu_msg.orientation.x = imuData.fusionQPose.x();
         imu_msg.orientation.y = imuData.fusionQPose.y();
         imu_msg.orientation.z = imuData.fusionQPose.z();
@@ -102,6 +102,7 @@ void I2cImu::update()
         imu_msg.linear_acceleration.z = imuData.accel.z() * G_2_MPSS;
 
         imu_pub_.publish(imu_msg);
+
     }
 
 }
