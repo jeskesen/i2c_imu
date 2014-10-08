@@ -1,21 +1,25 @@
-//
-//  Copyright (c) 2014 richards-tech
+////////////////////////////////////////////////////////////////////////////
 //
 //  This file is part of RTIMULib
 //
-//  RTIMULib is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
+//  Copyright (c) 2014, richards-tech
 //
-//  RTIMULib is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy of
+//  this software and associated documentation files (the "Software"), to deal in
+//  the Software without restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+//  Software, and to permit persons to whom the Software is furnished to do so,
+//  subject to the following conditions:
 //
-//  You should have received a copy of the GNU General Public License
-//  along with RTIMULib.  If not, see <http://www.gnu.org/licenses/>.
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
 //
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+//  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+//  PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+//  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+//  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <QMessageBox>
 #include <qboxlayout.h>
@@ -34,14 +38,14 @@ RTIMULibDemo::RTIMULibDemo()
 {
     //  This is some normal Qt GUI stuff
 
-	ui.setupUi(this);
+    ui.setupUi(this);
 
     layoutWindow();
-	layoutStatusBar();
+    layoutStatusBar();
 
     //  This code connects up signals from the GUI
 
-	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui.actionCalibrateCompass, SIGNAL(triggered()), this, SLOT(onCalibrateCompass()));
     connect(ui.actionSelectFusionAlgorithm, SIGNAL(triggered()), this, SLOT(onSelectFusionAlgorithm()));
     connect(ui.actionSelectIMU, SIGNAL(triggered()), this, SLOT(onSelectIMU()));
@@ -60,7 +64,7 @@ RTIMULibDemo::RTIMULibDemo()
     connect(this, SIGNAL(newIMU()), m_imuThread, SLOT(newIMU()));
 
     m_imuThread->resumeThread();
-	
+
     //  This value allows a sample rate to be calculated
 
     m_sampleCount = 0;
@@ -159,26 +163,26 @@ void RTIMULibDemo::timerEvent(QTimerEvent *event)
     if (event->timerId() == m_displayTimer) {
         //  Update the GUI
 
-        m_gyroX->setText(QString::number(m_imuData.gyro.x(), 'g', 6));
-        m_gyroY->setText(QString::number(m_imuData.gyro.y(), 'g', 6));
-        m_gyroZ->setText(QString::number(m_imuData.gyro.z(), 'g', 6));
+        m_gyroX->setText(QString::number(m_imuData.gyro.x(), 'f', 6));
+        m_gyroY->setText(QString::number(m_imuData.gyro.y(), 'f', 6));
+        m_gyroZ->setText(QString::number(m_imuData.gyro.z(), 'f', 6));
 
-        m_accelX->setText(QString::number(m_imuData.accel.x(), 'g', 6));
-        m_accelY->setText(QString::number(m_imuData.accel.y(), 'g', 6));
-        m_accelZ->setText(QString::number(m_imuData.accel.z(), 'g', 6));
+        m_accelX->setText(QString::number(m_imuData.accel.x(), 'f', 6));
+        m_accelY->setText(QString::number(m_imuData.accel.y(), 'f', 6));
+        m_accelZ->setText(QString::number(m_imuData.accel.z(), 'f', 6));
 
-        m_compassX->setText(QString::number(m_imuData.compass.x(), 'g', 6));
-        m_compassY->setText(QString::number(m_imuData.compass.y(), 'g', 6));
-        m_compassZ->setText(QString::number(m_imuData.compass.z(), 'g', 6));
+        m_compassX->setText(QString::number(m_imuData.compass.x(), 'f', 6));
+        m_compassY->setText(QString::number(m_imuData.compass.y(), 'f', 6));
+        m_compassZ->setText(QString::number(m_imuData.compass.z(), 'f', 6));
 
-        m_fusionPoseX->setText(QString::number(m_imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE, 'g', 6));
-        m_fusionPoseY->setText(QString::number(m_imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE, 'g', 6));
-        m_fusionPoseZ->setText(QString::number(m_imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE, 'g', 6));
+        m_fusionPoseX->setText(QString::number(m_imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE, 'f', 6));
+        m_fusionPoseY->setText(QString::number(m_imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE, 'f', 6));
+        m_fusionPoseZ->setText(QString::number(m_imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE, 'f', 6));
 
-        m_fusionQPoseScalar->setText(QString::number(m_imuData.fusionQPose.scalar(), 'g', 6));
-        m_fusionQPoseX->setText(QString::number(m_imuData.fusionQPose.x(), 'g', 6));
-        m_fusionQPoseY->setText(QString::number(m_imuData.fusionQPose.y(), 'g', 6));
-        m_fusionQPoseZ->setText(QString::number(m_imuData.fusionQPose.z(), 'g', 6));
+        m_fusionQPoseScalar->setText(QString::number(m_imuData.fusionQPose.scalar(), 'f', 6));
+        m_fusionQPoseX->setText(QString::number(m_imuData.fusionQPose.x(), 'f', 6));
+        m_fusionQPoseY->setText(QString::number(m_imuData.fusionQPose.y(), 'f', 6));
+        m_fusionQPoseZ->setText(QString::number(m_imuData.fusionQPose.z(), 'f', 6));
     } else {
 
         //  Update the sample rate

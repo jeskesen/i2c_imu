@@ -2,7 +2,9 @@
 
 RTIMULib is the simplest way to connect a 9-dof IMU to an embedded Linux system and obtain Kalman-filtered quaternion or Euler angle pose data. Basically, two simple funtion calls (IMUInit() and IMURead()) are pretty much all that's need to integrate RTIMULib.
 
-Two demo programs are included - RTIMULibDemo is a GUI-based program that shows all the data being produce and also support compass calibration. RTIMULibDrive is just about the most basic program possible and can be used for performance testing filters and drivers. It can also be used as the basis of a real application quite easily.
+Two demo programs are included - RTIMULibDemo is a GUI-based program that shows all the data being produced and also support compass calibration. RTIMULibDrive is just about the most basic program possible and can be used for performance testing filters and drivers. It can also be used as the basis of a real application quite easily.
+
+In addition, there are two apps (RTHostIMU and RTHostIMUGL) that allow the sensor fusion to be separated from the sensor interfacing and collection. An Arduino (running the RTArduLinkIMU sketch from the RTIMULib-Arduino repo) fitted with an IMU chip collects the sensor data and sends it to the host. RTHostIMU and RTHostIMUGL (this one has an OpenGL visualization of the data) communicate with the Arduino via a USB connection.
 
 Its prerequisites are very simple - just I2C support on the target system along with the standard build-essential (included in the Raspberry Pi Raspbian distribution by default).
 
@@ -12,9 +14,15 @@ The instructions here are for the Raspberry Pi but RTIMULib can be use easily wi
 
 Check out www.richards-tech.com for more details, updates and news.
 
-RTIMULib is licensed under GPLv3.
+RTIMULib is licensed under the MIT license.
 
 ## Release history
+
+### October 8 2014 - 2.1.0
+
+Changed license to MIT.
+
+Added RTHostIMU and RTHostIMUGL. These apps use RTArduLink to connect the host system to an IMU connected to an Arduino. This allows processing to be split between the Arduino and the host system. Sensor data collection is performed on the Arduino, sensor fusion and display is performed on the host. This means that the apps will run on hosts without I2C ports (such as PCs). See below for more details.
 
 ### October 2 2014 - 2.0.0
 
@@ -207,6 +215,12 @@ All of the platform-specific code is in the following files:
 Changes to I2C code on Linux systems should only involve changes to RTIMUHal. RTIMUSettings uses the Linux file system so, if this is not present, this code would also have to modified to load and store configuration data from somewhere else.
 
 RTIMUSettings would also need to be modified if new IMU drivers and filters are added to the library.
+
+## RTHostIMU and RTHostIMUGL
+
+These apps are built in the same way as RTIMULibDemo. The assumption is that an Arduino running RTArduLinkIMU is connected to one of the host's USB ports. When the apps are started, no com port is configured. The com port dropdown should be used to select the correct port for the connected Arduino. Once this is done, data should start being received and the displays activated.
+
+*** Important note: RTHostIMUGL will not work on the Raspberry Pi as Qt does not support OpenGL on that platform at the moment. Use RTHostIMU instead. RTHostIMUGL has been tested on Ubuntu 14.04 PCs and Windows 7 PCs.
 
 ## Next Steps
 
