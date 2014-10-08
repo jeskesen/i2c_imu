@@ -485,11 +485,11 @@ void RTHostIMUGL::populateComPorts()
 
     m_comPort->clear();
     m_comPort->insertItem(0, "Off");
-    for (int i = 1; i < ports.size(); i++)
+    for (int i = 0; i < ports.size(); i++)
 #ifdef Q_OS_WIN
-        m_comPort->insertItem(i, ports.at(i).portName);
+        m_comPort->insertItem(i + 1, ports.at(i).portName);
 #else
-        m_comPort->insertItem(i, ports.at(i).physName);
+        m_comPort->insertItem(i + 1, ports.at(i).physName);
 #endif
 
 }
