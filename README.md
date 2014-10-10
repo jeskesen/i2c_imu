@@ -18,6 +18,10 @@ RTIMULib is licensed under the MIT license.
 
 ## Release history
 
+### October 8 2014 - 2.1.2
+
+Fixed some missed license header changes.
+
 ### October 8 2014 - 2.1.1
 
 Fixed bug where the first com put was missed on the GUI dropdown in RTHostIMU and RTHostIMUGL.
