@@ -22,6 +22,10 @@ It is essential to calibrate the magnetometer or else very poor fusion results w
 
 ## Release history
 
+### October 13 2014 - 3.0.2
+
+Added license information to Calibrate.pdf.
+
 ### October 13 2014 - 3.0.1
 
 Fixed missing license header in RTEllipsoidFit.
