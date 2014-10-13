@@ -16,7 +16,15 @@ Check out www.richards-tech.com for more details, updates and news.
 
 RTIMULib is licensed under the MIT license.
 
+## Note about magnetometer (compass) calibration
+
+It is essential to calibrate the magnetometer or else very poor fusion results will be obtained. For more about this, see http://wp.me/p4qcHg-b4. 
+
 ## Release history
+
+### October 13 2014 - 3.0.1
+
+Fixed missing license header in RTEllipsoidFit.
 
 ### October 13 2014 - 3.0.0
 
