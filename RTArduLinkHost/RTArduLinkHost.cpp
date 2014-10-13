@@ -34,6 +34,10 @@
 #include <QTimerEvent>
 #include "qdebug.h"
 
+//  Uncomment this symbol to get message trace
+
+//#define RTARDULINKHOST_TRACE
+
 RTArduLinkHost::RTArduLinkHost(QObject *parent)
     : QObject(parent)
 {
@@ -226,15 +230,18 @@ void RTArduLinkHost::processReceivedMessage(RTARDULINKHOST_PORT *portInfo)
         return;
     }
     subsystem = m_subsystem[portInfo->index] + address;
-
+#ifdef RTARDULINKHOST_TRACE
+    qDebug() << "Received " << message->messageType << " from port " << portInfo->index << " address " << address;
+#endif
     switch (message->messageType)
     {
         case RTARDULINK_MESSAGE_POLL:
-//          qDebug() << QString("Received poll from port %1 address %2").arg(portInfo->index) .arg(address);
             subsystem->pollsIn++;
             emitStatus(portInfo->index, address);
             if (!subsystem->active && ((int)strlen(subsystem->identity) > 0)) {
-//              qDebug() << QString("Subsystem port %1 address %2 active").arg(portInfo->index).arg(address);
+#ifdef RTARDULINKHOST_TRACE
+                qDebug() << QString("Subsystem port %1 address %2 active").arg(portInfo->index).arg(address);
+#endif
                 subsystem->active = true;
                 subsystem->pollsIn = 0;
                 subsystem->pollsOut = 0;
@@ -247,7 +254,9 @@ void RTArduLinkHost::processReceivedMessage(RTARDULINKHOST_PORT *portInfo)
             subsystem->waitingForIdentity = false;
             message->data[RTARDULINK_DATA_MAX_LEN - 1] = 0;	// make sure zero terminated
             strcpy(subsystem->identity, (const char *)message->data);
-//          qDebug() << QString("Received identity %1") .arg(subsystem->identity);
+#ifdef RTARDULINKHOST_TRACE
+            qDebug() << QString("Received identity %1") .arg(subsystem->identity);
+#endif
             emitStatus(portInfo->index, address);
             break;
 
@@ -346,7 +355,13 @@ bool RTArduLinkHost::sendMessage(int port, unsigned int messageAddress, unsigned
         return false;
     if (length > RTARDULINK_DATA_MAX_LEN)
         return false;
+
     message = &(portInfo->TXFrameBuffer.message);
+
+#ifdef RTARDULINKHOST_TRACE
+    qDebug() << "Sending " << message->messageType << " to port " << portInfo->index << " address " << messageAddress;
+#endif
+
     portInfo->TXFrameBuffer.messageLength = length + RTARDULINK_MESSAGE_HEADER_LEN;
     RTArduLinkConvertIntToUC2(messageAddress, message->messageAddress);
     message->messageType = messageType;

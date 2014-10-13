@@ -2,7 +2,7 @@
 
 RTIMULib is the simplest way to connect a 9-dof IMU to an embedded Linux system and obtain Kalman-filtered quaternion or Euler angle pose data. Basically, two simple funtion calls (IMUInit() and IMURead()) are pretty much all that's need to integrate RTIMULib.
 
-Two demo programs are included - RTIMULibDemo is a GUI-based program that shows all the data being produced and also support compass calibration. RTIMULibDrive is just about the most basic program possible and can be used for performance testing filters and drivers. It can also be used as the basis of a real application quite easily.
+Two demo apps are included - RTIMULibDemo is a GUI-based program that shows all the data being produced and also support compass calibration. RTIMULibDrive is just about the most basic program possible and can be used for performance testing filters and drivers. It can also be used as the basis of a real application quite easily.
 
 In addition, there are two apps (RTHostIMU and RTHostIMUGL) that allow the sensor fusion to be separated from the sensor interfacing and collection. An Arduino (running the RTArduLinkIMU sketch from the RTIMULib-Arduino repo) fitted with an IMU chip collects the sensor data and sends it to the host. RTHostIMU and RTHostIMUGL (this one has an OpenGL visualization of the data) communicate with the Arduino via a USB connection.
 
@@ -17,6 +17,10 @@ Check out www.richards-tech.com for more details, updates and news.
 RTIMULib is licensed under the MIT license.
 
 ## Release history
+
+### October 13 2014 - 3.0.0
+
+RTIMULib now support accelerometer calibration and enhanced magnetometer calibration using ellipsoid fitting. Please check the Calibration.pdf document for instructions on how to create the calibration data.
 
 ### October 8 2014 - 2.1.2
 
@@ -178,7 +182,9 @@ RTIMULibDemo is a Qt-based program (Qt is used to supply the GUI). So, do the fo
 
 	sudo apt-get install libqt4-dev
 
-This will install the libraries and utilities that Qt needs.
+This will install the libraries and utilities that Qt needs. If compass ellipsoid fitting is desired, also install Octave:
+
+	sudo apt-get install liboctave-dev
 
 Then, go to the RTIMULibDemo directory and enter:
 

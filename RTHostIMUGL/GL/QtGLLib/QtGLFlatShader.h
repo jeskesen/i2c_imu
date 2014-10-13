@@ -27,13 +27,13 @@
 class QtGLFlatShader : public QtGLShader
 {
 public:
-	QtGLFlatShader(QObject *parent);
-	~QtGLFlatShader();
+    QtGLFlatShader(QObject *parent);
+    ~QtGLFlatShader();
 
-	void load(const QVector3D *vertices, const QColor& color);
+    void load(const QVector3D *vertices, const QColor& color);
 
 private:
 
 };
-		
+
 #endif // QTGLFLATSHADER_H

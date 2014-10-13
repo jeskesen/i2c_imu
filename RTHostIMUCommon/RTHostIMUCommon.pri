@@ -21,6 +21,7 @@
 #//  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 #//  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
@@ -28,8 +29,12 @@ HEADERS += $$PWD/RTArduLinkIMUDefs.h \
     $$PWD/RTHostIMUClient.h \
     $$PWD/RTHostIMUThread.h \
     $$PWD/SelectFusionDlg.h \
+    $$PWD/MagCalDlg.h \
+    $$PWD/AccelCalDlg.h \
 
 SOURCES += $$PWD/RTHostIMUClient.cpp \
     $$PWD/RTHostIMUThread.cpp \
     $$PWD/SelectFusionDlg.cpp \
+    $$PWD/MagCalDlg.cpp \
+    $$PWD/AccelCalDlg.cpp \
 

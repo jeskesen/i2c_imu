@@ -78,6 +78,8 @@
     <ClCompile Include="..\qextserialport\src\qextwineventnotifier_p.cpp" />
     <ClCompile Include="..\RTArduLinkHost\RTArduLinkHost.cpp" />
     <ClCompile Include="..\RTArduLinkHost\RTArduLinkUtils.cpp" />
+    <ClCompile Include="..\RTHostIMUCommon\AccelCalDlg.cpp" />
+    <ClCompile Include="..\RTHostIMUCommon\MagCalDlg.cpp" />
     <ClCompile Include="..\RTHostIMUCommon\RTHostIMUClient.cpp" />
     <ClCompile Include="..\RTHostIMUCommon\RTHostIMUThread.cpp" />
     <ClCompile Include="..\RTHostIMUCommon\SelectFusionDlg.cpp" />
@@ -85,14 +87,22 @@
     <ClCompile Include="..\RTIMULib\RTFusionKalman4.cpp" />
     <ClCompile Include="..\RTIMULib\RTFusionRTQF.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMU.cpp" />
+    <ClCompile Include="..\RTIMULib\RTIMUAccelCal.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUGD20HM303D.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUGD20M303DLHC.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUHal.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMULSM9DS0.cpp" />
+    <ClCompile Include="..\RTIMULib\RTIMUMagCal.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUMPU9150.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUNull.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUSettings.cpp" />
     <ClCompile Include="..\RTIMULib\RTMath.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_AccelCalDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MagCalDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_qextserialenumerator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -117,6 +127,12 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_SelectFusionDlg.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AccelCalDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MagCalDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_qextserialenumerator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -159,6 +175,29 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="..\RTHostIMUCommon\AccelCalDlg.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing AccelCalDlg.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\..\qextserialport\src" "-I.\..\RTIMULib" "-I.\..\RTArduLinkHost" "-I.\..\RTHostIMUCommon" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing AccelCalDlg.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\..\qextserialport\src" "-I.\..\RTIMULib" "-I.\..\RTArduLinkHost" "-I.\..\RTHostIMUCommon" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\RTHostIMUCommon\MagCalDlg.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing MagCalDlg.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\..\qextserialport\src" "-I.\..\RTIMULib" "-I.\..\RTArduLinkHost" "-I.\..\RTHostIMUCommon" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing MagCalDlg.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\..\qextserialport\src" "-I.\..\RTIMULib" "-I.\..\RTArduLinkHost" "-I.\..\RTHostIMUCommon" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
+    </CustomBuild>
+    <ClInclude Include="..\RTIMULib\RTIMUAccelCal.h" />
+    <ClInclude Include="..\RTIMULib\RTIMUCalDefs.h" />
+    <ClInclude Include="..\RTIMULib\RTIMUMagCal.h" />
     <ClInclude Include="GeneratedFiles\ui_RTHostIMU.h" />
     <CustomBuild Include="..\qextserialport\src\qextserialenumerator.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

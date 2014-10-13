@@ -33,22 +33,22 @@ class RTIMUSettings;
 
 class SelectFusionDlg : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     SelectFusionDlg(RTIMUSettings *settings, QWidget *parent = 0);
     ~SelectFusionDlg();
 
 public slots:
-	void onOk();
+    void onOk();
     void onCancel();
 
 private:
-	void layoutWindow();
+    void layoutWindow();
 
     RTIMUSettings *m_settings;
 
-	QDialogButtonBox *m_buttons;
+    QDialogButtonBox *m_buttons;
     QComboBox *m_selectFusion;
 };
 

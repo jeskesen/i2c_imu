@@ -34,45 +34,45 @@ QtGLWireCubeComponent::~QtGLWireCubeComponent()
 
 void QtGLWireCubeComponent::generate(float width, float height, float depth)
 {
-	float w2 = width / 2.0f;
-	float h2 = height / 2.0f;
-	float d2 = depth / 2.0f;
+    float w2 = width / 2.0f;
+    float h2 = height / 2.0f;
+    float d2 = depth / 2.0f;
 
-	reset();
+    reset();
 
-	addVertex(QVector3D(-w2, h2, d2));
-	addVertex(QVector3D(w2, h2, d2));
-	addVertex(QVector3D(-w2, -h2, d2));
-	addVertex(QVector3D(w2, -h2, d2));
+    addVertex(QVector3D(-w2, h2, d2));
+    addVertex(QVector3D(w2, h2, d2));
+    addVertex(QVector3D(-w2, -h2, d2));
+    addVertex(QVector3D(w2, -h2, d2));
 
-	addVertex(QVector3D(w2, -h2, d2));
-	addVertex(QVector3D(w2, h2, d2));
-	addVertex(QVector3D(-w2, -h2, d2));
-	addVertex(QVector3D(-w2, h2, d2));
+    addVertex(QVector3D(w2, -h2, d2));
+    addVertex(QVector3D(w2, h2, d2));
+    addVertex(QVector3D(-w2, -h2, d2));
+    addVertex(QVector3D(-w2, h2, d2));
 
-	addVertex(QVector3D(-w2, h2, -d2));
-	addVertex(QVector3D(w2, h2, -d2));
-	addVertex(QVector3D(-w2, -h2, -d2));
-	addVertex(QVector3D(w2, -h2, -d2));
+    addVertex(QVector3D(-w2, h2, -d2));
+    addVertex(QVector3D(w2, h2, -d2));
+    addVertex(QVector3D(-w2, -h2, -d2));
+    addVertex(QVector3D(w2, -h2, -d2));
 
-	addVertex(QVector3D(w2, -h2, -d2));
-	addVertex(QVector3D(w2, h2, -d2));
-	addVertex(QVector3D(-w2, -h2, -d2));
-	addVertex(QVector3D(-w2, h2, -d2));
+    addVertex(QVector3D(w2, -h2, -d2));
+    addVertex(QVector3D(w2, h2, -d2));
+    addVertex(QVector3D(-w2, -h2, -d2));
+    addVertex(QVector3D(-w2, h2, -d2));
 
-	addVertex(QVector3D(-w2, -h2, -d2));
-	addVertex(QVector3D(-w2, -h2, d2));
-	addVertex(QVector3D(w2, -h2, -d2));
-	addVertex(QVector3D(w2, -h2, d2));
+    addVertex(QVector3D(-w2, -h2, -d2));
+    addVertex(QVector3D(-w2, -h2, d2));
+    addVertex(QVector3D(w2, -h2, -d2));
+    addVertex(QVector3D(w2, -h2, d2));
 
-	addVertex(QVector3D(-w2, h2, -d2));
-	addVertex(QVector3D(-w2, h2, d2));
-	addVertex(QVector3D(w2, h2, -d2));
-	addVertex(QVector3D(w2, h2, d2));
+    addVertex(QVector3D(-w2, h2, -d2));
+    addVertex(QVector3D(-w2, h2, d2));
+    addVertex(QVector3D(w2, h2, -d2));
+    addVertex(QVector3D(w2, h2, d2));
 
 }
 
 void QtGLWireCubeComponent::draw()
 {
-	QtGLComponent::draw(GL_LINES);
+    QtGLComponent::draw(GL_LINES);
 }

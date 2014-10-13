@@ -167,8 +167,7 @@ bool RTIMUMPU9150::IMUInit()
     setGyroFsr(m_settings->m_MPU9150GyroFsr);
     setAccelFsr(m_settings->m_MPU9150AccelFsr);
 
-    setCalibrationData(m_settings->m_compassCalValid, m_settings->m_compassCalMin,
-                              m_settings->m_compassCalMax);
+    setCalibrationData();
 
 
     //  enable the I2C bus
@@ -531,6 +530,7 @@ bool RTIMUMPU9150::IMURead()
 
     handleGyroBias();
     calibrateAverageCompass();
+    calibrateAccel();
 
     if (m_firstTime)
         m_imuData.timestamp = RTMath::currentUSecsSinceEpoch();

@@ -24,7 +24,7 @@
 #include "VRIMUWidget.h"
 
 VRIMUWidget::VRIMUWidget(QObject *parent, VRWIDGET_TYPE widgetType)
-	: VRWidget(parent, widgetType)
+    : VRWidget(parent, widgetType)
 {
 }
 
@@ -80,12 +80,12 @@ void VRIMUWidget::VRWidgetInit()
                         QVector3D(1.0, 1.0, 1.0), 6.0);
     m_cube.setColor(QColor(255, 255, 0));
 
-    setRotationOrder(VRWidgetRotationXZY);					// so that roll/pitch/yaw works
+    setRotationOrder(VRWidgetRotationXZY);                  // so that roll/pitch/yaw works
 }
 
 void VRIMUWidget::VRWidgetRender()
 {
-	startWidgetRender();
+    startWidgetRender();
 
     //  do cube
 

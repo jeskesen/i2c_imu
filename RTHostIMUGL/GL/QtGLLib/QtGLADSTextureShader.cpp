@@ -24,13 +24,13 @@
 #include "QtGL.h"
 
 QtGLADSTextureShader::QtGLADSTextureShader(QObject *parent)
-	: QtGLShader(parent)
+    : QtGLShader(parent)
 {
-	#define PROGRAM_VERTEX_ATTRIBUTE 0
-	#define PROGRAM_NORMAL_ATTRIBUTE 1
-	#define PROGRAM_TEXTURE_ATTRIBUTE 2
+    #define PROGRAM_VERTEX_ATTRIBUTE 0
+    #define PROGRAM_NORMAL_ATTRIBUTE 1
+    #define PROGRAM_TEXTURE_ATTRIBUTE 2
 
-	m_type = QTGLSHADER_ADSTEXTURE;
+    m_type = QTGLSHADER_ADSTEXTURE;
 
     m_vshader = new QGLShader(QGLShader::Vertex, parent);
     const char *vsrc =
@@ -38,40 +38,40 @@ QtGLADSTextureShader::QtGLADSTextureShader(QObject *parent)
         "attribute mediump vec3 normal;\n"
         "attribute mediump vec2 texCoord;\n"
         "varying mediump vec2 texc;\n"
-		"varying mediump vec3 lightI;\n"
+        "varying mediump vec3 lightI;\n"
         "uniform mediump mat4 MV;\n"
-		"uniform mediump mat4 MVP\n;"
- 		"uniform mediump mat3 normalMatrix;\n"
-		"uniform mediump int lightCount;\n"
-		"uniform mediump vec4 posL[4];\n"
-		"uniform mediump vec3 ambientL[4];\n" 
-		"uniform mediump vec3 diffuseL[4];\n" 
-		"uniform mediump vec3 specularL[4];\n" 
-		"uniform mediump vec3 ambientM;\n"
-		"uniform mediump vec3 diffuseM;\n"
-		"uniform mediump vec3 specularM;\n"
-		"uniform mediump float shininess;\n"
+        "uniform mediump mat4 MVP\n;"
+        "uniform mediump mat3 normalMatrix;\n"
+        "uniform mediump int lightCount;\n"
+        "uniform mediump vec4 posL[4];\n"
+        "uniform mediump vec3 ambientL[4];\n"
+        "uniform mediump vec3 diffuseL[4];\n"
+        "uniform mediump vec3 specularL[4];\n"
+        "uniform mediump vec3 ambientM;\n"
+        "uniform mediump vec3 diffuseM;\n"
+        "uniform mediump vec3 specularM;\n"
+        "uniform mediump float shininess;\n"
         "void main(void)\n"
         "{\n"
-		"    gl_Position = MVP * vec4(vertex, 1.0);\n"
+        "    gl_Position = MVP * vec4(vertex, 1.0);\n"
         "    texc = texCoord;\n"
- 		"    vec3 tnorm = normalize(normalMatrix * normal);\n"
-		"    vec4 eyeCoords = MV * vec4(vertex, 1.0);\n"
-		"    vec3 v = normalize(-eyeCoords.xyz);\n"
-		"    lightI = vec3(0.0, 0.0, 0.0);\n"
-		"    for (int i = 0; i < lightCount; i++) {\n"
-		"        vec3 s = normalize(vec3(posL[i] - eyeCoords));\n"
-		"        float sDotN = max(dot(s, tnorm), 0.0);\n"
-		"        vec3 r = reflect(-s, tnorm);\n"
-		"        vec3 ambient = ambientL[i] * ambientM;\n"
-		"        vec3 diffuse = diffuseL[i] * diffuseM * sDotN;\n"
-		"        vec3 spec = vec3(0.0);\n"
-		"        if (sDotN > 0.0) spec = specularL[i] * specularM * pow(max(dot(r,v), 0.0), shininess);\n"
-		"        lightI += ambient + diffuse + spec;\n"
-		"    }\n"
+        "    vec3 tnorm = normalize(normalMatrix * normal);\n"
+        "    vec4 eyeCoords = MV * vec4(vertex, 1.0);\n"
+        "    vec3 v = normalize(-eyeCoords.xyz);\n"
+        "    lightI = vec3(0.0, 0.0, 0.0);\n"
+        "    for (int i = 0; i < lightCount; i++) {\n"
+        "        vec3 s = normalize(vec3(posL[i] - eyeCoords));\n"
+        "        float sDotN = max(dot(s, tnorm), 0.0);\n"
+        "        vec3 r = reflect(-s, tnorm);\n"
+        "        vec3 ambient = ambientL[i] * ambientM;\n"
+        "        vec3 diffuse = diffuseL[i] * diffuseM * sDotN;\n"
+        "        vec3 spec = vec3(0.0);\n"
+        "        if (sDotN > 0.0) spec = specularL[i] * specularM * pow(max(dot(r,v), 0.0), shininess);\n"
+        "        lightI += ambient + diffuse + spec;\n"
+        "    }\n"
        "}\n";
     if (!m_vshader->compileSourceCode(vsrc))
-		qDebug() << "Failed to compile ADS shader";
+        qDebug() << "Failed to compile ADS shader";
 
     m_fshader = new QGLShader(QGLShader::Fragment, parent);
     const char *fsrc =
@@ -80,10 +80,10 @@ QtGLADSTextureShader::QtGLADSTextureShader(QObject *parent)
         "varying mediump vec3 lightI;\n"
         "void main(void)\n"
         "{\n"
-		"    gl_FragColor = texture2D(texture, texc.st) * vec4(lightI, 1.0);\n"
+        "    gl_FragColor = texture2D(texture, texc.st) * vec4(lightI, 1.0);\n"
         "}\n";
     if (!m_fshader->compileSourceCode(fsrc))
-		qDebug() << "Failed to compile ADS fragment shader";
+        qDebug() << "Failed to compile ADS fragment shader";
 
     addShader(m_vshader);
     addShader(m_fshader);
@@ -91,7 +91,7 @@ QtGLADSTextureShader::QtGLADSTextureShader(QObject *parent)
     bindAttributeLocation("normal", PROGRAM_NORMAL_ATTRIBUTE);
     bindAttributeLocation("texCoord", PROGRAM_TEXTURE_ATTRIBUTE);
     link();
-	setUniformValue("texture", 0);
+    setUniformValue("texture", 0);
 }
 
 QtGLADSTextureShader::~QtGLADSTextureShader()
@@ -99,8 +99,8 @@ QtGLADSTextureShader::~QtGLADSTextureShader()
 
 }
 
-void QtGLADSTextureShader::load(const QVector3D *vertices, const QVector3D *normals, 
-				const QVector2D* textureCoords, const COMPONENT_MATERIAL& material)
+void QtGLADSTextureShader::load(const QVector3D *vertices, const QVector3D *normals,
+                const QVector2D* textureCoords, const COMPONENT_MATERIAL& material)
 {
     bind();
     setUniformValue("MV", globalTransforms.modelViewMatrix);

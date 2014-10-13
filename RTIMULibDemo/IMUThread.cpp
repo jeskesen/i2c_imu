@@ -61,24 +61,6 @@ void IMUThread::newIMU()
     m_timer = startTimer(m_imu->IMUGetPollInterval());
 }
 
-
-
-void IMUThread::setCalibrationMode(bool enable)
-{
-    m_imu->setCalibrationMode(enable);
-    m_calibrationMode = enable;
-}
-
-void IMUThread::newCompassCalData(const RTVector3& compassCalMin, const RTVector3& compassCalMax)
-{
-    m_settings->m_compassCalValid = true;
-    m_settings->m_compassCalMin = compassCalMin;
-    m_settings->m_compassCalMax = compassCalMax;
-    m_settings->saveSettings();
-    m_imu->setCalibrationData(true, compassCalMin, compassCalMax);
-}
-
-
 void IMUThread::initThread()
 {
     //  create IMU. There's a special function call for this

@@ -151,6 +151,16 @@ bool RTIMUSettings::loadSettings()
     m_I2CBus = 1;
     m_fusionType = RTFUSION_TYPE_RTQF;
     m_compassCalValid = false;
+    m_compassCalEllipsoidValid = false;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            m_compassCalEllipsoidCorr[i][j] = 0;
+        }
+    }
+    m_compassCalEllipsoidCorr[0][0] = 1;
+    m_compassCalEllipsoidCorr[1][1] = 1;
+    m_compassCalEllipsoidCorr[2][2] = 1;
+    m_accelCalValid = false;
     m_gyroBiasValid = false;
 
     //  MPU9150 defaults
@@ -255,6 +265,70 @@ bool RTIMUSettings::loadSettings()
         } else if (strcmp(key, RTIMULIB_COMPASSCAL_MAXZ) == 0) {
             sscanf(val, "%f", &ftemp);
             m_compassCalMax.setZ(ftemp);
+
+        // compass ellipsoid calibration
+
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_ELLIPSOID_VALID) == 0) {
+            m_compassCalEllipsoidValid = strcmp(val, "true") == 0;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_OFFSET_X) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidOffset.setX(ftemp);
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_OFFSET_Y) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidOffset.setY(ftemp);
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_OFFSET_Z) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidOffset.setZ(ftemp);
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR11) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[0][0] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR12) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[0][1] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR13) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[0][2] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR21) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[1][0] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR22) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[1][1] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR23) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[1][2] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR31) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[2][0] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR32) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[2][1] = ftemp;
+        } else if (strcmp(key, RTIMULIB_COMPASSCAL_CORR33) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_compassCalEllipsoidCorr[2][2] = ftemp;
+
+       // accel calibration
+
+        } else if (strcmp(key, RTIMULIB_ACCELCAL_VALID) == 0) {
+            m_accelCalValid = strcmp(val, "true") == 0;
+        } else if (strcmp(key, RTIMULIB_ACCELCAL_MINX) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_accelCalMin.setX(ftemp);
+        } else if (strcmp(key, RTIMULIB_ACCELCAL_MINY) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_accelCalMin.setY(ftemp);
+        } else if (strcmp(key, RTIMULIB_ACCELCAL_MINZ) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_accelCalMin.setZ(ftemp);
+        } else if (strcmp(key, RTIMULIB_ACCELCAL_MAXX) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_accelCalMax.setX(ftemp);
+        } else if (strcmp(key, RTIMULIB_ACCELCAL_MAXY) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_accelCalMax.setY(ftemp);
+        } else if (strcmp(key, RTIMULIB_ACCELCAL_MAXZ) == 0) {
+            sscanf(val, "%f", &ftemp);
+            m_accelCalMax.setZ(ftemp);
 
         // gyro bias
 
@@ -415,6 +489,44 @@ bool RTIMUSettings::saveSettings()
     setValue(RTIMULIB_COMPASSCAL_MAXX, m_compassCalMax.x());
     setValue(RTIMULIB_COMPASSCAL_MAXY, m_compassCalMax.y());
     setValue(RTIMULIB_COMPASSCAL_MAXZ, m_compassCalMax.z());
+
+    //  Compass ellipsoid calibration settings
+
+    setBlank();
+    setComment("#####################################################################");
+    setComment("");
+
+    setBlank();
+    setComment("Compass ellipsoid calibration");
+    setValue(RTIMULIB_COMPASSCAL_ELLIPSOID_VALID, m_compassCalEllipsoidValid);
+    setValue(RTIMULIB_COMPASSCAL_OFFSET_X, m_compassCalEllipsoidOffset.x());
+    setValue(RTIMULIB_COMPASSCAL_OFFSET_Y, m_compassCalEllipsoidOffset.y());
+    setValue(RTIMULIB_COMPASSCAL_OFFSET_Z, m_compassCalEllipsoidOffset.z());
+    setValue(RTIMULIB_COMPASSCAL_CORR11, m_compassCalEllipsoidCorr[0][0]);
+    setValue(RTIMULIB_COMPASSCAL_CORR12, m_compassCalEllipsoidCorr[0][1]);
+    setValue(RTIMULIB_COMPASSCAL_CORR13, m_compassCalEllipsoidCorr[0][2]);
+    setValue(RTIMULIB_COMPASSCAL_CORR21, m_compassCalEllipsoidCorr[1][0]);
+    setValue(RTIMULIB_COMPASSCAL_CORR22, m_compassCalEllipsoidCorr[1][1]);
+    setValue(RTIMULIB_COMPASSCAL_CORR23, m_compassCalEllipsoidCorr[1][2]);
+    setValue(RTIMULIB_COMPASSCAL_CORR31, m_compassCalEllipsoidCorr[2][0]);
+    setValue(RTIMULIB_COMPASSCAL_CORR32, m_compassCalEllipsoidCorr[2][1]);
+    setValue(RTIMULIB_COMPASSCAL_CORR33, m_compassCalEllipsoidCorr[2][2]);
+
+    //  Accel calibration settings
+
+    setBlank();
+    setComment("#####################################################################");
+    setComment("");
+
+    setBlank();
+    setComment("Accel calibration");
+    setValue(RTIMULIB_ACCELCAL_VALID, m_accelCalValid);
+    setValue(RTIMULIB_ACCELCAL_MINX, m_accelCalMin.x());
+    setValue(RTIMULIB_ACCELCAL_MINY, m_accelCalMin.y());
+    setValue(RTIMULIB_ACCELCAL_MINZ, m_accelCalMin.z());
+    setValue(RTIMULIB_ACCELCAL_MAXX, m_accelCalMax.x());
+    setValue(RTIMULIB_ACCELCAL_MAXY, m_accelCalMax.y());
+    setValue(RTIMULIB_ACCELCAL_MAXZ, m_accelCalMax.z());
 
     //  Gyro bias settings
 

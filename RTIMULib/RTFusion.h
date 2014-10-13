@@ -59,6 +59,10 @@ public:
     inline const RTVector3& getMeasuredPose() {return m_measuredPose;}
     inline const RTQuaternion& getMeasuredQPose() {return m_measuredQPose;}
 
+    //  getAccelResiduals() gets the residual after subtracting gravity
+
+    RTVector3 getAccelResiduals();
+
     void setDebugEnable(bool enable) { m_debug = enable; }
 
 protected:
@@ -73,6 +77,8 @@ protected:
     RTQuaternion m_fusionQPose;                             // quaternion form of pose from fusion
     RTVector3 m_fusionPose;                                 // vector form of pose from fusion
 
+    RTQuaternion m_gravity;                                 // the gravity vector as a quaternion
+
     bool m_debug;
     bool m_enableGyro;                                      // enables gyro as input
     bool m_enableAccel;                                     // enables accel as input
@@ -81,7 +87,7 @@ protected:
     bool m_firstTime;                                       // if first time after reset
     uint64_t m_lastFusionTime;                              // for delta time calculation
 
-    static const char *m_fusionNameMap[];                     // the fusion name array
+    static const char *m_fusionNameMap[];                   // the fusion name array
 };
 
 #endif // _RTFUSION_H

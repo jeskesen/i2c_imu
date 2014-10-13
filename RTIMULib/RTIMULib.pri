@@ -37,7 +37,10 @@ HEADERS += $$PWD/RTIMULib.h \
     $$PWD/RTFusion.h \
     $$PWD/RTFusionKalman4.h \
     $$PWD/RTFusionRTQF.h \
-    $$PWD/RTIMUSettings.h
+    $$PWD/RTIMUSettings.h \
+    $$PWD/RTIMUMagCal.h \
+    $$PWD/RTIMUAccelCal.h \
+    $$PWD/RTIMUCalDefs.h \
  
 SOURCES += $$PWD/RTMath.cpp \
     $$PWD/RTIMUHal.cpp \
@@ -50,5 +53,7 @@ SOURCES += $$PWD/RTMath.cpp \
     $$PWD/RTFusion.cpp \
     $$PWD/RTFusionKalman4.cpp \
     $$PWD/RTFusionRTQF.cpp \
-    $$PWD/RTIMUSettings.cpp
+    $$PWD/RTIMUSettings.cpp \
+    $$PWD/RTIMUMagCal.cpp \
+    $$PWD/RTIMUAccelCal.cpp \
 

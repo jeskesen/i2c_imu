@@ -25,7 +25,6 @@
 #include "RTIMU.h"
 #include "RTFusionKalman4.h"
 #include "RTFusionRTQF.h"
-#include "RTIMUSettings.h"
 
 #include "RTIMUNull.h"
 #include "RTIMUMPU9150.h"
@@ -80,8 +79,8 @@ RTIMU::RTIMU(RTIMUSettings *settings)
 {
     m_settings = settings;
 
-    m_calibrationMode = false;
-    m_calibrationValid = false;
+    m_compassCalibrationMode = false;
+    m_accelCalibrationMode = false;
 
     switch (m_settings->m_fusionType) {
     case RTFUSION_TYPE_KALMANSTATE4:
@@ -105,37 +104,48 @@ RTIMU::~RTIMU()
     m_fusion = NULL;
 }
 
-void RTIMU::setCalibrationData(const bool valid,
-                               const RTVector3& compassMin, const RTVector3& compassMax)
+void RTIMU::setCalibrationData()
 {
     float maxDelta = -1;
     float delta;
 
-    m_calibrationValid = valid;
-    if (!valid) {
-        HAL_INFO("Compass not calibrated\n");
-        return;
+    if (m_settings->m_compassCalValid) {
+        //  find biggest range
+
+        for (int i = 0; i < 3; i++) {
+            if ((m_settings->m_compassCalMax.data(i) - m_settings->m_compassCalMin.data(i)) > maxDelta)
+                maxDelta = m_settings->m_compassCalMax.data(i) - m_settings->m_compassCalMin.data(i);
+        }
+        if (maxDelta < 0) {
+            HAL_ERROR("Error in compass calibration data\n");
+            return;
+        }
+        maxDelta /= 2.0f;                                       // this is the max +/- range
+
+        for (int i = 0; i < 3; i++) {
+            delta = (m_settings->m_compassCalMax.data(i) - m_settings->m_compassCalMin.data(i)) / 2.0f;
+            m_compassCalScale[i] = maxDelta / delta;            // makes everything the same range
+            m_compassCalOffset[i] = (m_settings->m_compassCalMax.data(i) + m_settings->m_compassCalMin.data(i)) / 2.0f;
+        }
     }
 
-    //  find biggest range
+    if (m_settings->m_compassCalValid) {
+        HAL_INFO("Using min/max compass calibration\n");
+    } else {
+        HAL_INFO("min/max compass calibration not in use\n");
+    }
 
-    for (int i = 0; i < 3; i++) {
-        if ((compassMax.data(i) - compassMin.data(i)) > maxDelta)
-            maxDelta = compassMax.data(i) - compassMin.data(i);
+    if (m_settings->m_compassCalEllipsoidValid) {
+        HAL_INFO("Using ellipsoid compass calibration\n");
+    } else {
+        HAL_INFO("Ellipsoid compass calibration not in use\n");
     }
-    if (maxDelta < 0) {
-        HAL_ERROR("Error in compass calibration data\n");
-        return;
-    }
-    maxDelta /= 2.0f;                                       // this is the max +/- range
 
-    for (int i = 0; i < 3; i++) {
-        delta = (compassMax.data(i) - compassMin.data(i)) / 2.0f;
-        m_compassCalScale[i] = maxDelta / delta;            // makes everything the same range
-        m_compassCalOffset[i] = (compassMax.data(i) + compassMin.data(i)) / 2.0f;
+    if (m_settings->m_accelCalValid) {
+        HAL_INFO("Using accel calibration\n");
+    } else {
+        HAL_INFO("Accel calibration not in use\n");
     }
-    m_calibrationValid = true;
-    HAL_INFO("Compass is calibrated\n");
 }
 
 void RTIMU::gyroBiasInit()
@@ -174,10 +184,27 @@ void RTIMU::calibrateAverageCompass()
 {
     //  calibrate if required
 
-    if (!m_calibrationMode && m_calibrationValid) {
+    if (getCompassCalibrationValid()) {
         m_imuData.compass.setX((m_imuData.compass.x() - m_compassCalOffset[0]) * m_compassCalScale[0]);
         m_imuData.compass.setY((m_imuData.compass.y() - m_compassCalOffset[1]) * m_compassCalScale[1]);
         m_imuData.compass.setZ((m_imuData.compass.z() - m_compassCalOffset[2]) * m_compassCalScale[2]);
+
+        if (m_settings->m_compassCalEllipsoidValid) {
+            RTVector3 ev = m_imuData.compass;
+            ev -= m_settings->m_compassCalEllipsoidOffset;
+
+            m_imuData.compass.setX(ev.x() * m_settings->m_compassCalEllipsoidCorr[0][0] +
+                ev.y() * m_settings->m_compassCalEllipsoidCorr[0][1] +
+                ev.z() * m_settings->m_compassCalEllipsoidCorr[0][2]);
+
+            m_imuData.compass.setY(ev.x() * m_settings->m_compassCalEllipsoidCorr[1][0] +
+                ev.y() * m_settings->m_compassCalEllipsoidCorr[1][1] +
+                ev.z() * m_settings->m_compassCalEllipsoidCorr[1][2]);
+
+            m_imuData.compass.setZ(ev.x() * m_settings->m_compassCalEllipsoidCorr[2][0] +
+                ev.y() * m_settings->m_compassCalEllipsoidCorr[2][1] +
+                ev.z() * m_settings->m_compassCalEllipsoidCorr[2][2]);
+        }
     }
 
     //  update running average
@@ -189,6 +216,27 @@ void RTIMU::calibrateAverageCompass()
     m_imuData.compass = m_compassAverage;
 }
 
+void RTIMU::calibrateAccel()
+{
+    if (!getAccelCalibrationValid())
+        return;
+
+    if (m_imuData.accel.x() >= 0)
+        m_imuData.accel.setX(m_imuData.accel.x() / m_settings->m_accelCalMax.x());
+    else
+        m_imuData.accel.setX(m_imuData.accel.x() / -m_settings->m_accelCalMin.x());
+
+    if (m_imuData.accel.y() >= 0)
+        m_imuData.accel.setY(m_imuData.accel.y() / m_settings->m_accelCalMax.y());
+    else
+        m_imuData.accel.setY(m_imuData.accel.y() / -m_settings->m_accelCalMin.y());
+
+    if (m_imuData.accel.z() >= 0)
+        m_imuData.accel.setZ(m_imuData.accel.z() / m_settings->m_accelCalMax.z());
+    else
+        m_imuData.accel.setZ(m_imuData.accel.z() / -m_settings->m_accelCalMin.z());
+}
+
 void RTIMU::updateFusion()
 {
     m_fusion->newIMUData(m_imuData);
@@ -198,5 +246,4 @@ bool RTIMU::IMUGyroBiasValid()
 {
     return m_settings->m_gyroBiasValid;
 }
-
 

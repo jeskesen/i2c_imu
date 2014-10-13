@@ -32,6 +32,8 @@
 #include "SelectFusionDlg.h"
 #include "RTHostIMUThread.h"
 #include "RTHostIMUClient.h"
+#include "AccelCalDlg.h"
+#include "MagCalDlg.h"
 
 #define RATE_TIMER_INTERVAL 2
 
@@ -49,6 +51,8 @@ RTHostIMU::RTHostIMU()
 
     connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui.actionSelectFusionAlgorithm, SIGNAL(triggered()), this, SLOT(onSelectFusionAlgorithm()));
+    connect(ui.actionCalibrateAccelerometers, SIGNAL(triggered()), this, SLOT(onCalibrateAccelerometers()));
+    connect(ui.actionCalibrateMagnetometers, SIGNAL(triggered()), this, SLOT(onCalibrateMagnetometers()));
     connect(m_enableGyro, SIGNAL(stateChanged(int)), this, SLOT(onEnableGyro(int)));
     connect(m_enableAccel, SIGNAL(stateChanged(int)), this, SLOT(onEnableAccel(int)));
     connect(m_enableCompass, SIGNAL(stateChanged(int)), this, SLOT(onEnableCompass(int)));
@@ -94,6 +98,41 @@ void RTHostIMU::onSelectFusionAlgorithm()
         emit newIMU();
         m_fusionType->setText(RTFusion::fusionName(m_imuThread->getSettings()->m_fusionType));
     }
+}
+
+void RTHostIMU::onCalibrateAccelerometers()
+{
+    m_imuThread->getIMU()->setAccelCalibrationMode(true);
+
+    AccelCalDlg dlg(this, m_imuThread->getSettings());
+
+    connect(m_imuThread, SIGNAL(newIMUData(const RTIMU_DATA&)),
+        &dlg, SLOT(newIMUData(const RTIMU_DATA&)), Qt::DirectConnection);
+
+
+    if (dlg.exec() == QDialog::Accepted) {
+
+    }
+
+    disconnect(m_imuThread, SIGNAL(newIMUData(const RTIMU_DATA&)),
+        &dlg, SLOT(newIMUData(const RTIMU_DATA&)));
+    emit newIMU();
+}
+
+void RTHostIMU::onCalibrateMagnetometers()
+{
+    m_imuThread->getIMU()->setCompassCalibrationMode(true);
+    MagCalDlg dlg(this, m_imuThread->getSettings());
+
+    connect(m_imuThread, SIGNAL(newIMUData(const RTIMU_DATA&)),
+        &dlg, SLOT(newIMUData(const RTIMU_DATA&)), Qt::DirectConnection);
+
+    if (dlg.exec() == QDialog::Accepted) {
+
+    }
+    disconnect(m_imuThread, SIGNAL(newIMUData(const RTIMU_DATA&)),
+        &dlg, SLOT(newIMUData(const RTIMU_DATA&)));
+    emit newIMU();
 }
 
 void RTHostIMU::newIMUData(const RTIMU_DATA& data)
@@ -162,6 +201,13 @@ void RTHostIMU::timerEvent(QTimerEvent *event)
         updateComRXTX(m_comRXLabel, false);
         updateComRXTX(m_comTXLabel, false);
 
+        m_accelMagnitude->setText(QString::number(m_imuData.accel.length(), 'f', 6));
+        m_compassMagnitude->setText(QString::number(m_imuData.compass.length(), 'f', 6));
+
+        RTVector3 residuals = m_imuThread->getIMU()->getAccelResiduals();
+        m_accelResidualX->setText(QString::number(residuals.x(), 'f', 6));
+        m_accelResidualY->setText(QString::number(residuals.y(), 'f', 6));
+        m_accelResidualZ->setText(QString::number(residuals.z(), 'f', 6));
     } else {
 
         //  Update the sample rate
@@ -173,10 +219,10 @@ void RTHostIMU::timerEvent(QTimerEvent *event)
         if (m_imuThread->getIMU() == NULL) {
             m_calStatus->setText("No IMU found");
         } else {
-            if (m_imuThread->getIMU()->getCalibrationValid())
-                m_calStatus->setText("Calibration in use");
-            else
-                m_calStatus->setText("Uncalibrated");
+            m_calStatus->setText(QString("Accel %1 : Compass %2 : Ellipsoid %3")
+                    .arg(m_imuThread->getIMU()->getAccelCalibrationValid() ? "calibrated" : "uncalibrated")
+                    .arg(m_imuThread->getIMU()->getCompassCalibrationValid() ? "calibrated" : "uncalibrated")
+                    .arg(m_imuThread->getIMU()->getCompassCalibrationEllipsoidValid() ? "in use" : "not in use"));
         }
 
         if (m_imuThread->getIMU() != NULL) {
@@ -267,7 +313,6 @@ void RTHostIMU::layoutWindow()
     imuLayout->addWidget(new QLabel("IMU type: "));
     m_imuType = new QLabel();
     imuLayout->addWidget(m_imuType);
-    imuLayout->setStretch(1, 1);
 
     vLayout->addSpacing(10);
 
@@ -277,96 +322,115 @@ void RTHostIMU::layoutWindow()
     biasLayout->addWidget(new QLabel("Gyro bias status: "));
     m_biasStatus = new QLabel();
     biasLayout->addWidget(m_biasStatus);
-    biasLayout->setStretch(1, 1);
 
     vLayout->addSpacing(10);
 
     vLayout->addWidget(new QLabel("Fusion state (quaternion): "));
 
     QHBoxLayout *dataLayout = new QHBoxLayout();
+    dataLayout->setAlignment(Qt::AlignLeft);
+    m_fusionQPoseScalar = getFixedPanel("1");
+    m_fusionQPoseX = getFixedPanel("0");
+    m_fusionQPoseY = getFixedPanel("0");
+    m_fusionQPoseZ = getFixedPanel("0");
     dataLayout->addSpacing(30);
-    m_fusionQPoseScalar = new QLabel("1");
-    m_fusionQPoseScalar->setFrameStyle(QFrame::Panel);
-    m_fusionQPoseX = new QLabel("0");
-    m_fusionQPoseX->setFrameStyle(QFrame::Panel);
-    m_fusionQPoseY = new QLabel("0");
-    m_fusionQPoseY->setFrameStyle(QFrame::Panel);
-    m_fusionQPoseZ = new QLabel("0");
-    m_fusionQPoseZ->setFrameStyle(QFrame::Panel);
     dataLayout->addWidget(m_fusionQPoseScalar);
     dataLayout->addWidget(m_fusionQPoseX);
     dataLayout->addWidget(m_fusionQPoseY);
     dataLayout->addWidget(m_fusionQPoseZ);
-    dataLayout->addSpacing(30);
     vLayout->addLayout(dataLayout);
 
     vLayout->addSpacing(10);
     vLayout->addWidget(new QLabel("Pose - roll, pitch, yaw (degrees): "));
 
-    m_fusionPoseX = new QLabel("0");
-    m_fusionPoseX->setFrameStyle(QFrame::Panel);
-    m_fusionPoseY = new QLabel("0");
-    m_fusionPoseY->setFrameStyle(QFrame::Panel);
-    m_fusionPoseZ = new QLabel("0");
-    m_fusionPoseZ->setFrameStyle(QFrame::Panel);
+    m_fusionPoseX = getFixedPanel("0");
+    m_fusionPoseY = getFixedPanel("0");
+    m_fusionPoseZ = getFixedPanel("0");
     dataLayout = new QHBoxLayout();
+    dataLayout->setAlignment(Qt::AlignLeft);
     dataLayout->addSpacing(30);
     dataLayout->addWidget(m_fusionPoseX);
     dataLayout->addWidget(m_fusionPoseY);
     dataLayout->addWidget(m_fusionPoseZ);
-    dataLayout->addSpacing(137);
     vLayout->addLayout(dataLayout);
 
     vLayout->addSpacing(10);
     vLayout->addWidget(new QLabel("Gyros (radians/s): "));
 
-    m_gyroX = new QLabel("0");
-    m_gyroX->setFrameStyle(QFrame::Panel);
-    m_gyroY = new QLabel("0");
-    m_gyroY->setFrameStyle(QFrame::Panel);
-    m_gyroZ = new QLabel("0");
-    m_gyroZ->setFrameStyle(QFrame::Panel);
+    m_gyroX = getFixedPanel("0");
+    m_gyroY = getFixedPanel("0");
+    m_gyroZ = getFixedPanel("0");
     dataLayout = new QHBoxLayout();
+    dataLayout->setAlignment(Qt::AlignLeft);
     dataLayout->addSpacing(30);
     dataLayout->addWidget(m_gyroX);
     dataLayout->addWidget(m_gyroY);
     dataLayout->addWidget(m_gyroZ);
-    dataLayout->addSpacing(137);
     vLayout->addLayout(dataLayout);
 
     vLayout->addSpacing(10);
     vLayout->addWidget(new QLabel("Accelerometers (g): "));
 
-    m_accelX = new QLabel("0");
-    m_accelX->setFrameStyle(QFrame::Panel);
-    m_accelY = new QLabel("0");
-    m_accelY->setFrameStyle(QFrame::Panel);
-    m_accelZ = new QLabel("0");
-    m_accelZ->setFrameStyle(QFrame::Panel);
+    m_accelX = getFixedPanel("0");
+    m_accelY = getFixedPanel("0");
+    m_accelZ = getFixedPanel("0");
     dataLayout = new QHBoxLayout();
     dataLayout->addSpacing(30);
+    dataLayout->setAlignment(Qt::AlignLeft);
     dataLayout->addWidget(m_accelX);
     dataLayout->addWidget(m_accelY);
     dataLayout->addWidget(m_accelZ);
-    dataLayout->addSpacing(137);
+    vLayout->addLayout(dataLayout);
+
+    vLayout->addSpacing(10);
+    vLayout->addWidget(new QLabel("Accelerometer magnitude (g): "));
+
+    m_accelMagnitude = getFixedPanel("0");
+    dataLayout = new QHBoxLayout();
+    dataLayout->addSpacing(30);
+    dataLayout->addWidget(m_accelMagnitude);
+    dataLayout->setAlignment(Qt::AlignLeft);
+    vLayout->addLayout(dataLayout);
+
+    vLayout->addSpacing(10);
+    vLayout->addWidget(new QLabel("Accelerometer residuals (g): "));
+
+    m_accelResidualX = getFixedPanel("0");
+    m_accelResidualY = getFixedPanel("0");
+    m_accelResidualZ = getFixedPanel("0");
+    dataLayout = new QHBoxLayout();
+    dataLayout->addSpacing(30);
+    dataLayout->setAlignment(Qt::AlignLeft);
+    dataLayout->addWidget(m_accelResidualX);
+    dataLayout->addWidget(m_accelResidualY);
+    dataLayout->addWidget(m_accelResidualZ);
     vLayout->addLayout(dataLayout);
 
     vLayout->addSpacing(10);
     vLayout->addWidget(new QLabel("Magnetometers (uT): "));
 
-    m_compassX = new QLabel("0");
-    m_compassX->setFrameStyle(QFrame::Panel);
-    m_compassY = new QLabel("0");
-    m_compassY->setFrameStyle(QFrame::Panel);
-    m_compassZ = new QLabel("0");
-    m_compassZ->setFrameStyle(QFrame::Panel);
+    m_compassX = getFixedPanel("0");
+    m_compassY = getFixedPanel("0");
+    m_compassZ = getFixedPanel("0");
     dataLayout = new QHBoxLayout();
+    dataLayout->setAlignment(Qt::AlignLeft);
     dataLayout->addSpacing(30);
     dataLayout->addWidget(m_compassX);
     dataLayout->addWidget(m_compassY);
     dataLayout->addWidget(m_compassZ);
-    dataLayout->addSpacing(137);
     vLayout->addLayout(dataLayout);
+
+    vLayout->addSpacing(10);
+    vLayout->addWidget(new QLabel("Compass magnitude (uT): "));
+
+    m_compassMagnitude = getFixedPanel("0");
+    dataLayout = new QHBoxLayout();
+    dataLayout->addSpacing(30);
+    dataLayout->addWidget(m_compassMagnitude);
+    dataLayout->setAlignment(Qt::AlignLeft);
+    vLayout->addLayout(dataLayout);
+
+    vLayout->addSpacing(10);
 
     vLayout->addSpacing(10);
 
@@ -401,8 +465,16 @@ void RTHostIMU::layoutWindow()
     vLayout->addStretch(1);
 
     centralWidget()->setLayout(vLayout);
-    setFixedSize(500, 600);
+    setFixedSize(700, 700);
     loadSettings();
+}
+
+QLabel* RTHostIMU::getFixedPanel(QString text)
+{
+    QLabel *label = new QLabel(text);
+    label->setFrameStyle(QFrame::Panel);
+    label->setFixedSize(QSize(100, 16));
+    return label;
 }
 
 void RTHostIMU::layoutStatusBar()

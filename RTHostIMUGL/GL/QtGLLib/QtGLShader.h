@@ -29,38 +29,38 @@
 
 typedef enum
 {
-	QTGLSHADER_FLAT,
-	QTGLSHADER_TEXTURE,
-	QTGLSHADER_ADS,
-	QTGLSHADER_ADSTEXTURE,
-	QTGLSHADER_COUNT
+    QTGLSHADER_FLAT,
+    QTGLSHADER_TEXTURE,
+    QTGLSHADER_ADS,
+    QTGLSHADER_ADSTEXTURE,
+    QTGLSHADER_COUNT
 } QTGLSHADER_TYPE;
 
 class QtGLShader : public QGLShaderProgram
 {
 public:
-	QtGLShader(QObject *parent) : QGLShaderProgram(parent) {};
-	virtual ~QtGLShader() { removeAllShaders(); };
+    QtGLShader(QObject *parent) : QGLShaderProgram(parent) {};
+    virtual ~QtGLShader() { removeAllShaders(); };
 
-	inline QTGLSHADER_TYPE getType() {return m_type;};
+    inline QTGLSHADER_TYPE getType() {return m_type;};
 
-//	virtual void load(const QVector3D *vertices, const QVector2D *textureCoords);
-	virtual void load(const QVector3D *, const QVector2D *) { qDebug() << "No shader load";};
+//  virtual void load(const QVector3D *vertices, const QVector2D *textureCoords);
+    virtual void load(const QVector3D *, const QVector2D *) { qDebug() << "No shader load";};
 
-//	virtual void load(const QVector3D *vertices, const QColor& color);
-	virtual void load(const QVector3D *, const QColor&) {qDebug() << "No shader load";};
+//  virtual void load(const QVector3D *vertices, const QColor& color);
+    virtual void load(const QVector3D *, const QColor&) {qDebug() << "No shader load";};
 
-//	virtual void load(const QVector3D *vertices, const QVector3D *normals, const COMPONENT_MATERIAL& material);
-	virtual void load(const QVector3D *, const QVector3D *, const COMPONENT_MATERIAL& ) {qDebug() << "No shader load";};
+//  virtual void load(const QVector3D *vertices, const QVector3D *normals, const COMPONENT_MATERIAL& material);
+    virtual void load(const QVector3D *, const QVector3D *, const COMPONENT_MATERIAL& ) {qDebug() << "No shader load";};
 
-//	virtual void load(const QVector3D *vertices, const QVector3D *normals, 
+//  virtual void load(const QVector3D *vertices, const QVector3D *normals,
 //			const QVector2D *textureCoords, const COMPONENT_MATERIAL& material);
-	virtual void load(const QVector3D *, const QVector3D *, const QVector2D*, const COMPONENT_MATERIAL& ) {qDebug() << "No shader load";};
+    virtual void load(const QVector3D *, const QVector3D *, const QVector2D*, const COMPONENT_MATERIAL& ) {qDebug() << "No shader load";};
 
 protected:
-	QGLShader *m_vshader;
-	QGLShader *m_fshader;
-	QTGLSHADER_TYPE m_type;
+    QGLShader *m_vshader;
+    QGLShader *m_fshader;
+    QTGLSHADER_TYPE m_type;
 };
-		
+
 #endif // QTGLSHADER_H

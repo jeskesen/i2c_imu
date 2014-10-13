@@ -55,6 +55,8 @@ public:
 
 public slots:
     void onSelectFusionAlgorithm();
+    void onCalibrateAccelerometers();
+    void onCalibrateMagnetometers();
     void onEnableGyro(int);
     void onEnableAccel(int);
     void onEnableCompass(int);
@@ -94,6 +96,7 @@ private:
     //  Qt GUI stuff
 
     Ui::RTHostIMUGLClass ui;
+    QLabel *getFixedPanel(QString text);
 
     QLabel *m_comLabel;
     QLabel *m_comRXLabel;
@@ -118,10 +121,15 @@ private:
     QLabel *m_accelX;
     QLabel *m_accelY;
     QLabel *m_accelZ;
+    QLabel *m_accelMagnitude;
+    QLabel *m_accelResidualX;
+    QLabel *m_accelResidualY;
+    QLabel *m_accelResidualZ;
 
     QLabel *m_compassX;
     QLabel *m_compassY;
     QLabel *m_compassZ;
+    QLabel *m_compassMagnitude;
 
     QLabel *m_fusionType;
     QCheckBox *m_enableGyro;
@@ -139,7 +147,6 @@ private:
 
     int m_rateTimer;
     int m_displayTimer;
-
 
     int m_sampleCount;
 };

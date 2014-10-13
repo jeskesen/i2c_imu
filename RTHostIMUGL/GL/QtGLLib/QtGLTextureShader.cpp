@@ -24,12 +24,12 @@
 #include "QtGL.h"
 
 QtGLTextureShader::QtGLTextureShader(QObject *parent)
-	: QtGLShader(parent)
+    : QtGLShader(parent)
 {
-	#define PROGRAM_VERTEX_ATTRIBUTE 0
-	#define PROGRAM_TEXCOORD_ATTRIBUTE 1
+    #define PROGRAM_VERTEX_ATTRIBUTE 0
+    #define PROGRAM_TEXCOORD_ATTRIBUTE 1
 
-	m_type = QTGLSHADER_TEXTURE;
+    m_type = QTGLSHADER_TEXTURE;
 
     m_vshader = new QGLShader(QGLShader::Vertex, parent);
     const char *vsrc =
@@ -39,7 +39,7 @@ QtGLTextureShader::QtGLTextureShader(QObject *parent)
         "uniform mediump mat4 matrix;\n"
         "void main(void)\n"
         "{\n"
-		"    gl_Position = matrix * vec4(vertex, 1.0);\n"
+        "    gl_Position = matrix * vec4(vertex, 1.0);\n"
         "    texc = texCoord;\n"
         "}\n";
     m_vshader->compileSourceCode(vsrc);

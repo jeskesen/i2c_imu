@@ -27,14 +27,14 @@
 class QtGLADSTextureShader : public QtGLShader
 {
 public:
-	QtGLADSTextureShader(QObject *parent);
-	~QtGLADSTextureShader();
+    QtGLADSTextureShader(QObject *parent);
+    ~QtGLADSTextureShader();
 
-	void load(const QVector3D *vertices, const QVector3D *normals, 
-			const QVector2D *textureCoords, const COMPONENT_MATERIAL& material);
+    void load(const QVector3D *vertices, const QVector3D *normals,
+            const QVector2D *textureCoords, const COMPONENT_MATERIAL& material);
 
 private:
 
 };
-		
+
 #endif // QTGLADSTEXTURESHADER_H

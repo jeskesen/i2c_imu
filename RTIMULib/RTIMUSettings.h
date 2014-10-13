@@ -102,6 +102,30 @@
 #define RTIMULIB_COMPASSCAL_MINZ            "CompassCalMinZ"
 #define RTIMULIB_COMPASSCAL_MAXZ            "CompassCalMaxZ"
 
+#define RTIMULIB_COMPASSCAL_ELLIPSOID_VALID "compassCalEllipsoidValid"
+#define RTIMULIB_COMPASSCAL_OFFSET_X        "compassCalOffsetX"
+#define RTIMULIB_COMPASSCAL_OFFSET_Y        "compassCalOffsetY"
+#define RTIMULIB_COMPASSCAL_OFFSET_Z        "compassCalOffsetZ"
+#define RTIMULIB_COMPASSCAL_CORR11          "compassCalCorr11"
+#define RTIMULIB_COMPASSCAL_CORR12          "compassCalCorr12"
+#define RTIMULIB_COMPASSCAL_CORR13          "compassCalCorr13"
+#define RTIMULIB_COMPASSCAL_CORR21          "compassCalCorr21"
+#define RTIMULIB_COMPASSCAL_CORR22          "compassCalCorr22"
+#define RTIMULIB_COMPASSCAL_CORR23          "compassCalCorr23"
+#define RTIMULIB_COMPASSCAL_CORR31          "compassCalCorr31"
+#define RTIMULIB_COMPASSCAL_CORR32          "compassCalCorr32"
+#define RTIMULIB_COMPASSCAL_CORR33          "compassCalCorr33"
+
+//  Accel calibration settings keys
+
+#define RTIMULIB_ACCELCAL_VALID             "AccelCalValid"
+#define RTIMULIB_ACCELCAL_MINX              "AccelCalMinX"
+#define RTIMULIB_ACCELCAL_MAXX              "AccelCalMaxX"
+#define RTIMULIB_ACCELCAL_MINY              "AccelCalMinY"
+#define RTIMULIB_ACCELCAL_MAXY              "AccelCalMaxY"
+#define RTIMULIB_ACCELCAL_MINZ              "AccelCalMinZ"
+#define RTIMULIB_ACCELCAL_MAXZ              "AccelCalMaxZ"
+
 class RTIMUSettings : public RTIMUHal
 {
 public:
@@ -131,6 +155,14 @@ public:
     bool m_compassCalValid;                                 // true if there is valid compass calibration data
     RTVector3 m_compassCalMin;                              // the minimum values
     RTVector3 m_compassCalMax;                              // the maximum values
+
+    bool m_compassCalEllipsoidValid;                        // true if the ellipsoid calibration data is valid
+    RTVector3 m_compassCalEllipsoidOffset;                  // the ellipsoid offset         
+    float m_compassCalEllipsoidCorr[3][3];                  // the correction matrix
+
+    bool m_accelCalValid;                                   // true if there is valid accel calibration data
+    RTVector3 m_accelCalMin;                                // the minimum values
+    RTVector3 m_accelCalMax;                                // the maximum values
 
     bool m_gyroBiasValid;                                   // true if the recorded gyro bias is valid
     RTVector3 m_gyroBias;                                   // the recorded gyro bias

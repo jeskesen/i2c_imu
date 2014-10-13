@@ -6,7 +6,7 @@ import os.path
 import time
 import math
 
-SETTINGS_FILE = "RTIMU"
+SETTINGS_FILE = "RTIMULib"
 
 print("Using settings file " + SETTINGS_FILE + ".ini")
 if not os.path.exists(SETTINGS_FILE + ".ini"):

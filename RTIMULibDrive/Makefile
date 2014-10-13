@@ -25,28 +25,28 @@
 
 RTIMULIBPATH  = ../RTIMULib
 
-CC            = gcc
-CXX           = g++
-DEFINES       = 
-CFLAGS        = -pipe -O2 -Wall -W $(DEFINES)
-CXXFLAGS      = -pipe -O2 -Wall -W $(DEFINES)
-INCPATH       = -I. -I$(RTIMULIBPATH)
-LINK          = g++
-LFLAGS        = -Wl,-O1
-LIBS          = -L/usr/lib/arm-linux-gnueabihf 
-COPY          = cp -f
-COPY_FILE     = $(COPY)
-COPY_DIR      = $(COPY) -r
-STRIP         = strip
-INSTALL_FILE  = install -m 644 -p
-INSTALL_DIR   = $(COPY_DIR)
+CC    			= gcc
+CXX   			= g++
+DEFINES       	=
+CFLAGS			= -pipe -O2 -Wall -W $(DEFINES)
+CXXFLAGS      	= -pipe -O2 -Wall -W $(DEFINES)
+INCPATH       	= -I. -I$(RTIMULIBPATH)
+LINK  			= g++
+LFLAGS			= -Wl,-O1
+LIBS  			= -L/usr/lib/arm-linux-gnueabihf
+COPY  			= cp -f
+COPY_FILE     	= $(COPY)
+COPY_DIR      	= $(COPY) -r
+STRIP 			= strip
+INSTALL_FILE  	= install -m 644 -p
+INSTALL_DIR   	= $(COPY_DIR)
 INSTALL_PROGRAM = install -m 755 -p
-DEL_FILE      = rm -f
-SYMLINK       = ln -f -s
-DEL_DIR       = rmdir
-MOVE          = mv -f
-CHK_DIR_EXISTS= test -d
-MKDIR         = mkdir -p
+DEL_FILE      	= rm -f
+SYMLINK       	= ln -f -s
+DEL_DIR       	= rmdir
+MOVE  			= mv -f
+CHK_DIR_EXISTS	= test -d
+MKDIR			= mkdir -p
 
 # Output directory
 
@@ -54,43 +54,48 @@ OBJECTS_DIR   = objects/
 
 # Files
 
-DEPS          = $(RTIMULIBPATH)/RTMath.h \
-		$(RTIMULIBPATH)/RTIMULib.h \
-		$(RTIMULIBPATH)/RTIMULibDefs.h \
-		$(RTIMULIBPATH)/RTIMUHal.h \
-		$(RTIMULIBPATH)/RTIMU.h \
-		$(RTIMULIBPATH)/RTIMUNull.h \
-		$(RTIMULIBPATH)/RTIMUMPU9150.h \
-		$(RTIMULIBPATH)/RTIMUGD20HM303D.h \
-		$(RTIMULIBPATH)/RTIMUGD20M303DLHC.h \
-		$(RTIMULIBPATH)/RTIMULSM9DS0.h \
-		$(RTIMULIBPATH)/RTFusion.h \
-		$(RTIMULIBPATH)/RTFusionKalman4.h \
-		$(RTIMULIBPATH)/RTFusionRTQF.h \
-		$(RTIMULIBPATH)/RTIMUSettings.h
+DEPS    = $(RTIMULIBPATH)/RTMath.h \
+    $(RTIMULIBPATH)/RTIMULib.h \
+    $(RTIMULIBPATH)/RTIMULibDefs.h \
+    $(RTIMULIBPATH)/RTIMUHal.h \
+    $(RTIMULIBPATH)/RTIMU.h \
+    $(RTIMULIBPATH)/RTIMUNull.h \
+    $(RTIMULIBPATH)/RTIMUMPU9150.h \
+    $(RTIMULIBPATH)/RTIMUGD20HM303D.h \
+    $(RTIMULIBPATH)/RTIMUGD20M303DLHC.h \
+    $(RTIMULIBPATH)/RTIMULSM9DS0.h \
+    $(RTIMULIBPATH)/RTFusion.h \
+    $(RTIMULIBPATH)/RTFusionKalman4.h \
+    $(RTIMULIBPATH)/RTFusionRTQF.h \
+    $(RTIMULIBPATH)/RTIMUSettings.h \
+    $(RTIMULIBPATH)/RTIMUAccelCal.h \
+    $(RTIMULIBPATH)/RTIMUMagCal.h \
+    $(RTIMULIBPATH)/RTIMUCalDefs.h
 
-OBJECTS       = objects/RTIMULibDrive.o \
-		objects/RTMath.o \
-		objects/RTIMUHal.o \
-		objects/RTIMU.o \
-		objects/RTIMUNull.o \
-		objects/RTIMUMPU9150.o \
-		objects/RTIMUGD20HM303D.o \
-		objects/RTIMUGD20M303DLHC.o \
-		objects/RTIMULSM9DS0.o \
-		objects/RTFusion.o \
-		objects/RTFusionKalman4.o \
-		objects/RTFusionRTQF.o \
-		objects/RTIMUSettings.o 
+OBJECTS = objects/RTIMULibDrive.o \
+    objects/RTMath.o \
+    objects/RTIMUHal.o \
+    objects/RTIMU.o \
+    objects/RTIMUNull.o \
+    objects/RTIMUMPU9150.o \
+    objects/RTIMUGD20HM303D.o \
+    objects/RTIMUGD20M303DLHC.o \
+    objects/RTIMULSM9DS0.o \
+    objects/RTFusion.o \
+    objects/RTFusionKalman4.o \
+    objects/RTFusionRTQF.o \
+    objects/RTIMUSettings.o \
+    objects/RTIMUAccelCal.o \
+    objects/RTIMUMagCal.o
 
-MAKE_TARGET   = RTIMULibDrive
-DESTDIR       = Output/
-TARGET        = Output/$(MAKE_TARGET)
+MAKE_TARGET	= RTIMULibDrive
+DESTDIR		= Output/
+TARGET		= Output/$(MAKE_TARGET)
 
 # Build rules
 
-$(TARGET): $(OBJECTS)  
-	@$(CHK_DIR_EXISTS) Output/ || $(MKDIR) Output/ 
+$(TARGET): $(OBJECTS)
+	@$(CHK_DIR_EXISTS) Output/ || $(MKDIR) Output/
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
 
 clean:
@@ -100,23 +105,22 @@ clean:
 # Compile
 
 $(OBJECTS_DIR)%.o : $(RTIMULIBPATH)/%.cpp $(DEPS)
-	@$(CHK_DIR_EXISTS) objects/ || $(MKDIR) objects/ 
+	@$(CHK_DIR_EXISTS) objects/ || $(MKDIR) objects/
 	$(CXX) -c -o $@ $< $(CFLAGS) $(INCPATH)
 
 $(OBJECTS_DIR)RTIMULibDrive.o : RTIMULibDrive.cpp $(DEPS)
-	@$(CHK_DIR_EXISTS) objects/ || $(MKDIR) objects/ 
+	@$(CHK_DIR_EXISTS) objects/ || $(MKDIR) objects/
 	$(CXX) -c -o $@ RTIMULibDrive.cpp $(CFLAGS) $(INCPATH)
 
 # Install
 
 install_target: FORCE
-	@$(CHK_DIR_EXISTS) $(INSTALL_ROOT)/usr/bin/ || $(MKDIR) $(INSTALL_ROOT)/usr/bin/ 
+	@$(CHK_DIR_EXISTS) $(INSTALL_ROOT)/usr/bin/ || $(MKDIR) $(INSTALL_ROOT)/usr/bin/
 	-$(INSTALL_PROGRAM) "Output/$(MAKE_TARGET)" "$(INSTALL_ROOT)/usr/bin/$(MAKE_TARGET)"
 	-$(STRIP) "$(INSTALL_ROOT)/usr/bin/$(MAKE_TARGET)"
 
 uninstall_target:  FORCE
 	-$(DEL_FILE) "$(INSTALL_ROOT)/usr/bin/$(MAKE_TARGET)"
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/bin/ 
 
 
 install:  install_target  FORCE

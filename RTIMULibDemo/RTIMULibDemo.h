@@ -43,8 +43,9 @@ public:
     ~RTIMULibDemo();
 
 public slots:
-    void onCalibrateCompass();
     void onSelectFusionAlgorithm();
+    void onCalibrateAccelerometers();
+    void onCalibrateMagnetometers();
     void onSelectIMU();
     void onEnableGyro(int);
     void onEnableAccel(int);
@@ -62,6 +63,7 @@ protected:
 private:
     void layoutStatusBar();
     void layoutWindow();
+    QLabel *getFixedPanel(QString text);
 
     IMUThread *m_imuThread;                                 // the thread that operates the imu
 
@@ -87,10 +89,15 @@ private:
     QLabel *m_accelX;
     QLabel *m_accelY;
     QLabel *m_accelZ;
+    QLabel *m_accelMagnitude;
+    QLabel *m_accelResidualX;
+    QLabel *m_accelResidualY;
+    QLabel *m_accelResidualZ;
 
     QLabel *m_compassX;
     QLabel *m_compassY;
     QLabel *m_compassZ;
+    QLabel *m_compassMagnitude;
 
     QLabel *m_fusionType;
     QCheckBox *m_enableGyro;
@@ -105,7 +112,6 @@ private:
 
     int m_rateTimer;
     int m_displayTimer;
-
 
     int m_sampleCount;
 };

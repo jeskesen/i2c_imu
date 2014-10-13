@@ -167,6 +167,30 @@
     <ClCompile Include="..\RTIMULib\RTMath.cpp">
       <Filter>RTIMULib</Filter>
     </ClCompile>
+    <ClCompile Include="..\RTHostIMUCommon\AccelCalDlg.cpp">
+      <Filter>RTHostIMUCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AccelCalDlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AccelCalDlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RTHostIMUCommon\MagCalDlg.cpp">
+      <Filter>RTHostIMUCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MagCalDlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MagCalDlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RTIMULib\RTIMUAccelCal.cpp">
+      <Filter>RTIMULib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RTIMULib\RTIMUMagCal.cpp">
+      <Filter>RTIMULib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="RTHostImu.h">
@@ -195,6 +219,12 @@
     </CustomBuild>
     <CustomBuild Include="RTHostIMU.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\RTHostIMUCommon\AccelCalDlg.h">
+      <Filter>RTHostIMUCommon</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\RTHostIMUCommon\MagCalDlg.h">
+      <Filter>RTHostIMUCommon</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -263,6 +293,15 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_RTHostIMU.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RTIMULib\RTIMUAccelCal.h">
+      <Filter>RTIMULib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RTIMULib\RTIMUCalDefs.h">
+      <Filter>RTIMULib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RTIMULib\RTIMUMagCal.h">
+      <Filter>RTIMULib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -67,9 +67,7 @@ bool RTIMUGD20HM303D::IMUInit()
 
     m_bus = m_settings->m_I2CBus;
 
-    setCalibrationData(m_settings->m_compassCalValid, m_settings->m_compassCalMin,
-                              m_settings->m_compassCalMax);
-
+    setCalibrationData();
 
     //  enable the I2C bus
     setI2CBus(m_bus);
@@ -551,6 +549,7 @@ bool RTIMUGD20HM303D::IMURead()
 
     handleGyroBias();
     calibrateAverageCompass();
+    calibrateAccel();
 
     //  now update the filter
 

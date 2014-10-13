@@ -28,14 +28,14 @@
 
 class VRIMUWidget : public VRWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     VRIMUWidget(QObject *parent, VRWIDGET_TYPE = VRWIDGET_IMU);
     ~VRIMUWidget();
 
-	virtual void VRWidgetInit();
-	virtual void VRWidgetRender();
+    virtual void VRWidgetInit();
+    virtual void VRWidgetRender();
 
 private:
     QtGLCylinderComponent m_IMUXCylinder;

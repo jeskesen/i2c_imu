@@ -30,12 +30,12 @@
 class QtGLWireCubeComponent : public QtGLComponent
 {
 public:
-	QtGLWireCubeComponent();
-	~QtGLWireCubeComponent();
+    QtGLWireCubeComponent();
+    ~QtGLWireCubeComponent();
 
-	void generate(float width, float height, float depth);
-	void draw();
+    void generate(float width, float height, float depth);
+    void draw();
 
 };
-		
+
 #endif // QTGLWIRECUBECOMPONENT_H

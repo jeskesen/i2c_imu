@@ -60,7 +60,7 @@ signals:
     void internalKillThread();								// tells the QThread to quit
 
     void IMURunning();                                      // emitted when a new IMU is running
-    void newIMUData(const RTIMU_DATA& data);                // this contains the latest data form the IMU
+    void newIMUData(const RTIMU_DATA& data);                // this contains the latest data from the IMU
 
 protected:
     void initThread();

@@ -25,17 +25,19 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 HEADERS += RTIMULibDemo.h \
-        CompassCalDlg.h \
-	SelectIMUDlg.h \
-	SelectFusionDlg.h \
-	IMUThread.h
+        SelectIMUDlg.h \
+        SelectFusionDlg.h \
+        IMUThread.h \
+        AccelCalDlg.h \
+        MagCalDlg.h \
 
 SOURCES += main.cpp \
         RTIMULibDemo.cpp \
-        CompassCalDlg.cpp \
-	SelectIMUDlg.cpp \
-	SelectFusionDlg.cpp \
-	IMUThread.cpp
+        SelectIMUDlg.cpp \
+        SelectFusionDlg.cpp \
+        IMUThread.cpp \
+        AccelCalDlg.cpp \
+        MagCalDlg.cpp \
 
 FORMS += RTIMULibDemo.ui
 

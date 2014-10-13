@@ -32,6 +32,7 @@ GeneratedFiles/
 *.ini
 *.srf
 *.srx
+*.dta
 *~
 *.a
 *.o
@@ -45,3 +46,4 @@ GeneratedFiles/
 *.bz2
 *.pro.user*
 .DS_store
+octave-core

@@ -52,6 +52,8 @@ bool RTHostIMUClient::IMUInit()
     int speed;
     QString portString;
 
+    setCalibrationData();
+
     QSettings *settings = new QSettings("RTHostIMU.ini", QSettings::IniFormat);
 
     portString = settings->value(RTARDULINKHOST_SETTINGS_PORT).toString();
@@ -91,6 +93,9 @@ bool RTHostIMUClient::IMURead()
     //  as RTIMULib uses timestamps in uS.
 
     m_imuData.timestamp = RTArduLinkConvertUC4ToLong(message.timestamp) * 1000;
+
+    calibrateAverageCompass();
+    calibrateAccel();
 
     updateFusion();
 
@@ -133,7 +138,6 @@ void RTHostIMUClient::processCustomMessage(RTARDULINKHOST_PORT *portInfo, unsign
 
     m_messageQ.enqueue((*(RTARDULINKIMU_MESSAGE *)data));
     m_settings->m_gyroBiasValid = messageParam & RTARDULINKIMU_STATE_GYRO_BIAS_VALID;
-    m_calibrationValid = messageParam & RTARDULINKIMU_STATE_MAG_CAL_VALID;
 
     // check to see if too many messages and delete oldest if necessary
 

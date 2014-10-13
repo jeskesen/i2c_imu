@@ -27,13 +27,13 @@
 class QtGLTextureShader : public QtGLShader
 {
 public:
-	QtGLTextureShader(QObject *parent);
-	~QtGLTextureShader();
+    QtGLTextureShader(QObject *parent);
+    ~QtGLTextureShader();
 
-	void load(const QVector3D *vertices, const QVector2D *textureCoords);
+    void load(const QVector3D *vertices, const QVector2D *textureCoords);
 
 private:
 
 };
-		
+
 #endif // QTGLTEXTURESHADER_H

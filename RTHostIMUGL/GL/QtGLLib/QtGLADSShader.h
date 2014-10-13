@@ -27,13 +27,13 @@
 class QtGLADSShader : public QtGLShader
 {
 public:
-	QtGLADSShader(QObject *parent);
-	~QtGLADSShader();
+    QtGLADSShader(QObject *parent);
+    ~QtGLADSShader();
 
-	void load(const QVector3D *vertices, const QVector3D *normals, const COMPONENT_MATERIAL& material);
+    void load(const QVector3D *vertices, const QVector3D *normals, const COMPONENT_MATERIAL& material);
 
 private:
 
 };
-		
+
 #endif // QTGLADSSHADER_H

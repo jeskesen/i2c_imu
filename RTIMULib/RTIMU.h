@@ -28,8 +28,7 @@
 #include "RTIMUHal.h"
 #include "RTFusion.h"
 #include "RTIMULibDefs.h"
-
-class RTIMUSettings;
+#include "RTIMUSettings.h"
 
 class RTIMU : public RTIMUHal
 {
@@ -50,10 +49,6 @@ public:
     virtual bool IMUInit() = 0;                             // set up the IMU
     virtual int IMUGetPollInterval() = 0;                   // returns the recommended poll interval in mS
     virtual bool IMURead() = 0;                             // get a sample
-
-    //  This one wanted a similar name but isn't pure virtual
-
-    virtual bool IMUCompassCalValid() { return m_calibrationValid; }
 
     // returns true if enough samples for valid data
 
@@ -82,31 +77,47 @@ public:
     const RTVector3& getMeasuredPose() { return m_fusion->getMeasuredPose(); }
     const RTQuaternion& getMeasuredQPose() { return m_fusion->getMeasuredQPose(); }
 
-    //  setCalibrationMode() turns off use of cal data so that raw data can be accumulated
+    //  setCompassCalibrationMode() turns off use of cal data so that raw data can be accumulated
     //  to derive calibration data
 
-    void setCalibrationMode(bool enable) { m_calibrationMode = enable; }
+    void setCompassCalibrationMode(bool enable) { m_compassCalibrationMode = enable; }
 
-    //  setCalibrationData configured the cal data and also enables use if valid
+    //  setAccelCalibrationMode() turns off use of cal data so that raw data can be accumulated
+    //  to derive calibration data
 
-    void setCalibrationData(const bool valid, const RTVector3& compassMin, const RTVector3& compassMax);
+    void setAccelCalibrationMode(bool enable) { m_accelCalibrationMode = enable; }
 
-    //  getCalibrationValid() returns true if the calibration data is being used
+    //  setCalibrationData configures the cal data from settings and also enables use if valid
 
-    bool getCalibrationValid() { return !m_calibrationMode && m_calibrationValid; }
+    void setCalibrationData();
+
+    //  getCompassCalibrationValid() returns true if the compass min/max calibration data is being used
+
+    bool getCompassCalibrationValid() { return !m_compassCalibrationMode && m_settings->m_compassCalValid; }
+
+    //  getCompassCalibrationEllipsoidValid() returns true if the compass ellipsoid calibration data is being used
+
+    bool getCompassCalibrationEllipsoidValid() { return !m_compassCalibrationMode && m_settings->m_compassCalEllipsoidValid; }
+
+    //  getAccelCalibrationValid() returns true if the accel calibration data is being used
+
+    bool getAccelCalibrationValid() { return !m_accelCalibrationMode && m_settings->m_accelCalValid; }
 
     const RTVector3& getGyro() { return m_imuData.gyro; }   // gets gyro rates in radians/sec
     const RTVector3& getAccel() { return m_imuData.accel; } // get accel data in gs
     const RTVector3& getCompass() { return m_imuData.compass; } // gets compass data in uT
 
+    RTVector3 getAccelResiduals() { return m_fusion->getAccelResiduals(); }
+
 protected:
     void gyroBiasInit();                                    // sets up gyro bias calculation
     void handleGyroBias();                                  // adjust gyro for bias
     void calibrateAverageCompass();                         // calibrate and smooth compass
+    void calibrateAccel();                                  // calibrate the accelerometers
     void updateFusion();                                    // call when new data to update fusion state
 
-    bool m_calibrationMode;                                 // true if cal mode so don't use cal data!
-    bool m_calibrationValid;                                // true if call data is valid and can be used
+    bool m_compassCalibrationMode;                          // true if cal mode so don't use cal data!
+    bool m_accelCalibrationMode;                            // true if cal mode so don't use cal data!
 
     RTIMU_DATA m_imuData;                                   // the data from the IMU
 

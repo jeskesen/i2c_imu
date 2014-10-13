@@ -26,78 +26,78 @@
 
 #include <QtGL.h>
 
-QGLWidget *globalGLWidget;									// the global GL widget
-TRANSFORM_MATRICES globalTransforms;						// the various viewport transforms
-LIGHT_SOURCES globalLights;									// the lights
-QtGLShader *globalShader[QTGLSHADER_COUNT];					// the shaders
+QGLWidget *globalGLWidget;                                  // the global GL widget
+TRANSFORM_MATRICES globalTransforms;                        // the various viewport transforms
+LIGHT_SOURCES globalLights;                                 // the lights
+QtGLShader *globalShader[QTGLSHADER_COUNT];                 // the shaders
 
 void QtGLInit(QGLWidget *widget)
 {
-	globalLights.lightCount = 0;							// no lights
-	globalShader[QTGLSHADER_FLAT] = new QtGLFlatShader(widget);
-	globalShader[QTGLSHADER_TEXTURE] = new QtGLTextureShader(widget);
-	globalShader[QTGLSHADER_ADS] = new QtGLADSShader(widget);
-	globalShader[QTGLSHADER_ADSTEXTURE] = new QtGLADSTextureShader(widget);
+    globalLights.lightCount = 0;                            // no lights
+    globalShader[QTGLSHADER_FLAT] = new QtGLFlatShader(widget);
+    globalShader[QTGLSHADER_TEXTURE] = new QtGLTextureShader(widget);
+    globalShader[QTGLSHADER_ADS] = new QtGLADSShader(widget);
+    globalShader[QTGLSHADER_ADSTEXTURE] = new QtGLADSTextureShader(widget);
 }
 
-void QtGLAddLight(const QVector4D& position, const QVector3D& ambient, 
-						const QVector3D& diffuse, const QVector3D& specular)
+void QtGLAddLight(const QVector4D& position, const QVector3D& ambient,
+                        const QVector3D& diffuse, const QVector3D& specular)
 {
-	int count;
-	if ((count = globalLights.lightCount) == QTGL_MAX_LIGHTS) {
-		qDebug() << "Too many lights";
-		return;
-	}
-	globalLights.ambient[count] = ambient;
-	globalLights.diffuse[count] = diffuse;
-	globalLights.specular[count] = specular;
-	globalLights.position[count] = position;
-	globalLights.lightCount++;
+    int count;
+    if ((count = globalLights.lightCount) == QTGL_MAX_LIGHTS) {
+        qDebug() << "Too many lights";
+        return;
+    }
+    globalLights.ambient[count] = ambient;
+    globalLights.diffuse[count] = diffuse;
+    globalLights.specular[count] = specular;
+    globalLights.position[count] = position;
+    globalLights.lightCount++;
 }
 
-bool QtGLRayRectangleIntersection(QVector3D& intersection, const QVector3D& ray0, const QVector3D& ray1, 
-				const QVector3D& plane0, const QVector3D& plane1, const QVector3D& plane2, const QVector3D& plane3,
-				bool checkInside)
+bool QtGLRayRectangleIntersection(QVector3D& intersection, const QVector3D& ray0, const QVector3D& ray1,
+                const QVector3D& plane0, const QVector3D& plane1, const QVector3D& plane2, const QVector3D& plane3,
+                bool checkInside)
 {
-	QVector3D normal;
-	QVector3D test;
-	float dist0, dist1;
+    QVector3D normal;
+    QVector3D test;
+    float dist0, dist1;
 
-	//	Compute normal to plane
+    //  Compute normal to plane
 
-	normal = QVector3D::crossProduct(plane1 - plane0, plane2 - plane0);
-	normal.normalize();
+    normal = QVector3D::crossProduct(plane1 - plane0, plane2 - plane0);
+    normal.normalize();
 
-	// find distance from points defining line to plane
+    //  find distance from points defining line to plane
 
-	dist0 = QVector3D::dotProduct(ray0 - plane0, normal);
-	dist1 = QVector3D::dotProduct(ray1 - plane0, normal);
+    dist0 = QVector3D::dotProduct(ray0 - plane0, normal);
+    dist1 = QVector3D::dotProduct(ray1 - plane0, normal);
 
-	if (qFuzzyCompare(dist0, dist1))
-		return false;										// line and plane are parallel
+    if (qFuzzyCompare(dist0, dist1))
+        return false;                                           // line and plane are parallel
 
-	intersection = ray0 + (ray1 - ray0) * (-dist0 / (dist1 - dist0));
+    intersection = ray0 + (ray1 - ray0) * (-dist0 / (dist1 - dist0));
 
-	if (!checkInside)
-		return true;
+    if (!checkInside)
+        return true;
 
-	// check if intersection point lies within the rectangle
+    //  check if intersection point lies within the rectangle
 
-	test = QVector3D::crossProduct(normal, plane1 - plane0);
-	if (QVector3D::dotProduct(test, intersection - plane0) < 0.0f)
-		return false;
+    test = QVector3D::crossProduct(normal, plane1 - plane0);
+    if (QVector3D::dotProduct(test, intersection - plane0) < 0.0f)
+        return false;
 
-	test = QVector3D::crossProduct(normal, plane2 - plane1);
-	if (QVector3D::dotProduct(test, intersection - plane1) < 0.0f)
-		return false;
+    test = QVector3D::crossProduct(normal, plane2 - plane1);
+    if (QVector3D::dotProduct(test, intersection - plane1) < 0.0f)
+        return false;
 
-	test = QVector3D::crossProduct(normal, plane3 - plane2);
-	if (QVector3D::dotProduct(test, intersection - plane2) < 0.0f)
-		return false;
+    test = QVector3D::crossProduct(normal, plane3 - plane2);
+    if (QVector3D::dotProduct(test, intersection - plane2) < 0.0f)
+        return false;
 
-	test = QVector3D::crossProduct(normal, plane0 - plane3);
-	if (QVector3D::dotProduct(test, intersection - plane3) < 0.0f)
-		return false;
+    test = QVector3D::crossProduct(normal, plane0 - plane3);
+    if (QVector3D::dotProduct(test, intersection - plane3) < 0.0f)
+        return false;
 
-	return true;
+    return true;
 }

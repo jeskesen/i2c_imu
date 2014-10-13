@@ -30,12 +30,12 @@
 #include <QLabel>
 
 SelectFusionDlg::SelectFusionDlg(RTIMUSettings *settings, QWidget *parent)
-	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint)
+    : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint)
 {
     m_settings = settings;
-	layoutWindow();
+    layoutWindow();
     setWindowTitle("Select Fusion algorithm");
-	connect(m_buttons, SIGNAL(accepted()), this, SLOT(onOk()));
+    connect(m_buttons, SIGNAL(accepted()), this, SLOT(onOk()));
     connect(m_buttons, SIGNAL(rejected()), this, SLOT(onCancel()));
  }
 
@@ -69,7 +69,7 @@ void SelectFusionDlg::layoutWindow()
 
     form = new QFormLayout();
     mainLayout->addLayout(form);
-	
+
     m_selectFusion = new QComboBox();
 
     for (int i = 0; i < RTFUSION_TYPE_COUNT; i++)
@@ -80,7 +80,7 @@ void SelectFusionDlg::layoutWindow()
     form->addRow("Select Fusion algorithm type: ", m_selectFusion);
 
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
-	m_buttons->setCenterButtons(true);
+    m_buttons->setCenterButtons(true);
 
     mainLayout->addWidget(m_buttons);
 }
