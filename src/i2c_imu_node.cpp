@@ -41,6 +41,8 @@ private:
     tf::TransformBroadcaster tf_broadcaster_;
 
     ros::Publisher imu_pub_;
+    ros::Publisher* magnetometer_pub_;
+
     std::string imu_frame_id_;
 
     ros::Time last_update_;
@@ -74,6 +76,13 @@ I2cImu::I2cImu() : nh_(), private_nh_("~")
  
     imu_pub_ = nh_.advertise<sensor_msgs::Imu>("/imu", 1.0/(imu_->IMUGetPollInterval()/1000.0));
 
+    bool magnetometer;
+	private_nh_.param("publish_magnetometer", magnetometer, false);
+	if(magnetometer)
+	{
+		magnetometer_pub_ = new ros::Publisher();
+		*magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3>("/mag", 10, false);
+	}
 }
 
 void I2cImu::update()
@@ -83,10 +92,11 @@ void I2cImu::update()
     {
         RTIMU_DATA imuData = imu_->getIMUData();
 
+        ros::Time current_time = ros::Time::now();
 	// sensor msg topic output
         sensor_msgs::Imu imu_msg;
 
-        imu_msg.header.stamp = ros::Time::now();
+        imu_msg.header.stamp = current_time;
         imu_msg.header.frame_id = imu_frame_id_;
         imu_msg.orientation.x = imuData.fusionQPose.x();
         imu_msg.orientation.y = imuData.fusionQPose.y();
@@ -102,6 +112,18 @@ void I2cImu::update()
         imu_msg.linear_acceleration.z = imuData.accel.z() * G_2_MPSS;
 
         imu_pub_.publish(imu_msg);
+
+        if(magnetometer_pub_ != NULL && imuData.compassValid)
+        {
+			 geometry_msgs::Vector3Stamped msg;
+			 msg.header.stamp = current_time;
+			 msg.header.frame_id = imu_frame_id_;
+			 msg.vector.x = imuData.compass.x();
+			 msg.vector.y = imuData.compass.y();
+			 msg.vector.z = imuData.compass.z();
+
+			 magnetometer_pub_->publish(msg);
+         }
 
     }
 
