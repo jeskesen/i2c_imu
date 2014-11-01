@@ -66,8 +66,9 @@ int main()
 
             //  display 10 times per second
 
-            if ((now - displayTimer) > 10000) {
+            if ((now - displayTimer) > 100000) {
                 printf("Sample rate %d: %s\r", sampleRate, RTMath::displayDegrees("", imuData.fusionPose));
+                fflush(stdout);
                 displayTimer = now;
             }
 
