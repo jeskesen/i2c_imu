@@ -5,6 +5,7 @@ Makefile*
 *.cache
 Makefile*
 !RTIMULibDrive/Makefile
+!RTIMULibCal/Makefile
 build/
 debug/
 Debug/

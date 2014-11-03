@@ -4,6 +4,8 @@ RTIMULib is the simplest way to connect a 9-dof IMU to an embedded Linux system 
 
 Two demo apps are included - RTIMULibDemo is a GUI-based program that shows all the data being produced and also support compass calibration. RTIMULibDrive is just about the most basic program possible and can be used for performance testing filters and drivers. It can also be used as the basis of a real application quite easily.
 
+RTIMULibCal is a stand-alone, command line program that can be used to generate calibration data in non-GUI environments. See the RTIMULibCal readme for more details.
+
 In addition, there are two apps (RTHostIMU and RTHostIMUGL) that allow the sensor fusion to be separated from the sensor interfacing and collection. An Arduino (running the RTArduLinkIMU sketch from the RTIMULib-Arduino repo) fitted with an IMU chip collects the sensor data and sends it to the host. RTHostIMU and RTHostIMUGL (this one has an OpenGL visualization of the data) communicate with the Arduino via a USB connection.
 
 Its prerequisites are very simple - just I2C support on the target system along with the standard build-essential (included in the Raspberry Pi Raspbian distribution by default).
@@ -18,9 +20,13 @@ RTIMULib is licensed under the MIT license.
 
 ## Note about magnetometer (compass) calibration
 
-It is essential to calibrate the magnetometer or else very poor fusion results will be obtained. For more about this, see http://wp.me/p4qcHg-b4. 
+It is essential to calibrate the magnetometer or else very poor fusion results will be obtained. For more about this, see http://wp.me/p4qcHg-b4. RTIMULibDemo (GUI) and RTIMULibCal (command line) can be used to do this. They both support magnetometer min/max, magnetometer ellipsoid fit and accelerometer min/max calibration.
 
 ## Release history
+
+### November 1 2014 - 3.1.0
+
+Added the RTIMULibCal application. This implements IMU calibration in no GUI (command line) environments.
 
 ### October 13 2014 - 3.0.3
 
