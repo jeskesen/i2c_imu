@@ -60,9 +60,19 @@ static bool magMinMaxDone;
 static bool accelEnables[3];
 static int accelCurrentAxis;
 
-int main()
+int main(int argc, char **argv)
 {
-    settings = new RTIMUSettings("RTIMULib");
+    char *settingsFile;
+
+    if (argc == 2)
+        settingsFile = argv[1];
+    else
+        settingsFile = (char *)"RTIMULib";
+
+    printf("RTIMULibCal - using %s.ini\n", settingsFile);
+
+    settings = new RTIMUSettings(settingsFile);
+
     bool mustExit = false;
     imu = NULL;
     newIMU();

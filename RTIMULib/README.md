@@ -24,6 +24,14 @@ It is essential to calibrate the magnetometer or else very poor fusion results w
 
 ## Release history
 
+### November 4 2014 - 3.1.1
+
+Can now supply the .ini name as a command line argument. For example:
+
+    RTIMULibCal Palm
+    
+would calibrate a settings file called Palm.ini.
+
 ### November 1 2014 - 3.1.0
 
 Added the RTIMULibCal application. This implements IMU calibration in no GUI (command line) environments.
