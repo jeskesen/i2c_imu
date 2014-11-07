@@ -28,6 +28,7 @@
 
 #include "RTIMUNull.h"
 #include "RTIMUMPU9150.h"
+#include "RTIMUMPU9250.h"
 #include "RTIMUGD20HM303D.h"
 #include "RTIMUGD20M303DLHC.h"
 #include "RTIMULSM9DS0.h"
@@ -59,8 +60,11 @@ RTIMU *RTIMU::createIMU(RTIMUSettings *settings)
     case RTIMU_TYPE_LSM9DS0:
         return new RTIMULSM9DS0(settings);
 
+    case RTIMU_TYPE_MPU9250:
+        return new RTIMUMPU9250(settings);
+
     case RTIMU_TYPE_AUTODISCOVER:
-        if (settings->discoverIMU(settings->m_imuType, settings->m_I2CSlaveAddress)) {
+        if (settings->discoverIMU(settings->m_imuType, settings->m_busIsI2C, settings->m_I2CSlaveAddress)) {
             settings->saveSettings();
             return RTIMU::createIMU(settings);
         }

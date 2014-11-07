@@ -21,8 +21,13 @@
 //  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+//  The MPU-9250 and SPI driver code is based on code generously supplied by
+//  staslock@gmail.com (clickdrive.io)
+
+
 #include "RTIMUSettings.h"
 #include "RTIMUMPU9150.h"
+#include "RTIMUMPU9250.h"
 #include "RTIMUGD20HM303D.h"
 #include "RTIMUGD20M303DLHC.h"
 #include "RTIMULSM9DS0.h"
@@ -40,98 +45,125 @@ RTIMUSettings::RTIMUSettings(const char *productType)
     loadSettings();
 }
 
-bool RTIMUSettings::discoverIMU(int& imuType, unsigned char& slaveAddress)
+bool RTIMUSettings::discoverIMU(int& imuType, bool& busIsI2C, unsigned char& slaveAddress)
 {
     unsigned char result;
     unsigned char altResult;
 
-    setI2CBus(m_I2CBus);
-    if (!I2COpen()) {
-        HAL_ERROR1("Failed to open I2C bus %d\n", m_I2CBus);
-        return false;
-    }
+    //  auto detect on I2C bus
 
-    if (I2CRead(MPU9150_ADDRESS0, MPU9150_WHO_AM_I, 1, &result, "")) {
-        if (result == MPU9150_ID) {
-            imuType = RTIMU_TYPE_MPU9150;
-            slaveAddress = MPU9150_ADDRESS0;
-            I2CClose();
-            HAL_INFO("Detected MPU9150 at standard address\n");
-            return true;
+    m_busIsI2C = true;
+
+    if (HALOpen()) {
+
+        if (HALRead(MPU9150_ADDRESS0, MPU9150_WHO_AM_I, 1, &result, "")) {
+            if (result == MPU9250_ID) {
+                imuType = RTIMU_TYPE_MPU9250;
+                slaveAddress = MPU9250_ADDRESS0;
+                busIsI2C = true;
+                HAL_INFO("Detected MPU9250 at standard address\n");
+                return true;
+            } else if (result == MPU9150_ID) {
+                imuType = RTIMU_TYPE_MPU9150;
+                slaveAddress = MPU9150_ADDRESS0;
+                busIsI2C = true;
+                HAL_INFO("Detected MPU9150 at standard address\n");
+                return true;
+            }
         }
-    }
 
-    if (I2CRead(MPU9150_ADDRESS1, MPU9150_WHO_AM_I, 1, &result, "")) {
-        if (result == MPU9150_ID) {
-            imuType = RTIMU_TYPE_MPU9150;
-            slaveAddress = MPU9150_ADDRESS1;
-            I2CClose();
-            HAL_INFO("Detected MPU9150 at option address\n");
-            return true;
+        if (HALRead(MPU9150_ADDRESS1, MPU9150_WHO_AM_I, 1, &result, "")) {
+            if (result == MPU9250_ID) {
+                imuType = RTIMU_TYPE_MPU9250;
+                slaveAddress = MPU9250_ADDRESS1;
+                busIsI2C = true;
+                HAL_INFO("Detected MPU9250 at option address\n");
+                return true;
+            } else if (result == MPU9150_ID) {
+                imuType = RTIMU_TYPE_MPU9150;
+                slaveAddress = MPU9150_ADDRESS1;
+                busIsI2C = true;
+                HAL_INFO("Detected MPU9150 at option address\n");
+                return true;
+            }
         }
-    }
 
-    if (I2CRead(L3GD20H_ADDRESS0, L3GD20H_WHO_AM_I, 1, &result, "")) {
-        if (result == L3GD20H_ID) {
-            imuType = RTIMU_TYPE_GD20HM303D;
-            slaveAddress = L3GD20H_ADDRESS0;
-            I2CClose();
-            HAL_INFO("Detected L3GD20H at standard address\n");
-            return true;
-        } else if (result == LSM9DS0_GYRO_ID) {
-            if (I2CRead(LSM9DS0_ACCELMAG_ADDRESS0, LSM9DS0_WHO_AM_I, 1, &altResult, "")) {
-                if (altResult == LSM9DS0_ACCELMAG_ID) {
-                    imuType = RTIMU_TYPE_LSM9DS0;
-                    slaveAddress = LSM9DS0_GYRO_ADDRESS0;
-                    I2CClose();
-                    HAL_INFO("Detected LSM9DS0 at standard address\n");
-                    return true;
+        if (HALRead(L3GD20H_ADDRESS0, L3GD20H_WHO_AM_I, 1, &result, "")) {
+            if (result == L3GD20H_ID) {
+                imuType = RTIMU_TYPE_GD20HM303D;
+                slaveAddress = L3GD20H_ADDRESS0;
+                busIsI2C = true;
+                HAL_INFO("Detected L3GD20H at standard address\n");
+                return true;
+            } else if (result == LSM9DS0_GYRO_ID) {
+                if (HALRead(LSM9DS0_ACCELMAG_ADDRESS0, LSM9DS0_WHO_AM_I, 1, &altResult, "")) {
+                    if (altResult == LSM9DS0_ACCELMAG_ID) {
+                        imuType = RTIMU_TYPE_LSM9DS0;
+                        slaveAddress = LSM9DS0_GYRO_ADDRESS0;
+                        busIsI2C = true;
+                        HAL_INFO("Detected LSM9DS0 at standard address\n");
+                        return true;
+                    }
                 }
+            }
+        }
+
+        if (HALRead(L3GD20H_ADDRESS1, L3GD20H_WHO_AM_I, 1, &result, "")) {
+            if (result == L3GD20H_ID) {
+                imuType = RTIMU_TYPE_GD20HM303D;
+                slaveAddress = L3GD20H_ADDRESS1;
+                busIsI2C = true;
+                HAL_INFO("Detected L3GD20H at option address\n");
+                return true;
+            } else if (result == LSM9DS0_GYRO_ID) {
+                if (HALRead(LSM9DS0_ACCELMAG_ADDRESS1, LSM9DS0_WHO_AM_I, 1, &altResult, "")) {
+                    if (altResult == LSM9DS0_ACCELMAG_ID) {
+                        imuType = RTIMU_TYPE_LSM9DS0;
+                        slaveAddress = LSM9DS0_GYRO_ADDRESS1;
+                        busIsI2C = true;
+                        HAL_INFO("Detected LSM9DS0 at option address\n");
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (HALRead(L3GD20_ADDRESS0, L3GD20_WHO_AM_I, 1, &result, "")) {
+            if (result == L3GD20_ID) {
+                imuType = RTIMU_TYPE_GD20M303DLHC;
+                slaveAddress = L3GD20_ADDRESS0;
+                busIsI2C = true;
+                HAL_INFO("Detected L3GD20 at standard address\n");
+                return true;
+            }
+        }
+
+        if (HALRead(L3GD20_ADDRESS1, L3GD20_WHO_AM_I, 1, &result, "")) {
+            if (result == L3GD20_ID) {
+                imuType = RTIMU_TYPE_GD20M303DLHC;
+                slaveAddress = L3GD20_ADDRESS1;
+                busIsI2C = true;
+                HAL_INFO("Detected L3GD20 at option address\n");
+                return true;
             }
         }
     }
 
-    if (I2CRead(L3GD20H_ADDRESS1, L3GD20H_WHO_AM_I, 1, &result, "")) {
-        if (result == L3GD20H_ID) {
-            imuType = RTIMU_TYPE_GD20HM303D;
-            slaveAddress = L3GD20H_ADDRESS1;
-            I2CClose();
-            HAL_INFO("Detected L3GD20H at option address\n");
-            return true;
-        } else if (result == LSM9DS0_GYRO_ID) {
-            if (I2CRead(LSM9DS0_ACCELMAG_ADDRESS1, LSM9DS0_WHO_AM_I, 1, &altResult, "")) {
-                if (altResult == LSM9DS0_ACCELMAG_ID) {
-                    imuType = RTIMU_TYPE_LSM9DS0;
-                    slaveAddress = LSM9DS0_GYRO_ADDRESS1;
-                    I2CClose();
-                    HAL_INFO("Detected LSM9DS0 at option address\n");
-                    return true;
-                }
+    //  nothing found on I2C bus - try SPI instead
+
+    m_busIsI2C = false;
+
+    if (HALOpen()) {
+        if (HALRead(MPU9150_ADDRESS0, MPU9150_WHO_AM_I, 1, &result, "")) {
+            if (result == MPU9250_ID) {
+                imuType = RTIMU_TYPE_MPU9250;
+                slaveAddress = MPU9250_ADDRESS0;
+                busIsI2C = false;
+                HAL_INFO("Detected MPU9250 on SPI bus\n");
+                return true;
             }
         }
     }
-
-    if (I2CRead(L3GD20_ADDRESS0, L3GD20_WHO_AM_I, 1, &result, "")) {
-        if (result == L3GD20_ID) {
-            imuType = RTIMU_TYPE_GD20M303DLHC;
-            slaveAddress = L3GD20_ADDRESS0;
-            I2CClose();
-            HAL_INFO("Detected L3GD20 at standard address\n");
-            return true;
-        }
-    }
-
-    if (I2CRead(L3GD20_ADDRESS1, L3GD20_WHO_AM_I, 1, &result, "")) {
-        if (result == L3GD20_ID) {
-            imuType = RTIMU_TYPE_GD20M303DLHC;
-            slaveAddress = L3GD20_ADDRESS1;
-            I2CClose();
-            HAL_INFO("Detected L3GD20 at option address\n");
-            return true;
-        }
-    }
-
-   I2CClose();
 
     HAL_ERROR("No IMU detected\n");
     return false;
@@ -148,7 +180,10 @@ bool RTIMUSettings::loadSettings()
 
     m_imuType = RTIMU_TYPE_AUTODISCOVER;
     m_I2CSlaveAddress = 0;
+    m_busIsI2C = true;
     m_I2CBus = 1;
+    m_SPIBus = 0;
+    m_SPISpeed = 500000;
     m_fusionType = RTFUSION_TYPE_RTQF;
     m_compassCalValid = false;
     m_compassCalEllipsoidValid = false;
@@ -170,6 +205,15 @@ bool RTIMUSettings::loadSettings()
     m_MPU9150GyroAccelLpf = MPU9150_LPF_20;
     m_MPU9150GyroFsr = MPU9150_GYROFSR_1000;
     m_MPU9150AccelFsr = MPU9150_ACCELFSR_8;
+
+    //  MPU9250 defaults
+
+    m_MPU9250GyroAccelSampleRate = 80;
+    m_MPU9250CompassSampleRate = 40;
+    m_MPU9250GyroLpf = MPU9250_GYRO_LPF_41;
+    m_MPU9250AccelLpf = MPU9250_ACCEL_LPF_41;
+    m_MPU9250GyroFsr = MPU9250_GYROFSR_1000;
+    m_MPU9250AccelFsr = MPU9250_ACCELFSR_8;
 
     //  GD20HM303D defaults
 
@@ -238,8 +282,14 @@ bool RTIMUSettings::loadSettings()
             m_imuType = atoi(val);
         } else if (strcmp(key, RTIMULIB_FUSION_TYPE) == 0) {
             m_fusionType = atoi(val);
+        } else if (strcmp(key, RTIMULIB_BUS_IS_I2C) == 0) {
+            m_busIsI2C = strcmp(val, "true") == 0;
         } else if (strcmp(key, RTIMULIB_I2C_BUS) == 0) {
             m_I2CBus = atoi(val);
+        } else if (strcmp(key, RTIMULIB_SPI_BUS) == 0) {
+            m_SPIBus = atoi(val);
+        } else if (strcmp(key, RTIMULIB_SPI_SPEED) == 0) {
+            m_SPISpeed = atoi(val);
         } else if (strcmp(key, RTIMULIB_I2C_SLAVEADDRESS) == 0) {
             m_I2CSlaveAddress = atoi(val);
 
@@ -266,7 +316,7 @@ bool RTIMUSettings::loadSettings()
             sscanf(val, "%f", &ftemp);
             m_compassCalMax.setZ(ftemp);
 
-        // compass ellipsoid calibration
+            // compass ellipsoid calibration
 
         } else if (strcmp(key, RTIMULIB_COMPASSCAL_ELLIPSOID_VALID) == 0) {
             m_compassCalEllipsoidValid = strcmp(val, "true") == 0;
@@ -307,7 +357,7 @@ bool RTIMUSettings::loadSettings()
             sscanf(val, "%f", &ftemp);
             m_compassCalEllipsoidCorr[2][2] = ftemp;
 
-       // accel calibration
+            // accel calibration
 
         } else if (strcmp(key, RTIMULIB_ACCELCAL_VALID) == 0) {
             m_accelCalValid = strcmp(val, "true") == 0;
@@ -330,7 +380,7 @@ bool RTIMUSettings::loadSettings()
             sscanf(val, "%f", &ftemp);
             m_accelCalMax.setZ(ftemp);
 
-        // gyro bias
+            // gyro bias
 
         } else if (strcmp(key, RTIMULIB_GYRO_BIAS_VALID) == 0) {
             m_gyroBiasValid = strcmp(val, "true") == 0;
@@ -356,6 +406,21 @@ bool RTIMUSettings::loadSettings()
             m_MPU9150GyroFsr = atoi(val);
         } else if (strcmp(key, RTIMULIB_MPU9150_ACCEL_FSR) == 0) {
             m_MPU9150AccelFsr = atoi(val);
+
+        //  MPU9250 settings
+
+        } else if (strcmp(key, RTIMULIB_MPU9250_GYROACCEL_SAMPLERATE) == 0) {
+            m_MPU9250GyroAccelSampleRate = atoi(val);
+        } else if (strcmp(key, RTIMULIB_MPU9250_COMPASS_SAMPLERATE) == 0) {
+            m_MPU9250CompassSampleRate = atoi(val);
+        } else if (strcmp(key, RTIMULIB_MPU9250_GYRO_LPF) == 0) {
+            m_MPU9250GyroLpf = atoi(val);
+        } else if (strcmp(key, RTIMULIB_MPU9250_ACCEL_LPF) == 0) {
+            m_MPU9250AccelLpf = atoi(val);
+        } else if (strcmp(key, RTIMULIB_MPU9250_GYRO_FSR) == 0) {
+            m_MPU9250GyroFsr = atoi(val);
+        } else if (strcmp(key, RTIMULIB_MPU9250_ACCEL_FSR) == 0) {
+            m_MPU9250AccelFsr = atoi(val);
 
         //  GD20HM303D settings
 
@@ -453,6 +518,7 @@ bool RTIMUSettings::saveSettings()
     setComment("  3 = STM L3GD20H + LSM303D");
     setComment("  4 = STM L3GD20 + LSM303DLHC");
     setComment("  5 = STM LSM9DS0");
+    setComment("  6 = InvenSense MPU-9250");
     setValue(RTIMULIB_IMU_TYPE, m_imuType);
 
     setBlank();
@@ -466,8 +532,23 @@ bool RTIMUSettings::saveSettings()
 
     setBlank();
     setComment("");
+    setComment("Is bus I2C: 'true' for I2C, 'false' for SPI");
+    setValue(RTIMULIB_BUS_IS_I2C, m_busIsI2C);
+
+    setBlank();
+    setComment("");
     setComment("I2C Bus (between 0 and 7) ");
     setValue(RTIMULIB_I2C_BUS, m_I2CBus);
+
+    setBlank();
+    setComment("");
+    setComment("SPI Bus (between 0 and 7) ");
+    setValue(RTIMULIB_SPI_BUS, m_SPIBus);
+
+    setBlank();
+    setComment("");
+    setComment("SPI Speed in Hz");
+    setValue(RTIMULIB_SPI_SPEED, (int)m_SPISpeed);
 
     setBlank();
     setComment("");
@@ -587,6 +668,68 @@ bool RTIMUSettings::saveSettings()
     setComment("  16 - +/- 8g");
     setComment("  24 - +/- 16g");
     setValue(RTIMULIB_MPU9150_ACCEL_FSR, m_MPU9150AccelFsr);
+
+    //  MPU-9250 settings
+
+    setBlank();
+    setComment("#####################################################################");
+    setComment("");
+    setComment("MPU-9250 settings");
+    setComment("");
+
+    setBlank();
+    setComment("Gyro sample rate (between 5Hz and 1000Hz plus 8000Hz and 32000Hz) ");
+    setValue(RTIMULIB_MPU9250_GYROACCEL_SAMPLERATE, m_MPU9250GyroAccelSampleRate);
+
+    setBlank();
+    setComment("");
+    setComment("Compass sample rate (between 1Hz and 100Hz) ");
+    setValue(RTIMULIB_MPU9250_COMPASS_SAMPLERATE, m_MPU9250CompassSampleRate);
+
+    setBlank();
+    setComment("");
+    setComment("Gyro low pass filter - ");
+    setComment("  0x11 - 8800Hz, 0.64mS delay");
+    setComment("  0x10 - 3600Hz, 0.11mS delay");
+    setComment("  0x00 - 250Hz, 0.97mS delay");
+    setComment("  0x01 - 184Hz, 2.9mS delay");
+    setComment("  0x02 - 92Hz, 3.9mS delay");
+    setComment("  0x03 - 41Hz, 5.9mS delay");
+    setComment("  0x04 - 20Hz, 9.9mS delay");
+    setComment("  0x05 - 10Hz, 17.85mS delay");
+    setComment("  0x06 - 5Hz, 33.48mS delay");
+    setValue(RTIMULIB_MPU9250_GYRO_LPF, m_MPU9250GyroLpf);
+
+    setBlank();
+    setComment("");
+    setComment("Accel low pass filter - ");
+    setComment("  0x08 - 1130Hz, 0.75mS delay");
+    setComment("  0x00 - 460Hz, 1.94mS delay");
+    setComment("  0x01 - 184Hz, 5.80mS delay");
+    setComment("  0x02 - 92Hz, 7.80mS delay");
+    setComment("  0x03 - 41Hz, 11.80mS delay");
+    setComment("  0x04 - 20Hz, 19.80mS delay");
+    setComment("  0x05 - 10Hz, 35.70mS delay");
+    setComment("  0x06 - 5Hz, 66.96mS delay");
+    setValue(RTIMULIB_MPU9250_ACCEL_LPF, m_MPU9250AccelLpf);
+
+    setBlank();
+    setComment("");
+    setComment("Gyro full scale range - ");
+    setComment("  0  - +/- 250 degress per second");
+    setComment("  8  - +/- 500 degress per second");
+    setComment("  16 - +/- 1000 degress per second");
+    setComment("  24 - +/- 2000 degress per second");
+    setValue(RTIMULIB_MPU9250_GYRO_FSR, m_MPU9250GyroFsr);
+
+    setBlank();
+    setComment("");
+    setComment("Accel full scale range - ");
+    setComment("  0  - +/- 2g");
+    setComment("  8  - +/- 4g");
+    setComment("  16 - +/- 8g");
+    setComment("  24 - +/- 16g");
+    setValue(RTIMULIB_MPU9250_ACCEL_FSR, m_MPU9250AccelFsr);
 
     //  GD20HM303D settings
 

@@ -65,21 +65,19 @@ bool RTIMULSM9DS0::IMUInit()
     else
         m_accelCompassSlaveAddr = LSM9DS0_ACCELMAG_ADDRESS1;
 
-    m_bus = m_settings->m_I2CBus;
-
     setCalibrationData();
 
     //  enable the I2C bus
-    setI2CBus(m_bus);
-    if (!I2COpen())
+
+    if (!m_settings->HALOpen())
         return false;
 
     //  Set up the gyro
 
-    if (!I2CWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_CTRL5, 0x80, "Failed to boot LSM9DS0"))
+    if (!m_settings->HALWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_CTRL5, 0x80, "Failed to boot LSM9DS0"))
         return false;
 
-    if (!I2CRead(m_gyroSlaveAddr, LSM9DS0_GYRO_WHO_AM_I, 1, &result, "Failed to read LSM9DS0 gyro id"))
+    if (!m_settings->HALRead(m_gyroSlaveAddr, LSM9DS0_GYRO_WHO_AM_I, 1, &result, "Failed to read LSM9DS0 gyro id"))
         return false;
 
     if (result != LSM9DS0_GYRO_ID) {
@@ -98,7 +96,7 @@ bool RTIMULSM9DS0::IMUInit()
 
     //  Set up the accel
 
-    if (!I2CRead(m_accelCompassSlaveAddr, LSM9DS0_WHO_AM_I, 1, &result, "Failed to read LSM9DS0 accel/mag id"))
+    if (!m_settings->HALRead(m_accelCompassSlaveAddr, LSM9DS0_WHO_AM_I, 1, &result, "Failed to read LSM9DS0 accel/mag id"))
         return false;
 
     if (result != LSM9DS0_ACCELMAG_ID) {
@@ -125,7 +123,7 @@ bool RTIMULSM9DS0::IMUInit()
 
     //  turn on gyro fifo
 
-    if (!I2CWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_CTRL, 0x3f, "Failed to set LSM9DS0 FIFO mode"))
+    if (!m_settings->HALWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_CTRL, 0x3f, "Failed to set LSM9DS0 FIFO mode"))
         return false;
 #endif
 
@@ -189,7 +187,7 @@ bool RTIMULSM9DS0::setGyroSampleRate()
 
     }
 
-    return (I2CWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_CTRL1, ctrl1, "Failed to set LSM9DS0 gyro CTRL1"));
+    return (m_settings->HALWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_CTRL1, ctrl1, "Failed to set LSM9DS0 gyro CTRL1"));
 }
 
 bool RTIMULSM9DS0::setGyroCTRL2()
@@ -198,7 +196,7 @@ bool RTIMULSM9DS0::setGyroCTRL2()
         HAL_ERROR1("Illegal LSM9DS0 gyro high pass filter code %d\n", m_settings->m_LSM9DS0GyroHpf);
         return false;
     }
-    return I2CWrite(m_gyroSlaveAddr,  LSM9DS0_GYRO_CTRL2, m_settings->m_LSM9DS0GyroHpf, "Failed to set LSM9DS0 gyro CTRL2");
+    return m_settings->HALWrite(m_gyroSlaveAddr,  LSM9DS0_GYRO_CTRL2, m_settings->m_LSM9DS0GyroHpf, "Failed to set LSM9DS0 gyro CTRL2");
 }
 
 bool RTIMULSM9DS0::setGyroCTRL4()
@@ -226,7 +224,7 @@ bool RTIMULSM9DS0::setGyroCTRL4()
         return false;
     }
 
-    return I2CWrite(m_gyroSlaveAddr,  LSM9DS0_GYRO_CTRL4, ctrl4, "Failed to set LSM9DS0 gyro CTRL4");
+    return m_settings->HALWrite(m_gyroSlaveAddr,  LSM9DS0_GYRO_CTRL4, ctrl4, "Failed to set LSM9DS0 gyro CTRL4");
 }
 
 
@@ -244,7 +242,7 @@ bool RTIMULSM9DS0::setGyroCTRL5()
     ctrl5 |= 0x40;
 #endif
 
-    return I2CWrite(m_gyroSlaveAddr,  LSM9DS0_GYRO_CTRL5, ctrl5, "Failed to set LSM9DS0 gyro CTRL5");
+    return m_settings->HALWrite(m_gyroSlaveAddr,  LSM9DS0_GYRO_CTRL5, ctrl5, "Failed to set LSM9DS0 gyro CTRL5");
 }
 
 
@@ -259,7 +257,7 @@ bool RTIMULSM9DS0::setAccelCTRL1()
 
     ctrl1 = (m_settings->m_LSM9DS0AccelSampleRate << 4) | 0x07;
 
-    return I2CWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL1, ctrl1, "Failed to set LSM9DS0 accell CTRL1");
+    return m_settings->HALWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL1, ctrl1, "Failed to set LSM9DS0 accell CTRL1");
 }
 
 bool RTIMULSM9DS0::setAccelCTRL2()
@@ -299,7 +297,7 @@ bool RTIMULSM9DS0::setAccelCTRL2()
 
     ctrl2 = (m_settings->m_LSM9DS0AccelLpf << 6) | (m_settings->m_LSM9DS0AccelFsr << 3);
 
-    return I2CWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL2, ctrl2, "Failed to set LSM9DS0 accel CTRL2");
+    return m_settings->HALWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL2, ctrl2, "Failed to set LSM9DS0 accel CTRL2");
 }
 
 
@@ -320,7 +318,7 @@ bool RTIMULSM9DS0::setCompassCTRL5()
     ctrl5 |= 0x40;
 #endif
 
-    return I2CWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL5, ctrl5, "Failed to set LSM9DS0 compass CTRL5");
+    return m_settings->HALWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL5, ctrl5, "Failed to set LSM9DS0 compass CTRL5");
 }
 
 bool RTIMULSM9DS0::setCompassCTRL6()
@@ -355,12 +353,12 @@ bool RTIMULSM9DS0::setCompassCTRL6()
         return false;
     }
 
-    return I2CWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL6, ctrl6, "Failed to set LSM9DS0 compass CTRL6");
+    return m_settings->HALWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL6, ctrl6, "Failed to set LSM9DS0 compass CTRL6");
 }
 
 bool RTIMULSM9DS0::setCompassCTRL7()
 {
-     return I2CWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL7, 0x60, "Failed to set LSM9DS0CTRL7");
+     return m_settings->HALWrite(m_accelCompassSlaveAddr,  LSM9DS0_CTRL7, 0x60, "Failed to set LSM9DS0CTRL7");
 }
 
 
@@ -381,18 +379,18 @@ bool RTIMULSM9DS0::IMURead()
 #ifdef LSM9DS0_CACHE_MODE
     int count;
 
-    if (!I2CRead(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_SRC, 1, &status, "Failed to read LSM9DS0 gyro fifo status"))
+    if (!m_settings->HALRead(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_SRC, 1, &status, "Failed to read LSM9DS0 gyro fifo status"))
         return false;
 
     if ((status & 0x40) != 0) {
         HAL_INFO("LSM9DS0 gyro fifo overrun\n");
-        if (!I2CWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_CTRL5, 0x10, "Failed to set LSM9DS0 gyro CTRL5"))
+        if (!m_settings->HALWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_CTRL5, 0x10, "Failed to set LSM9DS0 gyro CTRL5"))
             return false;
 
-        if (!I2CWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_CTRL, 0x0, "Failed to set LSM9DS0 gyro FIFO mode"))
+        if (!m_settings->HALWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_CTRL, 0x0, "Failed to set LSM9DS0 gyro FIFO mode"))
             return false;
 
-        if (!I2CWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_CTRL, 0x3f, "Failed to set LSM9DS0 gyro FIFO mode"))
+        if (!m_settings->HALWrite(m_gyroSlaveAddr, LSM9DS0_GYRO_FIFO_CTRL, 0x3f, "Failed to set LSM9DS0 gyro FIFO mode"))
             return false;
 
         if (!setGyroCTRL5())
@@ -408,13 +406,13 @@ bool RTIMULSM9DS0::IMURead()
     if ((m_cacheCount == 0) && (count > 0) && (count < LSM9DS0_FIFO_THRESH)) {
         // special case of a small fifo and nothing cached - just handle as simple read
 
-        if (!I2CRead(m_gyroSlaveAddr, 0x80 | LSM9DS0_GYRO_OUT_X_L, 6, gyroData, "Failed to read LSM9DS0 gyro data"))
+        if (!m_settings->HALRead(m_gyroSlaveAddr, 0x80 | LSM9DS0_GYRO_OUT_X_L, 6, gyroData, "Failed to read LSM9DS0 gyro data"))
             return false;
 
-        if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_A, 6, accelData, "Failed to read LSM9DS0 accel data"))
+        if (!m_settings->HALRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_A, 6, accelData, "Failed to read LSM9DS0 accel data"))
             return false;
 
-        if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_M, 6, compassData, "Failed to read LSM9DS0 compass data"))
+        if (!m_settings->HALRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_M, 6, compassData, "Failed to read LSM9DS0 compass data"))
             return false;
 
         if (m_firstTime)
@@ -435,15 +433,15 @@ bool RTIMULSM9DS0::IMURead()
                 m_cacheCount--;
             }
 
-            if (!I2CRead(m_gyroSlaveAddr, 0x80 | LSM9DS0_GYRO_OUT_X_L, LSM9DS0_FIFO_CHUNK_SIZE * LSM9DS0_FIFO_THRESH,
+            if (!m_settings->HALRead(m_gyroSlaveAddr, 0x80 | LSM9DS0_GYRO_OUT_X_L, LSM9DS0_FIFO_CHUNK_SIZE * LSM9DS0_FIFO_THRESH,
                          m_cache[m_cacheIn].data, "Failed to read LSM9DS0 fifo data"))
                 return false;
 
-            if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_A, 6,
+            if (!m_settings->HALRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_A, 6,
                          m_cache[m_cacheIn].accel, "Failed to read LSM9DS0 accel data"))
                 return false;
 
-            if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_M, 6,
+            if (!m_settings->HALRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_M, 6,
                          m_cache[m_cacheIn].compass, "Failed to read LSM9DS0 compass data"))
                 return false;
 
@@ -483,21 +481,21 @@ bool RTIMULSM9DS0::IMURead()
     }
 
 #else
-    if (!I2CRead(m_gyroSlaveAddr, LSM9DS0_GYRO_STATUS, 1, &status, "Failed to read LSM9DS0 status"))
+    if (!m_settings->HALRead(m_gyroSlaveAddr, LSM9DS0_GYRO_STATUS, 1, &status, "Failed to read LSM9DS0 status"))
         return false;
 
     if ((status && 0x8) == 0)
         return false;
 
-    if (!I2CRead(m_gyroSlaveAddr, 0x80 | LSM9DS0_GYRO_OUT_X_L, 6, gyroData, "Failed to read LSM9DS0 gyro data"))
+    if (!m_settings->HALRead(m_gyroSlaveAddr, 0x80 | LSM9DS0_GYRO_OUT_X_L, 6, gyroData, "Failed to read LSM9DS0 gyro data"))
         return false;
 
     m_imuData.timestamp = RTMath::currentUSecsSinceEpoch();
 
-    if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_A, 6, accelData, "Failed to read LSM9DS0 accel data"))
+    if (!m_settings->HALRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_A, 6, accelData, "Failed to read LSM9DS0 accel data"))
         return false;
 
-    if (!I2CRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_M, 6, compassData, "Failed to read LSM9DS0 compass data"))
+    if (!m_settings->HALRead(m_accelCompassSlaveAddr, 0x80 | LSM9DS0_OUT_X_L_M, 6, compassData, "Failed to read LSM9DS0 compass data"))
         return false;
 
 #endif

@@ -43,6 +43,7 @@
 #define HAL_ERROR1(m, x)    fprintf(stderr, m, x);
 #define HAL_ERROR2(m, x, y)    fprintf(stderr, m, x, y);
 #define HAL_ERROR3(m, x, y, z)    fprintf(stderr, m, x, y, z);
+#define HAL_ERROR4(m, x, y, z, a)    fprintf(stderr, m, x, y, z, a);
 
 #else
 
@@ -56,6 +57,7 @@
 #define HAL_ERROR1(m, x)
 #define HAL_ERROR2(m, x, y)
 #define HAL_ERROR3(m, x, y, z)
+#define HAL_ERROR4(m, x, y, z, a)
 
 #endif
 
@@ -66,7 +68,8 @@
 #include <sys/time.h>
 #endif
 
-#define MAX_WRITE_LEN 511
+#define MAX_WRITE_LEN                   255
+#define MAX_READ_LEN                    255
 
 class RTIMUHal
 {
@@ -74,25 +77,31 @@ public:
     RTIMUHal();
     virtual ~RTIMUHal();
 
-protected:
-    void setI2CBus(unsigned char port);
-    bool I2COpen();
-    void I2CClose();
-    bool I2CRead(unsigned char slaveAddr, unsigned char regAddr, unsigned char length,
+    bool m_busIsI2C;                                        // true if I2C bus in use, false if SPI in use
+    unsigned char m_I2CBus;                                 // I2C bus of the imu (eg 1 for Raspberry Pi usually)
+    unsigned char m_SPIBus;                                 // SPI bus of the imu (eg 0 for Raspberry Pi usually)
+    unsigned int m_SPISpeed;                                // speed of interface
+
+    bool HALOpen();
+    bool HALRead(unsigned char slaveAddr, unsigned char regAddr, unsigned char length,
                  unsigned char *data, const char *errorMsg);
-    bool I2CSelectSlave(unsigned char slaveAddr, const char *errorMsg);
-    bool I2CWrite(unsigned char slaveAddr, unsigned char regAddr,
+    bool HALWrite(unsigned char slaveAddr, unsigned char regAddr,
                   unsigned char length, unsigned char const *data, const char *errorMsg);
-    bool I2CWrite(unsigned char slaveAddr, unsigned char regAddr,
+    bool HALWrite(unsigned char slaveAddr, unsigned char regAddr,
                   unsigned char const data, const char *errorMsg);
 
     void delayMs(int milliSeconds);
 
+protected:
+    void I2CClose();
+    bool I2CSelectSlave(unsigned char slaveAddr, const char *errorMsg);
+    void SPIClose();
+    bool ifWrite(unsigned char *data, unsigned char length);
+
 private:
     int m_I2C;
-
-    unsigned char m_I2CBus;
     unsigned char m_currentSlave;
+    int m_SPI;
 };
 
 #endif // _RTIMUHAL_H

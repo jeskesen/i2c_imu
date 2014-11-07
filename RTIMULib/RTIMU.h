@@ -25,12 +25,11 @@
 #define	_RTIMU_H
 
 #include "RTMath.h"
-#include "RTIMUHal.h"
 #include "RTFusion.h"
 #include "RTIMULibDefs.h"
 #include "RTIMUSettings.h"
 
-class RTIMU : public RTIMUHal
+class RTIMU
 {
 public:
     //  IMUs should always be created with the following call

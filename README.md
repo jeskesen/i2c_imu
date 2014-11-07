@@ -16,6 +16,8 @@ The instructions here are for the Raspberry Pi but RTIMULib can be use easily wi
 
 Check out www.richards-tech.com for more details, updates and news.
 
+The MPU-9250 and SPI driver code is based on code generously supplied by staslock@gmail.com (clickdrive.io). I am sure that any bugs that may exist are due to my integration efforts and not the quality of the supplied code!
+
 RTIMULib is licensed under the MIT license.
 
 ## Note about magnetometer (compass) calibration
@@ -23,6 +25,12 @@ RTIMULib is licensed under the MIT license.
 It is essential to calibrate the magnetometer or else very poor fusion results will be obtained. For more about this, see http://wp.me/p4qcHg-b4. RTIMULibDemo (GUI) and RTIMULibCal (command line) can be used to do this. They both support magnetometer min/max, magnetometer ellipsoid fit and accelerometer min/max calibration.
 
 ## Release history
+
+### November 7 2014 - 4.0.0
+
+Restructured library to add support for the MPU-9250 and SPI bus. This is a little experimental right now - use V3.1.1 if problems are encountered with existing supported IMUs. The MPU-9250 has been seen to hang when used on the SPI bus at sample rates above 300 samples per second. However, sample rates up to 1000 seem to work fine using I2C.
+
+The RTIMULib apps are now able to auto-detect on the I2C and SPI bus so, if only one supported IMU is present on either bus, the code should find it. Note that only the MPU-9250 is supported by the SPI driver at the moment. There are some new settings in the RTIMULib.ini file related to the SPI bus that may need editing in some systems. The default SPI bus is set 0 which works nicely for the Raspberry Pi. Connect the MPU-9250 to SPI0 and CS0 and it should work without needing to change anythin in RTIMULib.ini.
 
 ### November 4 2014 - 3.1.1
 

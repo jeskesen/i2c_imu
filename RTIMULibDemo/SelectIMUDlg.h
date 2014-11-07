@@ -50,6 +50,7 @@ private:
     RTIMUSettings *m_settings;
 
     QDialogButtonBox *m_buttons;
+    QComboBox *m_selectBus;
     QComboBox *m_selectIMU;
     QComboBox *m_selectAddress;
 

@@ -21,6 +21,9 @@
 //  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+//  The MPU-9250 and SPI driver code is based on code generously supplied by
+//  staslock@gmail.com (clickdrive.io)
+
 #ifndef _RTIMUSETTINGS_H
 #define _RTIMUSETTINGS_H
 
@@ -31,8 +34,11 @@
 
 #define RTIMULIB_IMU_TYPE                   "IMUType"
 #define RTIMULIB_FUSION_TYPE                "FusionType"
+#define RTIMULIB_BUS_IS_I2C                 "BusIsI2C"
 #define RTIMULIB_I2C_SLAVEADDRESS           "I2CSlaveAddress"
 #define RTIMULIB_I2C_BUS                    "I2CBus"
+#define RTIMULIB_SPI_BUS                    "SPIBus"
+#define RTIMULIB_SPI_SPEED                  "SPISpeed"
 
 //  MPU9150 settings keys
 
@@ -41,6 +47,15 @@
 #define RTIMULIB_MPU9150_GYROACCEL_LPF      "MPU9150GyroAccelLpf"
 #define RTIMULIB_MPU9150_GYRO_FSR           "MPU9150GyroFSR"
 #define RTIMULIB_MPU9150_ACCEL_FSR          "MPU9150AccelFSR"
+
+//  MPU9250 settings keys
+
+#define RTIMULIB_MPU9250_GYROACCEL_SAMPLERATE "MPU9250GyroAccelSampleRate"
+#define RTIMULIB_MPU9250_COMPASS_SAMPLERATE "MPU9250CompassSampleRate"
+#define RTIMULIB_MPU9250_GYRO_LPF           "MPU9250GyroLpf"
+#define RTIMULIB_MPU9250_ACCEL_LPF          "MPU9250AccelLpf"
+#define RTIMULIB_MPU9250_GYRO_FSR           "MPU9250GyroFSR"
+#define RTIMULIB_MPU9250_ACCEL_FSR          "MPU9250AccelFSR"
 
 //  GD20HM303D settings keys
 
@@ -126,6 +141,7 @@
 #define RTIMULIB_ACCELCAL_MINZ              "AccelCalMinZ"
 #define RTIMULIB_ACCELCAL_MAXZ              "AccelCalMaxZ"
 
+
 class RTIMUSettings : public RTIMUHal
 {
 public:
@@ -134,7 +150,7 @@ public:
     //  This function tries to find an IMU. It stops at the first valid one
     //  and return true or else false
 
-    bool discoverIMU(int& imuType, unsigned char& slaveAddress);
+    bool discoverIMU(int& imuType, bool& busIsI2C, unsigned char& slaveAddress);
 
     //  This function loads the local variables from the settings file or uses defaults
 
@@ -148,21 +164,20 @@ public:
 
     int m_imuType;                                          // type code of imu in use
     int m_fusionType;                                       // fusion algorithm type code
-
     unsigned char m_I2CSlaveAddress;                        // I2C slave address of the imu
-    unsigned char m_I2CBus;                                 // I2C bus of the imu (eg 1 for Raspberry Pi usually)
 
     bool m_compassCalValid;                                 // true if there is valid compass calibration data
     RTVector3 m_compassCalMin;                              // the minimum values
     RTVector3 m_compassCalMax;                              // the maximum values
 
     bool m_compassCalEllipsoidValid;                        // true if the ellipsoid calibration data is valid
-    RTVector3 m_compassCalEllipsoidOffset;                  // the ellipsoid offset         
+    RTVector3 m_compassCalEllipsoidOffset;                  // the ellipsoid offset
     float m_compassCalEllipsoidCorr[3][3];                  // the correction matrix
 
     bool m_accelCalValid;                                   // true if there is valid accel calibration data
     RTVector3 m_accelCalMin;                                // the minimum values
     RTVector3 m_accelCalMax;                                // the maximum values
+
 
     bool m_gyroBiasValid;                                   // true if the recorded gyro bias is valid
     RTVector3 m_gyroBias;                                   // the recorded gyro bias
@@ -176,6 +191,15 @@ public:
     int m_MPU9150GyroAccelLpf;                              // low pass filter code for the gyro and accel
     int m_MPU9150GyroFsr;                                   // FSR code for the gyro
     int m_MPU9150AccelFsr;                                  // FSR code for the accel
+
+    //  MPU9250
+
+    int m_MPU9250GyroAccelSampleRate;                       // the sample rate (samples per second) for gyro and accel
+    int m_MPU9250CompassSampleRate;                         // same for the compass
+    int m_MPU9250GyroLpf;                                   // low pass filter code for the gyro
+    int m_MPU9250AccelLpf;                                  // low pass filter code for the accel
+    int m_MPU9250GyroFsr;                                   // FSR code for the gyro
+    int m_MPU9250AccelFsr;                                  // FSR code for the accel
 
     //  GD20HM303D
 

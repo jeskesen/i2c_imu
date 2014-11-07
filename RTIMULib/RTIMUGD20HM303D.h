@@ -255,7 +255,6 @@ private:
 
     unsigned char m_gyroSlaveAddr;                          // I2C address of L3GD20H
     unsigned char m_accelCompassSlaveAddr;                  // I2C address of LSM303D
-    unsigned char m_bus;                                    // I2C bus (usually 1 for Raspberry Pi for example)
 
     RTFLOAT m_gyroScale;
     RTFLOAT m_accelScale;

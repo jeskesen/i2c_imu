@@ -21,6 +21,8 @@
 //  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+//  The MPU-9250 and SPI driver code is based on code generously supplied by
+//  staslock@gmail.com (clickdrive.io)
 
 #ifndef _RTIMULIBDEFS_H
 #define	_RTIMULIBDEFS_H
@@ -35,6 +37,7 @@
 #define RTIMU_TYPE_GD20HM303D               3                   // STM L3GD20H/LSM303D (Pololu Altimu)
 #define RTIMU_TYPE_GD20M303DLHC             4                   // STM L3GD20/LSM303DHLC (Adafruit IMU)
 #define RTIMU_TYPE_LSM9DS0                  5                   // STM LSM9DS0 (eg Sparkfun IMU)
+#define RTIMU_TYPE_MPU9250                  6                   // InvenSense MPU9250
 
 //  these defines describe the various fusion filter options
 

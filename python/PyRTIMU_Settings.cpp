@@ -293,7 +293,8 @@ static PyObject* RTIMU_Settings_discover(RTIMU_Settings* self, PyObject *args, P
 
     // Do the discovery
     unsigned char slave_addr_ch = slave_addr;
-    bool r = self->val->discoverIMU(imu_type, slave_addr_ch);
+    bool isI2C;
+    bool r = self->val->discoverIMU(imu_type, isI2C, slave_addr_ch);
 
     if (r) {
         Py_RETURN_TRUE;
