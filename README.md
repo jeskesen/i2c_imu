@@ -16,7 +16,7 @@ The instructions here are for the Raspberry Pi but RTIMULib can be use easily wi
 
 Check out www.richards-tech.com for more details, updates and news.
 
-The MPU-9250 and SPI driver code is based on code generously supplied by staslock@gmail.com (clickdrive.io). I am sure that any bugs that may exist are due to my integration efforts and not the quality of the supplied code!
+The MPU-9250 and SPI driver code is based on code generously supplied by staslock@gmail.com (www.clickdrive.io). I am sure that any bugs that may exist are due to my integration efforts and not the quality of the supplied code!
 
 RTIMULib is licensed under the MIT license.
 

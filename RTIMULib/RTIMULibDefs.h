@@ -22,7 +22,7 @@
 //  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 //  The MPU-9250 and SPI driver code is based on code generously supplied by
-//  staslock@gmail.com (clickdrive.io)
+//  staslock@gmail.com (www.clickdrive.io)
 
 #ifndef _RTIMULIBDEFS_H
 #define	_RTIMULIBDEFS_H
