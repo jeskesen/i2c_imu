@@ -94,6 +94,7 @@
     <ClCompile Include="..\RTIMULib\RTIMULSM9DS0.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUMagCal.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUMPU9150.cpp" />
+    <ClCompile Include="..\RTIMULib\RTIMUMPU9250.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUNull.cpp" />
     <ClCompile Include="..\RTIMULib\RTIMUSettings.cpp" />
     <ClCompile Include="..\RTIMULib\RTMath.cpp" />
@@ -312,6 +313,7 @@
     <ClInclude Include="..\RTIMULib\RTIMULSM9DS0.h" />
     <ClInclude Include="..\RTIMULib\RTIMUMagCal.h" />
     <ClInclude Include="..\RTIMULib\RTIMUMPU9150.h" />
+    <ClInclude Include="..\RTIMULib\RTIMUMPU9250.h" />
     <ClInclude Include="..\RTIMULib\RTIMUNull.h" />
     <ClInclude Include="..\RTIMULib\RTIMUSettings.h" />
     <ClInclude Include="..\RTIMULib\RTMath.h" />
@@ -367,7 +369,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" Qt5Version_x0020_Win32="Qt5.3.1" />
+      <UserProperties UicDir=".\GeneratedFiles" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" Qt5Version_x0020_Win32="$(DefaultQtVersion)" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

@@ -159,7 +159,6 @@ bool RTIMUMPU9150::IMUInit()
     //  configure IMU
 
     m_slaveAddr = m_settings->m_I2CSlaveAddress;
-    m_bus = m_settings->m_I2CBus;
 
     setSampleRate(m_settings->m_MPU9150GyroAccelSampleRate);
     setCompassRate(m_settings->m_MPU9150CompassSampleRate);
@@ -169,42 +168,41 @@ bool RTIMUMPU9150::IMUInit()
 
     setCalibrationData();
 
-
     //  enable the I2C bus
-    setI2CBus(m_bus);
-    if (!I2COpen())
+
+    if (!m_settings->HALOpen())
         return false;
 
     //  reset the MPU9150
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 0x80, "Failed to initiate MPU9150 reset"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 0x80, "Failed to initiate MPU9150 reset"))
         return false;
 
-    delayMs(100);
+    m_settings->delayMs(100);
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 0x00, "Failed to stop MPU9150 reset"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 0x00, "Failed to stop MPU9150 reset"))
         return false;
 
-    if (!I2CRead(m_slaveAddr, MPU9150_WHO_AM_I, 1, &result, "Failed to read MPU9150 id"))
+    if (!m_settings->HALRead(m_slaveAddr, MPU9150_WHO_AM_I, 1, &result, "Failed to read MPU9150 id"))
         return false;
 
-    if (result != 0x68) {
+    if (result != MPU9150_ID) {
         HAL_ERROR1("Incorrect MPU9150 id %d\n", result);
         return false;
     }
 
     //  now configure the various components
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_LPF_CONFIG, m_lpf, "Failed to set lpf"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_LPF_CONFIG, m_lpf, "Failed to set lpf"))
         return false;
 
     if (!setSampleRate())
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_GYRO_CONFIG, m_gyroFsr, "Failed to set gyro fsr"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_GYRO_CONFIG, m_gyroFsr, "Failed to set gyro fsr"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_ACCEL_CONFIG, m_accelFsr, "Failed to set accel fsr"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_ACCEL_CONFIG, m_accelFsr, "Failed to set accel fsr"))
          return false;
 
     //  now configure compass
@@ -213,17 +211,17 @@ bool RTIMUMPU9150::IMUInit()
 
     // get fuse ROM data
 
-    if (!I2CWrite(AK8975_ADDRESS, AK8975_CNTL, 0, "Failed to set compass in power down mode 1")) {
+    if (!m_settings->HALWrite(AK8975_ADDRESS, AK8975_CNTL, 0, "Failed to set compass in power down mode 1")) {
         bypassOff();
         return false;
     }
 
-    if (!I2CWrite(AK8975_ADDRESS, AK8975_CNTL, 0x0f, "Failed to set compass in fuse ROM mode")) {
+    if (!m_settings->HALWrite(AK8975_ADDRESS, AK8975_CNTL, 0x0f, "Failed to set compass in fuse ROM mode")) {
         bypassOff();
         return false;
     }
 
-    if (!I2CRead(AK8975_ADDRESS, AK8975_ASAX, 3, asa, "Failed to read compass fuse ROM")) {
+    if (!m_settings->HALRead(AK8975_ADDRESS, AK8975_ASAX, 3, asa, "Failed to read compass fuse ROM")) {
         bypassOff();
         return false;
     }
@@ -234,7 +232,7 @@ bool RTIMUMPU9150::IMUInit()
     m_compassAdjust[1] = ((float)asa[1] - 128.0) / 256.0 + 1.0f;
     m_compassAdjust[2] = ((float)asa[2] - 128.0) / 256.0 + 1.0f;
 
-    if (!I2CWrite(AK8975_ADDRESS, AK8975_CNTL, 0, "Failed to set compass in power down mode 2")) {
+    if (!m_settings->HALWrite(AK8975_ADDRESS, AK8975_CNTL, 0, "Failed to set compass in power down mode 2")) {
         bypassOff();
         return false;
     }
@@ -243,34 +241,34 @@ bool RTIMUMPU9150::IMUInit()
 
     //  now set up MPU9150 to talk to the compass chip
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_MST_CTRL, 0x40, "Failed to set I2C master mode"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_MST_CTRL, 0x40, "Failed to set I2C master mode"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV0_ADDR, 0x80 | AK8975_ADDRESS, "Failed to set slave 0 address"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV0_ADDR, 0x80 | AK8975_ADDRESS, "Failed to set slave 0 address"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV0_REG, AK8975_ST1, "Failed to set slave 0 reg"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV0_REG, AK8975_ST1, "Failed to set slave 0 reg"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV0_CTRL, 0x88, "Failed to set slave 0 ctrl"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV0_CTRL, 0x88, "Failed to set slave 0 ctrl"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV1_ADDR, AK8975_ADDRESS, "Failed to set slave 1 address"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV1_ADDR, AK8975_ADDRESS, "Failed to set slave 1 address"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV1_REG, AK8975_CNTL, "Failed to set slave 1 reg"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV1_REG, AK8975_CNTL, "Failed to set slave 1 reg"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV1_CTRL, 0x81, "Failed to set slave 1 ctrl"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV1_CTRL, 0x81, "Failed to set slave 1 ctrl"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV1_DO, 0x1, "Failed to set slave 1 DO"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV1_DO, 0x1, "Failed to set slave 1 DO"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_MST_DELAY_CTRL, 0x3, "Failed to set mst delay"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_MST_DELAY_CTRL, 0x3, "Failed to set mst delay"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_YG_OFFS_TC, 0x80, "Failed to set yg offs tc"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_YG_OFFS_TC, 0x80, "Failed to set yg offs tc"))
         return false;
 
     if (!setCompassRate())
@@ -278,10 +276,10 @@ bool RTIMUMPU9150::IMUInit()
 
     //  enable the sensors
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 1, "Failed to set pwr_mgmt_1"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_PWR_MGMT_1, 1, "Failed to set pwr_mgmt_1"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_PWR_MGMT_2, 0, "Failed to set pwr_mgmt_2"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_PWR_MGMT_2, 0, "Failed to set pwr_mgmt_2"))
          return false;
 
     //  select the data to go into the FIFO and enable
@@ -297,25 +295,25 @@ bool RTIMUMPU9150::IMUInit()
 
 bool RTIMUMPU9150::resetFifo()
 {
-    if (!I2CWrite(m_slaveAddr, MPU9150_INT_ENABLE, 0, "Writing int enable"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_INT_ENABLE, 0, "Writing int enable"))
         return false;
-    if (!I2CWrite(m_slaveAddr, MPU9150_FIFO_EN, 0, "Writing fifo enable"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_FIFO_EN, 0, "Writing fifo enable"))
         return false;
-    if (!I2CWrite(m_slaveAddr, MPU9150_USER_CTRL, 0, "Writing user control"))
-        return false;
-
-    if (!I2CWrite(m_slaveAddr, MPU9150_USER_CTRL, 0x04, "Resetting fifo"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_USER_CTRL, 0, "Writing user control"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_USER_CTRL, 0x60, "Enabling the fifo"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_USER_CTRL, 0x04, "Resetting fifo"))
         return false;
 
-    delayMs(50);
-
-    if (!I2CWrite(m_slaveAddr, MPU9150_INT_ENABLE, 1, "Writing int enable"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_USER_CTRL, 0x60, "Enabling the fifo"))
         return false;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_FIFO_EN, 0x78, "Failed to set FIFO enables"))
+    m_settings->delayMs(50);
+
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_INT_ENABLE, 1, "Writing int enable"))
+        return false;
+
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_FIFO_EN, 0x78, "Failed to set FIFO enables"))
         return false;
 
     return true;
@@ -325,20 +323,20 @@ bool RTIMUMPU9150::bypassOn()
 {
     unsigned char userControl;
 
-    if (!I2CRead(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to read user_ctrl reg"))
+    if (!m_settings->HALRead(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to read user_ctrl reg"))
         return false;
 
     userControl &= ~0x20;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to write user_ctrl reg"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to write user_ctrl reg"))
         return false;
 
-    delayMs(50);
+    m_settings->delayMs(50);
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_INT_PIN_CFG, 0x82, "Failed to write int_pin_cfg reg"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_INT_PIN_CFG, 0x82, "Failed to write int_pin_cfg reg"))
         return false;
 
-    delayMs(50);
+    m_settings->delayMs(50);
     return true;
 }
 
@@ -347,20 +345,20 @@ bool RTIMUMPU9150::bypassOff()
 {
     unsigned char userControl;
 
-    if (!I2CRead(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to read user_ctrl reg"))
+    if (!m_settings->HALRead(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to read user_ctrl reg"))
         return false;
 
     userControl |= 0x20;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to write user_ctrl reg"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_USER_CTRL, 1, &userControl, "Failed to write user_ctrl reg"))
         return false;
 
-    delayMs(50);
+    m_settings->delayMs(50);
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_INT_PIN_CFG, 0x80, "Failed to write int_pin_cfg reg"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_INT_PIN_CFG, 0x80, "Failed to write int_pin_cfg reg"))
          return false;
 
-    delayMs(50);
+    m_settings->delayMs(50);
     return true;
 }
 
@@ -371,7 +369,7 @@ bool RTIMUMPU9150::setSampleRate()
     if (m_lpf == MPU9150_LPF_256)
         clockRate = 8000;
 
-    if (!I2CWrite(m_slaveAddr, MPU9150_SMPRT_DIV, (unsigned char)(clockRate / m_sampleRate - 1),
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_SMPRT_DIV, (unsigned char)(clockRate / m_sampleRate - 1),
                   "Failed to set sample rate"))
         return false;
 
@@ -386,7 +384,7 @@ bool RTIMUMPU9150::setCompassRate()
 
     if (rate > 31)
         rate = 31;
-    if (!I2CWrite(m_slaveAddr, MPU9150_I2C_SLV4_CTRL, rate, "Failed to set slave ctrl 4"))
+    if (!m_settings->HALWrite(m_slaveAddr, MPU9150_I2C_SLV4_CTRL, rate, "Failed to set slave ctrl 4"))
          return false;
     return true;
 }
@@ -403,7 +401,7 @@ bool RTIMUMPU9150::IMURead()
     unsigned char fifoData[12];
     unsigned char compassData[8];
 
-    if (!I2CRead(m_slaveAddr, MPU9150_FIFO_COUNT_H, 2, fifoCount, "Failed to read fifo count"))
+    if (!m_settings->HALRead(m_slaveAddr, MPU9150_FIFO_COUNT_H, 2, fifoCount, "Failed to read fifo count"))
          return false;
 
     count = ((unsigned int)fifoCount[0] << 8) + fifoCount[1];
@@ -420,10 +418,10 @@ bool RTIMUMPU9150::IMURead()
     if ((m_cacheCount == 0) && (count  >= MPU9150_FIFO_CHUNK_SIZE) && (count < (MPU9150_CACHE_SIZE * MPU9150_FIFO_CHUNK_SIZE))) {
         // special case of a small fifo and nothing cached - just handle as simple read
 
-        if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
+        if (!m_settings->HALRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
             return false;
 
-        if (!I2CRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, compassData, "Failed to read compass data"))
+        if (!m_settings->HALRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, compassData, "Failed to read compass data"))
             return false;
     } else {
         if (count >= (MPU9150_CACHE_SIZE * MPU9150_FIFO_CHUNK_SIZE)) {
@@ -440,11 +438,11 @@ bool RTIMUMPU9150::IMURead()
             if (blockCount > MPU9150_CACHE_SIZE)
                 blockCount = MPU9150_CACHE_SIZE;
 
-            if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE * blockCount,
+            if (!m_settings->HALRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE * blockCount,
                                 m_cache[m_cacheIn].data, "Failed to read fifo data"))
                 return false;
 
-            if (!I2CRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, m_cache[m_cacheIn].compass, "Failed to read compass data"))
+            if (!m_settings->HALRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, m_cache[m_cacheIn].compass, "Failed to read compass data"))
                 return false;
 
             m_cache[m_cacheIn].count = blockCount;
@@ -480,7 +478,7 @@ bool RTIMUMPU9150::IMURead()
     if (count > MPU9150_FIFO_CHUNK_SIZE * 40) {
         // more than 40 samples behind - going too slowly so discard some samples but maintain timestamp correctly
         while (count >= MPU9150_FIFO_CHUNK_SIZE * 10) {
-            if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
+            if (!m_settings->HALRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
                 return false;
             count -= MPU9150_FIFO_CHUNK_SIZE;
             m_imuData.timestamp += m_sampleInterval;
@@ -490,10 +488,10 @@ bool RTIMUMPU9150::IMURead()
     if (count < MPU9150_FIFO_CHUNK_SIZE)
         return false;
 
-    if (!I2CRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
+    if (!m_settings->HALRead(m_slaveAddr, MPU9150_FIFO_R_W, MPU9150_FIFO_CHUNK_SIZE, fifoData, "Failed to read fifo data"))
         return false;
 
-    if (!I2CRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, compassData, "Failed to read compass data"))
+    if (!m_settings->HALRead(m_slaveAddr, MPU9150_EXT_SENS_DATA_00, 8, compassData, "Failed to read compass data"))
         return false;
 
 #endif

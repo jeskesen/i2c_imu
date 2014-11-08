@@ -203,6 +203,9 @@
     <ClCompile Include="..\RTIMULib\RTIMUMagCal.cpp">
       <Filter>RTIMULib</Filter>
     </ClCompile>
+    <ClCompile Include="..\RTIMULib\RTIMUMPU9250.cpp">
+      <Filter>RTIMULib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="RTHostIMUGL.h">
@@ -319,6 +322,9 @@
       <Filter>RTIMULib</Filter>
     </ClInclude>
     <ClInclude Include="..\RTIMULib\RTIMUMagCal.h">
+      <Filter>RTIMULib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RTIMULib\RTIMUMPU9250.h">
       <Filter>RTIMULib</Filter>
     </ClInclude>
   </ItemGroup>

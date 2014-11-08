@@ -30,6 +30,7 @@ HEADERS += $$PWD/RTIMULib.h \
     $$PWD/RTIMUHal.h \
     $$PWD/RTIMU.h \
     $$PWD/RTIMUMPU9150.h \
+    $$PWD/RTIMUMPU9250.h \
     $$PWD/RTIMUGD20HM303D.h \
     $$PWD/RTIMUGD20M303DLHC.h \
     $$PWD/RTIMULSM9DS0.h \
@@ -41,11 +42,12 @@ HEADERS += $$PWD/RTIMULib.h \
     $$PWD/RTIMUMagCal.h \
     $$PWD/RTIMUAccelCal.h \
     $$PWD/RTIMUCalDefs.h \
- 
+
 SOURCES += $$PWD/RTMath.cpp \
     $$PWD/RTIMUHal.cpp \
     $$PWD/RTIMU.cpp \
     $$PWD/RTIMUMPU9150.cpp \
+    $$PWD/RTIMUMPU9250.cpp \
     $$PWD/RTIMUGD20HM303D.cpp \
     $$PWD/RTIMUGD20M303DLHC.cpp \
     $$PWD/RTIMULSM9DS0.cpp \

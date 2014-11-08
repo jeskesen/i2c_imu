@@ -61,6 +61,7 @@ DEPS    = $(RTIMULIBPATH)/RTMath.h \
     $(RTIMULIBPATH)/RTIMU.h \
     $(RTIMULIBPATH)/RTIMUNull.h \
     $(RTIMULIBPATH)/RTIMUMPU9150.h \
+    $(RTIMULIBPATH)/RTIMUMPU9250.h \
     $(RTIMULIBPATH)/RTIMUGD20HM303D.h \
     $(RTIMULIBPATH)/RTIMUGD20M303DLHC.h \
     $(RTIMULIBPATH)/RTIMULSM9DS0.h \
@@ -78,6 +79,7 @@ OBJECTS = objects/RTIMULibDrive.o \
     objects/RTIMU.o \
     objects/RTIMUNull.o \
     objects/RTIMUMPU9150.o \
+    objects/RTIMUMPU9250.o \
     objects/RTIMUGD20HM303D.o \
     objects/RTIMUGD20M303DLHC.o \
     objects/RTIMULSM9DS0.o \

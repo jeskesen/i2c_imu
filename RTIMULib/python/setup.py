@@ -7,6 +7,7 @@ RTIMU_sources = [
     "RTIMU.cpp",
     "RTIMUNull.cpp",
     "RTIMUMPU9150.cpp",
+    "RTIMUMPU9250.cpp",
     "RTIMUGD20HM303D.cpp",
     "RTIMUGD20M303DLHC.cpp",
     "RTIMULSM9DS0.cpp",
@@ -22,7 +23,7 @@ mod = Extension('RTIMU',
                   [ os.path.join(RTIMU_sourcedir, sr) for sr in RTIMU_sources],
                 include_dirs = [RTIMU_sourcedir],
                 extra_compile_args = ['-std=c++0x'],
-                define_macros = [("HAL_QUITE", None)]
+                define_macros = [("HAL_QUIET", None)]
                 )
 
 setup (name = 'RTIMULib',
