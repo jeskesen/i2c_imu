@@ -26,7 +26,7 @@ It is essential to calibrate the magnetometer or else very poor fusion results w
 
 ## Release history
 
-### November 7 2014 - 4.0.1
+### November 8 2014 - 4.0.1
 
 Fixed some missing MPU-9250 related defs in python interface.
 
