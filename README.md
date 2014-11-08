@@ -26,6 +26,10 @@ It is essential to calibrate the magnetometer or else very poor fusion results w
 
 ## Release history
 
+### November 7 2014 - 4.0.1
+
+Fixed some missing MPU-9250 related defs in python interface.
+
 ### November 7 2014 - 4.0.0
 
 Restructured library to add support for the MPU-9250 and SPI bus. This is a little experimental right now - use V3.1.1 if problems are encountered with existing supported IMUs. The MPU-9250 has been seen to hang when used on the SPI bus at sample rates above 300 samples per second. However, sample rates up to 1000 seem to work fine using I2C.
