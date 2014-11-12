@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="imu_to_base" 
+    args="0 0 .1 0 0 0 base_link imu_link 50" />	
+
+	<node name="i2c_imu_node" pkg="i2c_imu" type="i2c_imu_node" output="screen">
+			<param name="imu_frame" value="imu_link" />
+			
+			<!--imu_type:
+				1 = Null: used when data is provided from a remote IMU
+				2 = InvenSense MPU-9150
+				3 = STM L3GD20H + LSM303D
+				4 = STM L3GD20 + LSM303DLHC
+				5 = STM LSM9DS0
+				6 = InvenSense MPU-9250
+			-->
+			<param name="imu_type" value="2" />
+			
+			<!--fusion_type:
+				0 = RTFUSION_TYPE_NULL: just a dummy to keep things happy if not needed
+				1 = RTFUSION_TYPE_KALMANSTATE4: kalman state is the quaternion pose
+				2 = RTFUSION_TYPE_RTQF: RT quaternion fusion
+			-->
+			<param name="fusion_type" value="2" />
+			
+			<!-- mpu9150/gyro_accel_sample_rate: 5 - 1000 Hz -->
+			<param name="mpu9150/gyro_accel_sample_rate" value="50" />
+
+			<!-- mpu9150/compass_sample_rate: 1 - 100 Hz -->
+			<param name="mpu9150/compass_sample_rate" value="25" />	
+			
+			<!-- mpu9150/accel_full_scale_range:
+				0x00: MPU9150_ACCELFSR_2		+/- 2g
+				0x08: MPU9150_ACCELFSR_4		+/- 4g
+				0x10: MPU9150_ACCELFSR_8		+/- 8g
+				0x18: MPU9150_ACCELFSR_16		+/- 16g
+			-->
+			<param name="mpu9150/accel_full_scale_range" value="16" />
+			
+			<!-- mpu9150/gyro_full_scale_range:
+				0x00: MPU9150_GYROFSR_250		+/- 250 degrees per second
+				0x08: MPU9150_GYROFSR_500		+/- 500 degrees per second
+				0x10: MPU9150_GYROFSR_1000		+/- 1000 degrees per second
+				0x18: MPU9150_GYROFSR_2000		+/- 2000 degrees per second
+			-->
+			<param name="mpu9150/gyro_full_scale_range" value="16" />
+			
+			
+			<!-- mpu9150/gyro_accel_low_pass_filter:
+				0: MPU9150_LPF_256:  gyro: 256Hz, accel: 260Hz
+				1: MPU9150_LPF_188:  gyro: 188Hz, accel: 184Hz
+				2: MPU9150_LPF_98:   gyro: 98Hz, accel: 98Hz
+				3: MPU9150_LPF_42:   gyro: 42Hz, accel: 44Hz
+				4: MPU9150_LPF_20:   gyro: 20Hz, accel: 21Hz
+				5: MPU9150_LPF_10:   gyro: 10Hz, accel: 10Hz
+				6: MPU9150_LPF_5:    gyro: 5Hz, accel: 5Hz
+			-->
+			<param name="mpu9150/gyro_accel_low_pass_filter" value="3" />
+	</node>
+
+</launch>
