@@ -116,6 +116,14 @@ I2cImu::I2cImu() : nh_(), private_nh_("~")
     private_nh_.param<int>("LSM9DS0/gyro_high_pass_filter", imu_settings_.m_LSM9DS0GyroHpf, imu_settings_.m_LSM9DS0GyroHpf);
     private_nh_.param<int>("LSM9DS0/gyro_bandwidth", imu_settings_.m_LSM9DS0GyroBW, imu_settings_.m_LSM9DS0GyroBW);
 
+	std::vector<int> compass_max, compass_min;
+	if(private_nh_.getParam("calib/compass_min", compass_min) && private_nh_.getParam("calib/compass_max", compass_min)
+			&& compass_min.size() == 3 && compass_min.size() == 3)
+	{
+		imu_settings_.m_compassCalMin = RTVector3(compass_min[0],compass_min[1],compass_min[2]);
+		imu_settings_.m_compassCalMax = RTVector3(compass_max[0],compass_max[1],compass_max[2]);
+	}
+
     imu_ = RTIMU::createIMU(&imu_settings_);
     if(imu_==NULL)
     {
