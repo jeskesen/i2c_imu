@@ -49,6 +49,11 @@ public:
     virtual int IMUGetPollInterval() = 0;                   // returns the recommended poll interval in mS
     virtual bool IMURead() = 0;                             // get a sample
 
+    // setGyroContinuousALearninglpha allows the continuous learning rate to be over-ridden
+    // The value must be between 0.0 and 1.0 and will generally be close to 0
+
+    bool setGyroContinuousLearningAlpha(RTFLOAT alpha);
+
     // returns true if enough samples for valid data
 
     virtual bool IMUGyroBiasValid();
@@ -127,7 +132,8 @@ protected:
     int m_sampleRate;                                       // samples per second
     uint64_t m_sampleInterval;                              // interval between samples in microseonds
 
-    RTFLOAT m_gyroAlpha;                                    // gyro bias learning rate
+    RTFLOAT m_gyroLearningAlpha;                            // gyro bias rapid learning rate
+    RTFLOAT m_gyroContinuousAlpha;                          // gyro bias continuous (slow) learning rate
     int m_gyroSampleCount;                                  // number of gyro samples used
 
     RTVector3 m_previousAccel;                              // previous step accel for gyro learning
