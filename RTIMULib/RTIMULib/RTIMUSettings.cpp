@@ -169,13 +169,8 @@ bool RTIMUSettings::discoverIMU(int& imuType, bool& busIsI2C, unsigned char& sla
     return false;
 }
 
-bool RTIMUSettings::loadSettings()
+void RTIMUSettings::setDefaults()
 {
-    char buf[200];
-    char key[200];
-    char val[200];
-    RTFLOAT ftemp;
-
     //  preset general defaults
 
     m_imuType = RTIMU_TYPE_AUTODISCOVER;
@@ -255,7 +250,16 @@ bool RTIMUSettings::loadSettings()
 
     m_LSM9DS0CompassSampleRate = LSM9DS0_COMPASS_SAMPLERATE_50;
     m_LSM9DS0CompassFsr = LSM9DS0_COMPASS_FSR_2;
+}
 
+bool RTIMUSettings::loadSettings()
+{
+    setDefaults();
+
+    char buf[200];
+    char key[200];
+    char val[200];
+    RTFLOAT ftemp;
     //  check to see if settings file exists
 
     if (!(m_fd = fopen(m_filename, "r"))) {

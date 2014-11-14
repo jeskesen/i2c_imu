@@ -152,13 +152,17 @@ public:
 
     bool discoverIMU(int& imuType, bool& busIsI2C, unsigned char& slaveAddress);
 
+    //  This function sets the settings to default values.
+
+    void setDefaults();
+
     //  This function loads the local variables from the settings file or uses defaults
 
-    bool loadSettings();
+    virtual bool loadSettings();
 
     //  This function saves the local variables to the settings file
 
-    bool saveSettings();
+    virtual bool saveSettings();
 
     //  These are the local variables
 

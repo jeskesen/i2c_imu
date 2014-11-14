@@ -152,9 +152,20 @@ void RTIMU::setCalibrationData()
     }
 }
 
+bool RTIMU::setGyroContinuousLearningAlpha(RTFLOAT alpha)
+{
+    if ((alpha < 0.0) || (alpha >= 1.0))
+        return false;
+
+    m_gyroContinuousAlpha = alpha;
+    return true;
+}
+
+
 void RTIMU::gyroBiasInit()
 {
-    m_gyroAlpha = 2.0f / m_sampleRate;
+    m_gyroLearningAlpha = 2.0f / m_sampleRate;
+    m_gyroContinuousAlpha = 0.01f / m_sampleRate;
     m_gyroSampleCount = 0;
 }
 
@@ -166,11 +177,12 @@ void RTIMU::handleGyroBias()
 
     if ((deltaAccel.length() < RTIMU_FUZZY_ACCEL_ZERO) && (m_imuData.gyro.length() < RTIMU_FUZZY_GYRO_ZERO)) {
         // what we are seeing on the gyros should be bias only so learn from this
-        m_settings->m_gyroBias.setX((1.0 - m_gyroAlpha) * m_settings->m_gyroBias.x() + m_gyroAlpha * m_imuData.gyro.x());
-        m_settings->m_gyroBias.setY((1.0 - m_gyroAlpha) * m_settings->m_gyroBias.y() + m_gyroAlpha * m_imuData.gyro.y());
-        m_settings->m_gyroBias.setZ((1.0 - m_gyroAlpha) * m_settings->m_gyroBias.z() + m_gyroAlpha * m_imuData.gyro.z());
 
         if (m_gyroSampleCount < (5 * m_sampleRate)) {
+            m_settings->m_gyroBias.setX((1.0 - m_gyroLearningAlpha) * m_settings->m_gyroBias.x() + m_gyroLearningAlpha * m_imuData.gyro.x());
+            m_settings->m_gyroBias.setY((1.0 - m_gyroLearningAlpha) * m_settings->m_gyroBias.y() + m_gyroLearningAlpha * m_imuData.gyro.y());
+            m_settings->m_gyroBias.setZ((1.0 - m_gyroLearningAlpha) * m_settings->m_gyroBias.z() + m_gyroLearningAlpha * m_imuData.gyro.z());
+
             m_gyroSampleCount++;
 
             if (m_gyroSampleCount == (5 * m_sampleRate)) {
@@ -178,6 +190,10 @@ void RTIMU::handleGyroBias()
                 m_settings->m_gyroBiasValid = true;
                 m_settings->saveSettings();
             }
+        } else {
+            m_settings->m_gyroBias.setX((1.0 - m_gyroContinuousAlpha) * m_settings->m_gyroBias.x() + m_gyroContinuousAlpha * m_imuData.gyro.x());
+            m_settings->m_gyroBias.setY((1.0 - m_gyroContinuousAlpha) * m_settings->m_gyroBias.y() + m_gyroContinuousAlpha * m_imuData.gyro.y());
+            m_settings->m_gyroBias.setZ((1.0 - m_gyroContinuousAlpha) * m_settings->m_gyroBias.z() + m_gyroContinuousAlpha * m_imuData.gyro.z());
         }
     }
 
