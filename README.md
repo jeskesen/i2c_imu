@@ -6,7 +6,7 @@ ROS driver for several 9-DOF IMUs.  This node is a ROS interface for [RTIMULib](
 The list of IMUs supported by RTIMULib is as follows:
 
 - [MPU-9150 by Invensense](http://www.invensense.com/mems/gyro/mpu9150.html)
-- [MPU-9250 by Invensense](http://www.invensense.com/mems/gyro/mpu9250.html) (this is SPI, not i2c)
+- [MPU-9250 by Invensense](http://www.invensense.com/mems/gyro/mpu9250.html)
 - [LSM9DS0 by STMicroelectronics](http://www.st.com/web/en/catalog/sense_power/FM89/SC1448/PF258556)
 - [Adafruit 9-DOF IMU Breakout - L3GD20 + LSM303](http://www.adafruit.com/product/1714)
 - [MinIMU-9 v3 Gyro, Accelerometer, and Compass (L3GD20H and LSM303D Carrier) by Polulu](http://www.pololu.com/product/2468)

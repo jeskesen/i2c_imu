@@ -28,190 +28,208 @@
 class I2cImu
 {
 public:
-    I2cImu();
+	I2cImu();
 
-    void update();
-    void spin();
+	void update();
+	void spin();
 
 private:
-    //ROS Stuff
-    ros::NodeHandle nh_;
-    ros::NodeHandle private_nh_;
+	//ROS Stuff
+	ros::NodeHandle nh_;
+	ros::NodeHandle private_nh_;
 
-    tf::TransformBroadcaster tf_broadcaster_;
+	tf::TransformBroadcaster tf_broadcaster_;
 
-    ros::Publisher imu_pub_;
-    ros::Publisher* magnetometer_pub_;
+	ros::Publisher imu_pub_;
+	ros::Publisher* magnetometer_pub_;
 
-    std::string imu_frame_id_;
+	std::string imu_frame_id_;
 
-    ros::Time last_update_;
+	ros::Time last_update_;
 
-    //RTUIMULib stuff
-    RTIMUSettings imu_settings_;
-    RTIMU *imu_;
+	//RTUIMULib stuff
+	RTIMU *imu_;
+
+	class ImuSettings: public RTIMUSettings
+	{
+	public:
+		ImuSettings(ros::NodeHandle* nh) : settings_nh_(nh){setDefaults();}
+		virtual bool loadSettings();
+		virtual bool saveSettings(){return true;}
+	private:
+		ros::NodeHandle* settings_nh_;
+	} imu_settings_;
 };
 
-I2cImu::I2cImu() : nh_(), private_nh_("~")
+I2cImu::I2cImu() :
+		nh_(), private_nh_("~"), imu_settings_(&private_nh_)
 {
 
-	// params used for all
-    private_nh_.param<std::string>("frame_id", imu_frame_id_, "imu_link");
+	// do all the ros parameter reading & pulbishing
+	private_nh_.param<std::string>("frame_id", imu_frame_id_, "imu_link");
 
-    private_nh_.param<int>("imu_type", imu_settings_.m_imuType, imu_settings_.m_imuType);
+	imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu",1);
 
-    private_nh_.param<int>("fusion_type", imu_settings_.m_fusionType, imu_settings_.m_fusionType);
-    int temp_int;
-    private_nh_.param<int>("i2c_bus", temp_int, (int)imu_settings_.m_I2CBus);
-    imu_settings_.m_I2CBus = (unsigned char)temp_int;
-
-    private_nh_.param<int>("i2c_slave_address", temp_int, (int)imu_settings_.m_I2CSlaveAddress);
-    imu_settings_.m_I2CSlaveAddress = (unsigned char)temp_int;
-
-    //MPU9150
-    private_nh_.param<int>("mpu9150/gyro_accel_sample_rate", imu_settings_.m_MPU9150GyroAccelSampleRate, imu_settings_.m_MPU9150GyroAccelSampleRate);
-    private_nh_.param<int>("mpu9150/compass_sample_rate", imu_settings_.m_MPU9150CompassSampleRate, imu_settings_.m_MPU9150CompassSampleRate);
-    private_nh_.param<int>("mpu9150/accel_full_scale_range", imu_settings_.m_MPU9150AccelFsr, imu_settings_.m_MPU9150AccelFsr);
-    private_nh_.param<int>("mpu9150/gyro_accel_low_pass_filter", imu_settings_.m_MPU9150GyroAccelLpf, imu_settings_.m_MPU9150GyroAccelLpf);
-    private_nh_.param<int>("mpu9150/gyro_full_scale_range", imu_settings_.m_MPU9150GyroFsr, imu_settings_.m_MPU9150GyroFsr);
-
-    //MPU9250
-    private_nh_.param<int>("mpu9250/gyro_accel_sample_rate", imu_settings_.m_MPU9250GyroAccelSampleRate, imu_settings_.m_MPU9250GyroAccelSampleRate);
-    private_nh_.param<int>("mpu9250/compass_sample_rate", imu_settings_.m_MPU9250CompassSampleRate, imu_settings_.m_MPU9250CompassSampleRate);
-    private_nh_.param<int>("mpu9250/accel_full_scale_range", imu_settings_.m_MPU9250AccelFsr, imu_settings_.m_MPU9250AccelFsr);
-    private_nh_.param<int>("mpu9250/accel_low_pass_filter", imu_settings_.m_MPU9250AccelLpf, imu_settings_.m_MPU9250AccelLpf);
-    private_nh_.param<int>("mpu9250/gyro_full_scale_range", imu_settings_.m_MPU9250GyroFsr, imu_settings_.m_MPU9250GyroFsr);
-    private_nh_.param<int>("mpu9250/gyro_low_pass_filter", imu_settings_.m_MPU9250GyroLpf, imu_settings_.m_MPU9250GyroLpf);
-
-    //GD20HM303D
-    private_nh_.param<int>("GD20HM303D/gyro_sample_rate", imu_settings_.m_GD20HM303DGyroSampleRate, imu_settings_.m_GD20HM303DGyroSampleRate);
-    private_nh_.param<int>("GD20HM303D/accel_sample_rate", imu_settings_.m_GD20HM303DAccelSampleRate, imu_settings_.m_GD20HM303DAccelSampleRate);
-    private_nh_.param<int>("GD20HM303D/compass_sample_rate", imu_settings_.m_GD20HM303DCompassSampleRate, imu_settings_.m_GD20HM303DCompassSampleRate);
-    private_nh_.param<int>("GD20HM303D/accel_full_scale_range", imu_settings_.m_GD20HM303DAccelFsr, imu_settings_.m_GD20HM303DAccelFsr);
-    private_nh_.param<int>("GD20HM303D/gyro_full_scale_range", imu_settings_.m_GD20HM303DGyroFsr, imu_settings_.m_GD20HM303DGyroFsr);
-    private_nh_.param<int>("GD20HM303D/compass_full_scale_range", imu_settings_.m_GD20HM303DCompassFsr, imu_settings_.m_GD20HM303DCompassFsr);
-    private_nh_.param<int>("GD20HM303D/accel_low_pass_filter", imu_settings_.m_GD20HM303DAccelLpf, imu_settings_.m_GD20HM303DAccelLpf);
-    private_nh_.param<int>("GD20HM303D/gyro_high_pass_filter", imu_settings_.m_GD20HM303DGyroHpf, imu_settings_.m_GD20HM303DGyroHpf);
-    private_nh_.param<int>("GD20HM303D/gyro_bandwidth", imu_settings_.m_GD20HM303DGyroBW, imu_settings_.m_GD20HM303DGyroBW);
-
-    //GD20M303DLHC
-    private_nh_.param<int>("GD20M303DLHC/gyro_sample_rate", imu_settings_.m_GD20M303DLHCGyroSampleRate, imu_settings_.m_GD20M303DLHCGyroSampleRate);
-    private_nh_.param<int>("GD20M303DLHC/accel_sample_rate", imu_settings_.m_GD20M303DLHCAccelSampleRate, imu_settings_.m_GD20M303DLHCAccelSampleRate);
-    private_nh_.param<int>("GD20M303DLHC/compass_sample_rate", imu_settings_.m_GD20M303DLHCCompassSampleRate, imu_settings_.m_GD20M303DLHCCompassSampleRate);
-    private_nh_.param<int>("GD20M303DLHC/accel_full_scale_range", imu_settings_.m_GD20M303DLHCAccelFsr, imu_settings_.m_GD20M303DLHCAccelFsr);
-    private_nh_.param<int>("GD20M303DLHC/gyro_full_scale_range", imu_settings_.m_GD20M303DLHCGyroFsr, imu_settings_.m_GD20M303DLHCGyroFsr);
-    private_nh_.param<int>("GD20M303DLHC/compass_full_scale_range", imu_settings_.m_GD20M303DLHCCompassFsr, imu_settings_.m_GD20M303DLHCCompassFsr);
-    private_nh_.param<int>("GD20M303DLHC/gyro_high_pass_filter", imu_settings_.m_GD20M303DLHCGyroHpf, imu_settings_.m_GD20M303DLHCGyroHpf);
-    private_nh_.param<int>("GD20M303DLHC/gyro_bandwidth", imu_settings_.m_GD20M303DLHCGyroBW, imu_settings_.m_GD20M303DLHCGyroBW);
-
-
-    //LSM9DS0
-    private_nh_.param<int>("LSM9DS0/gyro_sample_rate", imu_settings_.m_LSM9DS0GyroSampleRate, imu_settings_.m_LSM9DS0GyroSampleRate);
-    private_nh_.param<int>("LSM9DS0/accel_sample_rate", imu_settings_.m_LSM9DS0AccelSampleRate, imu_settings_.m_LSM9DS0AccelSampleRate);
-    private_nh_.param<int>("LSM9DS0/compass_sample_rate", imu_settings_.m_LSM9DS0CompassSampleRate, imu_settings_.m_LSM9DS0CompassSampleRate);
-    private_nh_.param<int>("LSM9DS0/accel_full_scale_range", imu_settings_.m_LSM9DS0AccelFsr, imu_settings_.m_LSM9DS0AccelFsr);
-    private_nh_.param<int>("LSM9DS0/gyro_full_scale_range", imu_settings_.m_LSM9DS0GyroFsr, imu_settings_.m_LSM9DS0GyroFsr);
-    private_nh_.param<int>("LSM9DS0/compass_full_scale_range", imu_settings_.m_LSM9DS0CompassFsr, imu_settings_.m_LSM9DS0CompassFsr);
-    private_nh_.param<int>("LSM9DS0/accel_low_pass_filter", imu_settings_.m_LSM9DS0AccelLpf, imu_settings_.m_LSM9DS0AccelLpf);
-    private_nh_.param<int>("LSM9DS0/gyro_high_pass_filter", imu_settings_.m_LSM9DS0GyroHpf, imu_settings_.m_LSM9DS0GyroHpf);
-    private_nh_.param<int>("LSM9DS0/gyro_bandwidth", imu_settings_.m_LSM9DS0GyroBW, imu_settings_.m_LSM9DS0GyroBW);
-
-	std::vector<int> compass_max, compass_min;
-	if(private_nh_.getParam("calib/compass_min", compass_min) && private_nh_.getParam("calib/compass_max", compass_min)
-			&& compass_min.size() == 3 && compass_min.size() == 3)
-	{
-		imu_settings_.m_compassCalMin = RTVector3(compass_min[0],compass_min[1],compass_min[2]);
-		imu_settings_.m_compassCalMax = RTVector3(compass_max[0],compass_max[1],compass_max[2]);
-	}
-
-    imu_ = RTIMU::createIMU(&imu_settings_);
-    if(imu_==NULL)
-    {
-        ROS_FATAL("I2cImu - %s - Failed to open the i2c device", __FUNCTION__);
-        ROS_BREAK();
-    }
-
-    imu_->IMUInit();
- 
-    imu_pub_ = nh_.advertise<sensor_msgs::Imu>("/imu", 1.0/(imu_->IMUGetPollInterval()/1000.0));
-
-    bool magnetometer;
+	bool magnetometer;
 	private_nh_.param("publish_magnetometer", magnetometer, false);
-	if(magnetometer)
+	if (magnetometer)
 	{
 		magnetometer_pub_ = new ros::Publisher();
-		*magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3>("/mag", 10, false);
+		*magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3>("mag", 10, false);
 	}
+
+	imu_settings_.loadSettings();
+
+	// now set up the IMU
+
+	imu_ = RTIMU::createIMU(&imu_settings_);
+	if (imu_ == NULL)
+	{
+		ROS_FATAL("I2cImu - %s - Failed to open the i2c device", __FUNCTION__);
+		ROS_BREAK();
+	}
+	imu_->IMUInit();
 }
 
 void I2cImu::update()
 {
 
-    while (imu_->IMURead())
-    {
-        RTIMU_DATA imuData = imu_->getIMUData();
+	while (imu_->IMURead())
+	{
+		RTIMU_DATA imuData = imu_->getIMUData();
 
-        ros::Time current_time = ros::Time::now();
-	// sensor msg topic output
-        sensor_msgs::Imu imu_msg;
+		ros::Time current_time = ros::Time::now();
+		// sensor msg topic output
+		sensor_msgs::Imu imu_msg;
 
-        imu_msg.header.stamp = current_time;
-        imu_msg.header.frame_id = imu_frame_id_;
-        imu_msg.orientation.x = imuData.fusionQPose.x();
-        imu_msg.orientation.y = imuData.fusionQPose.y();
-        imu_msg.orientation.z = imuData.fusionQPose.z();
-        imu_msg.orientation.w = imuData.fusionQPose.scalar();
+		imu_msg.header.stamp = current_time;
+		imu_msg.header.frame_id = imu_frame_id_;
+		imu_msg.orientation.x = imuData.fusionQPose.x();
+		imu_msg.orientation.y = imuData.fusionQPose.y();
+		imu_msg.orientation.z = imuData.fusionQPose.z();
+		imu_msg.orientation.w = imuData.fusionQPose.scalar();
 
-        imu_msg.angular_velocity.x = imuData.gyro.x();
-        imu_msg.angular_velocity.y = imuData.gyro.y();
-        imu_msg.angular_velocity.z = imuData.gyro.z();
+		imu_msg.angular_velocity.x = imuData.gyro.x();
+		imu_msg.angular_velocity.y = imuData.gyro.y();
+		imu_msg.angular_velocity.z = imuData.gyro.z();
 
-        imu_msg.linear_acceleration.x = imuData.accel.x() * G_2_MPSS;
-        imu_msg.linear_acceleration.y = imuData.accel.y() * G_2_MPSS;
-        imu_msg.linear_acceleration.z = imuData.accel.z() * G_2_MPSS;
+		imu_msg.linear_acceleration.x = imuData.accel.x() * G_2_MPSS;
+		imu_msg.linear_acceleration.y = imuData.accel.y() * G_2_MPSS;
+		imu_msg.linear_acceleration.z = imuData.accel.z() * G_2_MPSS;
 
-        imu_pub_.publish(imu_msg);
+		imu_pub_.publish(imu_msg);
 
-        if(magnetometer_pub_ != NULL && imuData.compassValid)
-        {
-			 geometry_msgs::Vector3Stamped msg;
-			 msg.header.stamp = current_time;
-			 msg.header.frame_id = imu_frame_id_;
-			 msg.vector.x = imuData.compass.x();
-			 msg.vector.y = imuData.compass.y();
-			 msg.vector.z = imuData.compass.z();
+		if (magnetometer_pub_ != NULL && imuData.compassValid)
+		{
+			geometry_msgs::Vector3Stamped msg;
+			msg.header.stamp = current_time;
+			msg.header.frame_id = imu_frame_id_;
+			msg.vector.x = imuData.compass.x();
+			msg.vector.y = imuData.compass.y();
+			msg.vector.z = imuData.compass.z();
 
-			 magnetometer_pub_->publish(msg);
-         }
+			magnetometer_pub_->publish(msg);
+		}
 
-    }
+	}
 
+}
+
+bool I2cImu::ImuSettings::loadSettings()
+{
+	int temp_int;
+
+	// General
+	settings_nh_->getParam("imu_type", m_imuType);
+	settings_nh_->getParam("fusion_type", m_fusionType);
+
+	if(settings_nh_->getParam("i2c_bus", temp_int))
+		m_I2CBus = (unsigned char) temp_int;
+
+	if(settings_nh_->getParam("i2c_slave_address", temp_int))
+			m_I2CSlaveAddress = (unsigned char) temp_int;
+
+	//MPU9150
+	settings_nh_->getParam("mpu9150/gyro_accel_sample_rate", m_MPU9150GyroAccelSampleRate);
+	settings_nh_->getParam("mpu9150/compass_sample_rate", m_MPU9150CompassSampleRate);
+	settings_nh_->getParam("mpu9150/accel_full_scale_range", m_MPU9150AccelFsr);
+	settings_nh_->getParam("mpu9150/gyro_accel_low_pass_filter", m_MPU9150GyroAccelLpf);
+	settings_nh_->getParam("mpu9150/gyro_full_scale_range", m_MPU9150GyroFsr);
+
+	//MPU9250
+	settings_nh_->getParam("mpu9250/gyro_accel_sample_rate", m_MPU9250GyroAccelSampleRate);
+	settings_nh_->getParam("mpu9250/compass_sample_rate", m_MPU9250CompassSampleRate);
+	settings_nh_->getParam("mpu9250/accel_full_scale_range", m_MPU9250AccelFsr);
+	settings_nh_->getParam("mpu9250/accel_low_pass_filter", m_MPU9250AccelLpf);
+	settings_nh_->getParam("mpu9250/gyro_full_scale_range", m_MPU9250GyroFsr);
+	settings_nh_->getParam("mpu9250/gyro_low_pass_filter", m_MPU9250GyroLpf);
+
+	//GD20HM303D
+	settings_nh_->getParam("GD20HM303D/gyro_sample_rate", m_GD20HM303DGyroSampleRate);
+	settings_nh_->getParam("GD20HM303D/accel_sample_rate", m_GD20HM303DAccelSampleRate);
+	settings_nh_->getParam("GD20HM303D/compass_sample_rate", m_GD20HM303DCompassSampleRate);
+	settings_nh_->getParam("GD20HM303D/accel_full_scale_range", m_GD20HM303DAccelFsr);
+	settings_nh_->getParam("GD20HM303D/gyro_full_scale_range", m_GD20HM303DGyroFsr);
+	settings_nh_->getParam("GD20HM303D/compass_full_scale_range", m_GD20HM303DCompassFsr);
+	settings_nh_->getParam("GD20HM303D/accel_low_pass_filter", m_GD20HM303DAccelLpf);
+	settings_nh_->getParam("GD20HM303D/gyro_high_pass_filter", m_GD20HM303DGyroHpf);
+	settings_nh_->getParam("GD20HM303D/gyro_bandwidth", m_GD20HM303DGyroBW);
+
+	//GD20M303DLHC
+	settings_nh_->getParam("GD20M303DLHC/gyro_sample_rate",m_GD20M303DLHCGyroSampleRate);
+	settings_nh_->getParam("GD20M303DLHC/accel_sample_rate",m_GD20M303DLHCAccelSampleRate);
+	settings_nh_->getParam("GD20M303DLHC/compass_sample_rate",m_GD20M303DLHCCompassSampleRate);
+	settings_nh_->getParam("GD20M303DLHC/accel_full_scale_range",m_GD20M303DLHCAccelFsr);
+	settings_nh_->getParam("GD20M303DLHC/gyro_full_scale_range",m_GD20M303DLHCGyroFsr);
+	settings_nh_->getParam("GD20M303DLHC/compass_full_scale_range",m_GD20M303DLHCCompassFsr);
+	settings_nh_->getParam("GD20M303DLHC/gyro_high_pass_filter",m_GD20M303DLHCGyroHpf);
+	settings_nh_->getParam("GD20M303DLHC/gyro_bandwidth",m_GD20M303DLHCGyroBW);
+
+	//LSM9DS0
+	settings_nh_->getParam("LSM9DS0/gyro_sample_rate",m_LSM9DS0GyroSampleRate);
+	settings_nh_->getParam("LSM9DS0/accel_sample_rate",m_LSM9DS0AccelSampleRate);
+	settings_nh_->getParam("LSM9DS0/compass_sample_rate",m_LSM9DS0CompassSampleRate);
+	settings_nh_->getParam("LSM9DS0/accel_full_scale_range",m_LSM9DS0AccelFsr);
+	settings_nh_->getParam("LSM9DS0/gyro_full_scale_range",m_LSM9DS0GyroFsr);
+	settings_nh_->getParam("LSM9DS0/compass_full_scale_range",m_LSM9DS0CompassFsr);
+	settings_nh_->getParam("LSM9DS0/accel_low_pass_filter",m_LSM9DS0AccelLpf);
+	settings_nh_->getParam("LSM9DS0/gyro_high_pass_filter",m_LSM9DS0GyroHpf);
+	settings_nh_->getParam("LSM9DS0/gyro_bandwidth",m_LSM9DS0GyroBW);
+
+	std::vector<int> compass_max, compass_min;
+	if (settings_nh_->getParam("calib/compass_min", compass_min)
+			&& settings_nh_->getParam("calib/compass_max", compass_min)
+			&& compass_min.size() == 3 && compass_min.size() == 3)
+	{
+		m_compassCalMin = RTVector3(compass_min[0], compass_min[1], compass_min[2]);
+		m_compassCalMax = RTVector3(compass_max[0],compass_max[1], compass_max[2]);
+	}
+
+	return true;
 }
 
 void I2cImu::spin()
 {
-    ros::Rate r(1.0/(imu_->IMUGetPollInterval()/1000.0));
-    while(nh_.ok())
-    {
-        update();
+	ros::Rate r(1.0 / (imu_->IMUGetPollInterval() / 1000.0));
+	while (nh_.ok())
+	{
+		update();
 
-        ros::spinOnce();
-        r.sleep();
-    }
-
+		ros::spinOnce();
+		r.sleep();
+	}
 }
 
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "i2c_imu_node");
+	ros::init(argc, argv, "i2c_imu_node");
 
-    ROS_INFO("RTIMU Node for ROS");
+	ROS_INFO("RTIMU Node for ROS");
 
-    I2cImu i2c_imu;
-    i2c_imu.spin();
+	I2cImu i2c_imu;
+	i2c_imu.spin();
 
-    return(0);
+	return (0);
 }
-
 // EOF
