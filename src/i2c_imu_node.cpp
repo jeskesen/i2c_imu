@@ -63,7 +63,7 @@ private:
 };
 
 I2cImu::I2cImu() :
-		nh_(), private_nh_("~"), imu_settings_(&private_nh_)
+		nh_(), private_nh_("~"), imu_settings_(&private_nh_), euler_pub_(NULL), magnetometer_pub_(NULL)
 {
 
 	// do all the ros parameter reading & pulbishing
@@ -76,7 +76,7 @@ I2cImu::I2cImu() :
 	if (magnetometer)
 	{
 		magnetometer_pub_ = new ros::Publisher();
-		*magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3>("mag", 10, false);
+		*magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("mag", 10, false);
 	}
 
 	bool euler;
@@ -84,7 +84,7 @@ I2cImu::I2cImu() :
 	if (euler)
 	{
 		euler_pub_ = new ros::Publisher();
-		*euler_pub_ = nh_.advertise<geometry_msgs::Vector3>("euler", 10, false);
+		*euler_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("euler", 10, false);
 	}
 	imu_settings_.loadSettings();
 
