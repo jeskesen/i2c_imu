@@ -42,6 +42,7 @@ private:
 
 	ros::Publisher imu_pub_;
 	ros::Publisher* magnetometer_pub_;
+	ros::Publisher* euler_pub_;
 
 	std::string imu_frame_id_;
 
@@ -68,7 +69,7 @@ I2cImu::I2cImu() :
 	// do all the ros parameter reading & pulbishing
 	private_nh_.param<std::string>("frame_id", imu_frame_id_, "imu_link");
 
-	imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu",1);
+	imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu",10);
 
 	bool magnetometer;
 	private_nh_.param("publish_magnetometer", magnetometer, false);
@@ -78,6 +79,13 @@ I2cImu::I2cImu() :
 		*magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3>("mag", 10, false);
 	}
 
+	bool euler;
+	private_nh_.param("publish_euler", euler, false);
+	if (euler)
+	{
+		euler_pub_ = new ros::Publisher();
+		*euler_pub_ = nh_.advertise<geometry_msgs::Vector3>("euler", 10, false);
+	}
 	imu_settings_.loadSettings();
 
 	// now set up the IMU
@@ -88,7 +96,13 @@ I2cImu::I2cImu() :
 		ROS_FATAL("I2cImu - %s - Failed to open the i2c device", __FUNCTION__);
 		ROS_BREAK();
 	}
-	imu_->IMUInit();
+
+	if (!imu_->IMUInit())
+	{
+		ROS_FATAL("I2cImu - %s - Failed to init the IMU", __FUNCTION__);
+		ROS_BREAK();
+	}
+	;
 }
 
 void I2cImu::update()
@@ -131,6 +145,16 @@ void I2cImu::update()
 			magnetometer_pub_->publish(msg);
 		}
 
+		if (euler_pub_ != NULL)
+		{
+			geometry_msgs::Vector3Stamped msg;
+			msg.header.stamp = current_time;
+			msg.header.frame_id = imu_frame_id_;
+			msg.vector.x = imuData.fusionPose.x();
+			msg.vector.y = imuData.fusionPose.y();
+			msg.vector.z = imuData.fusionPose.z();
+			euler_pub_->publish(msg);
+		}
 	}
 
 }
