@@ -161,6 +161,7 @@ void I2cImu::update()
 
 bool I2cImu::ImuSettings::loadSettings()
 {
+	ROS_INFO("%s: reading IMU parameters from param server", __FUNCTION__);
 	int temp_int;
 
 	// General
@@ -222,11 +223,12 @@ bool I2cImu::ImuSettings::loadSettings()
 
 	std::vector<int> compass_max, compass_min;
 	if (settings_nh_->getParam("calib/compass_min", compass_min)
-			&& settings_nh_->getParam("calib/compass_max", compass_min)
-			&& compass_min.size() == 3 && compass_min.size() == 3)
+			&& settings_nh_->getParam("calib/compass_max", compass_max)
+			&& compass_min.size() == 3 && compass_max.size() == 3)
 	{
 		m_compassCalMin = RTVector3(compass_min[0], compass_min[1], compass_min[2]);
 		m_compassCalMax = RTVector3(compass_max[0],compass_max[1], compass_max[2]);
+		m_compassCalValid = true;
 	}
 
 	return true;
