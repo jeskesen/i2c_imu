@@ -90,32 +90,11 @@ catkin_package(
 ## Build ##
 ###########
 
-set(RTIMU_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/RTIMULib/RTIMULib CACHE PATH "Path to RTIMULib")
-include_directories(${RTIMU_SOURCE_DIR})
-
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${RTIMU_SOURCE_DIR}
   ${catkin_INCLUDE_DIRS}
-)
-
-## Declare a cpp library
-add_library(rtimu
-  ${RTIMU_SOURCE_DIR}/RTFusion.cpp
-  ${RTIMU_SOURCE_DIR}/RTFusionKalman4.cpp
-  ${RTIMU_SOURCE_DIR}/RTFusionRTQF.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMU.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMUGD20HM303D.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMUGD20M303DLHC.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMUHal.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMULSM9DS0.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMUMPU9150.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMUMPU9250.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMUNull.cpp
-  ${RTIMU_SOURCE_DIR}/RTIMUSettings.cpp
-  ${RTIMU_SOURCE_DIR}/RTMath.cpp
 )
 
 ## Declare a cpp executable
@@ -127,7 +106,7 @@ add_executable(i2c_imu_node src/i2c_imu_node.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(i2c_imu_node
-  rtimu
+  RTIMULib
   ${catkin_LIBRARIES}
 )
 

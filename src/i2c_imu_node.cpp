@@ -20,7 +20,7 @@
 #include <tf/transform_broadcaster.h>
 #include <sensor_msgs/Imu.h>
 
-#include "RTIMU.h"
+#include "RTIMULib.h"
 #include "RTIMUSettings.h"
 
 #define G_2_MPSS 9.80665
