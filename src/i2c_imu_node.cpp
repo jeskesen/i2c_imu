@@ -19,6 +19,7 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <sensor_msgs/Imu.h>
+#include <angles/angles.h>
 
 #include "RTIMULib.h"
 #include "RTIMUSettings.h"
@@ -173,6 +174,11 @@ bool I2cImu::ImuSettings::loadSettings()
 
 	if(settings_nh_->getParam("i2c_slave_address", temp_int))
 			m_I2CSlaveAddress = (unsigned char) temp_int;
+
+
+	double declination_radians;
+	settings_nh_->param("magnetic_declination", declination_radians, 0.0);
+	m_compassAdjDeclination = angles::to_degrees(declination_radians);
 
 	//MPU9150
 	settings_nh_->getParam("mpu9150/gyro_accel_sample_rate", m_MPU9150GyroAccelSampleRate);
