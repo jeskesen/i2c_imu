@@ -41,8 +41,8 @@ private:
 	tf::TransformBroadcaster tf_broadcaster_;
 
 	ros::Publisher imu_pub_;
-	ros::Publisher* magnetometer_pub_;
-	ros::Publisher* euler_pub_;
+	ros::Publisher magnetometer_pub_;
+	ros::Publisher euler_pub_;
 
 	std::string imu_frame_id_;
 
@@ -63,28 +63,26 @@ private:
 };
 
 I2cImu::I2cImu() :
-		nh_(), private_nh_("~"), imu_settings_(&private_nh_), euler_pub_(NULL), magnetometer_pub_(NULL)
+		nh_(), private_nh_("~"), imu_settings_(&private_nh_)
 {
 
 	// do all the ros parameter reading & pulbishing
 	private_nh_.param<std::string>("frame_id", imu_frame_id_, "imu_link");
 
-	imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu",10);
+	imu_pub_ = nh_.advertise<sensor_msgs::Imu>("data",10);
 
 	bool magnetometer;
 	private_nh_.param("publish_magnetometer", magnetometer, false);
 	if (magnetometer)
 	{
-		magnetometer_pub_ = new ros::Publisher();
-		*magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("mag", 10, false);
+		magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("mag", 10, false);
 	}
 
 	bool euler;
 	private_nh_.param("publish_euler", euler, false);
 	if (euler)
 	{
-		euler_pub_ = new ros::Publisher();
-		*euler_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("euler", 10, false);
+		euler_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("euler", 10, false);
 	}
 	imu_settings_.loadSettings();
 
@@ -142,7 +140,7 @@ void I2cImu::update()
 			msg.vector.y = imuData.compass.y();
 			msg.vector.z = imuData.compass.z();
 
-			magnetometer_pub_->publish(msg);
+			magnetometer_pub_.publish(msg);
 		}
 
 		if (euler_pub_ != NULL)
@@ -153,7 +151,7 @@ void I2cImu::update()
 			msg.vector.x = imuData.fusionPose.x();
 			msg.vector.y = imuData.fusionPose.y();
 			msg.vector.z = imuData.fusionPose.z();
-			euler_pub_->publish(msg);
+			euler_pub_.publish(msg);
 		}
 	}
 
