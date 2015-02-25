@@ -19,6 +19,7 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <sensor_msgs/Imu.h>
+#include <angles/angles.h>
 
 #include "RTIMULib.h"
 #include "RTIMUSettings.h"
@@ -172,6 +173,11 @@ bool I2cImu::ImuSettings::loadSettings()
 	if(settings_nh_->getParam("i2c_slave_address", temp_int))
 			m_I2CSlaveAddress = (unsigned char) temp_int;
 
+
+	double declination_radians;
+	settings_nh_->param("magnetic_declination", declination_radians, 0.0);
+	m_compassAdjDeclination = angles::to_degrees(declination_radians);
+
 	//MPU9150
 	settings_nh_->getParam("mpu9150/gyro_accel_sample_rate", m_MPU9150GyroAccelSampleRate);
 	settings_nh_->getParam("mpu9150/compass_sample_rate", m_MPU9150CompassSampleRate);
@@ -207,6 +213,16 @@ bool I2cImu::ImuSettings::loadSettings()
 	settings_nh_->getParam("GD20M303DLHC/compass_full_scale_range",m_GD20M303DLHCCompassFsr);
 	settings_nh_->getParam("GD20M303DLHC/gyro_high_pass_filter",m_GD20M303DLHCGyroHpf);
 	settings_nh_->getParam("GD20M303DLHC/gyro_bandwidth",m_GD20M303DLHCGyroBW);
+
+	//GD20HM303DLHC
+	settings_nh_->getParam("GD20HM303DLHC/gyro_sample_rate", m_GD20HM303DLHCGyroSampleRate);
+	settings_nh_->getParam("GD20HM303DLHC/accel_sample_rate",m_GD20HM303DLHCAccelSampleRate);
+	settings_nh_->getParam("GD20HM303DLHC/compass_sample_rate",m_GD20HM303DLHCCompassSampleRate);
+	settings_nh_->getParam("GD20HM303DLHC/accel_full_scale_range",m_GD20HM303DLHCAccelFsr);
+	settings_nh_->getParam("GD20HM303DLHC/gyro_full_scale_range",m_GD20HM303DLHCGyroFsr);
+	settings_nh_->getParam("GD20HM303DLHC/compass_full_scale_range",m_GD20HM303DLHCCompassFsr);
+	settings_nh_->getParam("GD20HM303DLHC/gyro_high_pass_filter",m_GD20HM303DLHCGyroHpf);
+	settings_nh_->getParam("GD20HM303DLHC/gyro_bandwidth",m_GD20HM303DLHCGyroBW);
 
 	//LSM9DS0
 	settings_nh_->getParam("LSM9DS0/gyro_sample_rate",m_LSM9DS0GyroSampleRate);
