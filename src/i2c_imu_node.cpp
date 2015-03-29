@@ -48,6 +48,7 @@ private:
 	std::string imu_frame_id_;
 
 	ros::Time last_update_;
+	double declination_radians_;
 
 	//RTUIMULib stuff
 	RTIMU *imu_;
@@ -86,6 +87,8 @@ I2cImu::I2cImu() :
 		euler_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("euler", 10, false);
 	}
 	imu_settings_.loadSettings();
+
+	private_nh_.param("magnetic_declination", declination_radians_, 0.0);
 
 	// now set up the IMU
 
@@ -151,7 +154,7 @@ void I2cImu::update()
 			msg.header.frame_id = imu_frame_id_;
 			msg.vector.x = imuData.fusionPose.x();
 			msg.vector.y = imuData.fusionPose.y();
-			msg.vector.z = -imuData.fusionPose.z();
+			msg.vector.z = (-imuData.fusionPose.z()) - declination_radians_;
 			euler_pub_.publish(msg);
 		}
 	}
@@ -174,9 +177,9 @@ bool I2cImu::ImuSettings::loadSettings()
 			m_I2CSlaveAddress = (unsigned char) temp_int;
 
 
-	double declination_radians;
-	settings_nh_->param("magnetic_declination", declination_radians, 0.0);
-	m_compassAdjDeclination = angles::to_degrees(declination_radians);
+	//double declination_radians;
+	//settings_nh_->param("magnetic_declination", declination_radians, 0.0);
+	//m_compassAdjDeclination = angles::to_degrees(declination_radians);
 
 	//MPU9150
 	settings_nh_->getParam("mpu9150/gyro_accel_sample_rate", m_MPU9150GyroAccelSampleRate);
