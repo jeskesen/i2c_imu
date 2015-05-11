@@ -274,6 +274,15 @@ bool I2cImu::ImuSettings::loadSettings()
 		m_compassCalValid = true;
 	}
 
+	std::vector<int> accel_max, accel_min;
+	if (settings_nh_->getParam("calib/accel_min", accel_min)
+			&& settings_nh_->getParam("calib/accel_max", accel_max)
+			&& accel_min.size() == 3 && accel_max.size() == 3)
+	{
+		m_accelCalMin = RTVector3(accel_min[0], accel_min[1], accel_min[2]);
+		m_accelCalMax = RTVector3(accel_max[0],accel_max[1], accel_max[2]);
+		m_accelCalValid = true;
+	}
 
 
 	return true;
