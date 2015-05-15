@@ -180,7 +180,7 @@ void I2cImu::update()
 			msg.header.frame_id = imu_frame_id_;
 			msg.vector.x = imuData.fusionPose.x();
 			msg.vector.y = imuData.fusionPose.y();
-			msg.vector.z = imuData.fusionPose.z();
+			msg.vector.z = -imuData.fusionPose.z();
 			euler_pub_.publish(msg);
 		}
 	}
