@@ -90,7 +90,7 @@ I2cImu::I2cImu() :
 	}
 
 	std::vector<double> orientation_covariance, angular_velocity_covariance, linear_acceleration_covariance;
-	if (private_nh_.getParam("orientation_covarience", orientation_covariance) && orientation_covariance.size() == 9)
+	if (private_nh_.getParam("orientation_covariance", orientation_covariance) && orientation_covariance.size() == 9)
 	{
 		for(int i=0; i<9; i++)
 		{
@@ -98,7 +98,7 @@ I2cImu::I2cImu() :
 		}
 	}
 
-	if (private_nh_.getParam("angular_velocity_covarience", angular_velocity_covariance) && angular_velocity_covariance.size() == 9)
+	if (private_nh_.getParam("angular_velocity_covariance", angular_velocity_covariance) && angular_velocity_covariance.size() == 9)
 	{
 		for(int i=0; i<9; i++)
 		{
