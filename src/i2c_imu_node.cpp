@@ -38,6 +38,8 @@ private:
 	//ROS Stuff
 	ros::NodeHandle nh_;
 	ros::NodeHandle private_nh_;
+	// sensor msg topic output
+	sensor_msgs::Imu imu_msg;
 
 	tf::TransformBroadcaster tf_broadcaster_;
 
@@ -61,6 +63,7 @@ private:
 		virtual bool saveSettings(){return true;}
 	private:
 		ros::NodeHandle* settings_nh_;
+
 	} imu_settings_;
 };
 
@@ -86,6 +89,32 @@ I2cImu::I2cImu() :
 	{
 		euler_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("euler", 10, false);
 	}
+
+	std::vector<double> orientation_covariance, angular_velocity_covariance, linear_acceleration_covariance;
+	if (private_nh_.getParam("orientation_covariance", orientation_covariance) && orientation_covariance.size() == 9)
+	{
+		for(int i=0; i<9; i++)
+		{
+			imu_msg.orientation_covariance[i]=orientation_covariance[i];
+		}
+	}
+
+	if (private_nh_.getParam("angular_velocity_covariance", angular_velocity_covariance) && angular_velocity_covariance.size() == 9)
+	{
+		for(int i=0; i<9; i++)
+		{
+			imu_msg.angular_velocity_covariance[i]=angular_velocity_covariance[i];
+		}
+	}
+
+	if (private_nh_.getParam("linear_acceleration_covariance", linear_acceleration_covariance) && linear_acceleration_covariance.size() == 9)
+	{
+		for(int i=0; i<9; i++)
+		{
+			imu_msg.linear_acceleration_covariance[i]=linear_acceleration_covariance[i];
+		}
+	}
+
 	imu_settings_.loadSettings();
 
 	private_nh_.param("magnetic_declination", declination_radians_, 0.0);
@@ -115,8 +144,7 @@ void I2cImu::update()
 		RTIMU_DATA imuData = imu_->getIMUData();
 
 		ros::Time current_time = ros::Time::now();
-		// sensor msg topic output
-		sensor_msgs::Imu imu_msg;
+
 
 		imu_msg.header.stamp = current_time;
 		imu_msg.header.frame_id = imu_frame_id_;
@@ -247,6 +275,17 @@ bool I2cImu::ImuSettings::loadSettings()
 		m_compassCalMax = RTVector3(compass_max[0],compass_max[1], compass_max[2]);
 		m_compassCalValid = true;
 	}
+
+	std::vector<int> accel_max, accel_min;
+	if (settings_nh_->getParam("calib/accel_min", accel_min)
+			&& settings_nh_->getParam("calib/accel_max", accel_max)
+			&& accel_min.size() == 3 && accel_max.size() == 3)
+	{
+		m_accelCalMin = RTVector3(accel_min[0], accel_min[1], accel_min[2]);
+		m_accelCalMax = RTVector3(accel_max[0],accel_max[1], accel_max[2]);
+		m_accelCalValid = true;
+	}
+
 
 	return true;
 }
