@@ -79,14 +79,14 @@ I2cImu::I2cImu() :
 	private_nh_.param("publish_magnetometer", magnetometer, false);
 	if (magnetometer)
 	{
-		magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("mag", 10, false);
+		magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3>("mag", 10, false);
 	}
 
 	bool euler;
 	private_nh_.param("publish_euler", euler, false);
 	if (euler)
 	{
-		euler_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("euler", 10, false);
+		euler_pub_ = nh_.advertise<geometry_msgs::Vector3>("euler", 10, false);
 	}
 
 	std::vector<double> orientation_covariance, angular_velocity_covariance, linear_acceleration_covariance;
@@ -163,24 +163,20 @@ void I2cImu::update()
 
 		if (magnetometer_pub_ != NULL && imuData.compassValid)
 		{
-			geometry_msgs::Vector3Stamped msg;
-			msg.header.stamp = current_time;
-			msg.header.frame_id = imu_frame_id_;
-			msg.vector.x = imuData.compass.x();
-			msg.vector.y = imuData.compass.y();
-			msg.vector.z = imuData.compass.z();
+			geometry_msgs::Vector3 msg;
+			msg.x = imuData.compass.x();
+			msg.y = imuData.compass.y();
+			msg.z = imuData.compass.z();
 
 			magnetometer_pub_.publish(msg);
 		}
 
 		if (euler_pub_ != NULL)
 		{
-			geometry_msgs::Vector3Stamped msg;
-			msg.header.stamp = current_time;
-			msg.header.frame_id = imu_frame_id_;
-			msg.vector.x = imuData.fusionPose.x();
-			msg.vector.y = imuData.fusionPose.y();
-			msg.vector.z = -imuData.fusionPose.z();
+			geometry_msgs::Vector3 msg();
+			msg.x = imuData.fusionPose.x();
+			msg.y = imuData.fusionPose.y();
+			msg.z = -imuData.fusionPose.z();
 			euler_pub_.publish(msg);
 		}
 	}
