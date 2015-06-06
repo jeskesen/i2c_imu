@@ -133,6 +133,11 @@ I2cImu::I2cImu() :
 		ROS_FATAL("I2cImu - %s - Failed to init the IMU", __FUNCTION__);
 		ROS_BREAK();
 	}
+
+        imu_->setSlerpPower(0.02);
+        imu_->setGyroEnable(true);
+        imu_->setAccelEnable(true);
+        imu_->setCompassEnable(true);
 	
 }
 
