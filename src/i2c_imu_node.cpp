@@ -268,7 +268,7 @@ bool I2cImu::ImuSettings::loadSettings()
 	settings_nh_->getParam("LSM9DS0/gyro_high_pass_filter",m_LSM9DS0GyroHpf);
 	settings_nh_->getParam("LSM9DS0/gyro_bandwidth",m_LSM9DS0GyroBW);
 
-	std::vector<int> compass_max, compass_min;
+	std::vector<double> compass_max, compass_min;
 	if (settings_nh_->getParam("calib/compass_min", compass_min)
 			&& settings_nh_->getParam("calib/compass_max", compass_max)
 			&& compass_min.size() == 3 && compass_max.size() == 3)
@@ -276,9 +276,15 @@ bool I2cImu::ImuSettings::loadSettings()
 		m_compassCalMin = RTVector3(compass_min[0], compass_min[1], compass_min[2]);
 		m_compassCalMax = RTVector3(compass_max[0],compass_max[1], compass_max[2]);
 		m_compassCalValid = true;
+		
+		ROS_INFO("Got Calibration for Compass");
 	}
-
-	std::vector<int> accel_max, accel_min;
+	else
+	{
+	  	ROS_INFO("No Calibration for Compass");
+	}
+	
+	std::vector<double> accel_max, accel_min;
 	if (settings_nh_->getParam("calib/accel_min", accel_min)
 			&& settings_nh_->getParam("calib/accel_max", accel_max)
 			&& accel_min.size() == 3 && accel_max.size() == 3)
@@ -286,6 +292,12 @@ bool I2cImu::ImuSettings::loadSettings()
 		m_accelCalMin = RTVector3(accel_min[0], accel_min[1], accel_min[2]);
 		m_accelCalMax = RTVector3(accel_max[0],accel_max[1], accel_max[2]);
 		m_accelCalValid = true;
+		
+		ROS_INFO("Got Calibration for Accelerometer");
+	}
+	else
+	{
+	  	ROS_INFO("No Calibration for Accelerometer"); 
 	}
 
 
