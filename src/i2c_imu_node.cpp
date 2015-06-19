@@ -19,12 +19,14 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 #include <angles/angles.h>
 
 #include "RTIMULib.h"
 #include "RTIMUSettings.h"
 
 #define G_2_MPSS 9.80665
+#define uT_2_T 1000000
 
 class I2cImu
 {
@@ -80,7 +82,7 @@ I2cImu::I2cImu() :
 	private_nh_.param("publish_magnetometer", magnetometer, false);
 	if (magnetometer)
 	{
-		magnetometer_pub_ = nh_.advertise<geometry_msgs::Vector3>("mag", 10, false);
+		magnetometer_pub_ = nh_.advertise<sensor_msgs::MagneticField>("mag", 10, false);
 	}
 
 	bool euler;
@@ -170,10 +172,14 @@ void I2cImu::update()
 
 		if (magnetometer_pub_ != NULL && imuData.compassValid)
 		{
-			geometry_msgs::Vector3 msg;
-			msg.x = imuData.compass.x();
-			msg.y = imuData.compass.y();
-			msg.z = imuData.compass.z();
+			sensor_msgs::MagneticField msg;
+
+			msg.header.frame_id=imu_frame_id_;
+			msg.header.stamp=ros::Time::now();
+
+			msg.magnetic_field.x = imuData.compass.x()/uT_2_T;
+			msg.magnetic_field.y = imuData.compass.y()/uT_2_T;
+			msg.magnetic_field.z = imuData.compass.z()/uT_2_T;
 
 			magnetometer_pub_.publish(msg);
 		}
