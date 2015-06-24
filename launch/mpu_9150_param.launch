@@ -1,0 +1,7 @@
+<launch>
+	<node pkg="tf" type="static_transform_publisher" name="imu_to_base" 
+    	args="0 0 .1 0 0 0 base_link imu_link 50" />	
+	<node pkg="i2c_imu" type="i2c_imu_node" name="i2c_imu" output="screen" >
+	<rosparam file="$(find i2c_imu)/param/imu.yaml"/>		
+	</node>        
+</launch>
