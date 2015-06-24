@@ -144,7 +144,7 @@ I2cImu::I2cImu() :
 void I2cImu::update()
 {
 
-	while (imu_->IMURead())
+	while (imu_->IMURead() && ros::ok())
 	{
 		RTIMU_DATA imuData = imu_->getIMUData();
 
@@ -187,6 +187,7 @@ void I2cImu::update()
 			msg.z = (-imuData.fusionPose.z()) - declination_radians_;
 			euler_pub_.publish(msg);
 		}
+		ros::spinOnce();
 	}
 
 }
@@ -295,11 +296,9 @@ bool I2cImu::ImuSettings::loadSettings()
 void I2cImu::spin()
 {
 	ros::Rate r(1.0 / (imu_->IMUGetPollInterval() / 1000.0));
-	while (nh_.ok())
+	while (ros::ok())
 	{
 		update();
-
-		ros::spinOnce();
 		r.sleep();
 	}
 }
