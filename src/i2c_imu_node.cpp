@@ -213,7 +213,8 @@ bool I2cImu::ImuSettings::loadSettings()
 	if(settings_nh_->getParam("i2c_slave_address", temp_int))
 			m_I2CSlaveAddress = (unsigned char) temp_int;
 
-
+	settings_nh_->getParam("axis_rotation", m_axisRotation);
+	
 	//double declination_radians;
 	//settings_nh_->param("magnetic_declination", declination_radians, 0.0);
 	//m_compassAdjDeclination = angles::to_degrees(declination_radians);
