@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   roscpp
   tf
+  angles
 )
 
 ## System dependencies are found with CMake's conventions
@@ -84,7 +85,7 @@ find_library(RTIMULib libRTIMULib.so)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES 
-  CATKIN_DEPENDS sensor_msgs roscpp tf
+  CATKIN_DEPENDS sensor_msgs roscpp tf angles
 #  DEPENDS system_lib
 )
 
