@@ -1,7 +1,7 @@
 i2c_imu
 =======
 
-ROS driver for several 9-DOF IMUs.  This node is a ROS interface for [RTIMULib](https://github.com/richards-tech/RTIMULib) by [richards-tech](http://richardstechnotes.wordpress.com/), a C++ library of drivers & filters of operating I2C IMUs in linux.  I take no credit for RTIMULib (the hard part), I simply created a ROS interface to it (the easy part).
+ROS driver for several 9-DOF IMUs.  This node is a ROS interface for [RTIMULib2](https://github.com/RTIMULib/RTIMULib2) by [richards-tech](http://richardstechnotes.wordpress.com/), a C++ library of drivers & filters of operating I2C IMUs in linux.  I take no credit for RTIMULib (the hard part), I simply created a ROS interface to it (the easy part).
 
 The list of IMUs supported by RTIMULib is as follows:
 
