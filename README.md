@@ -46,3 +46,14 @@ If you want to use custom parameters, such as calibration data, you can specify 
 ## How to calibrate
 Calibration can be done using the tools from RTIMULib2. Intructions on how to do so can be found in [this guide](https://github.com/RTIMULib/RTIMULib2/blob/master/Calibration.pdf)
 
+By default, the calibration data will be written to a file named `RTIMULib.ini` located in the RTIMULib2 directory. In order for the `i2c_imu_node` to use this data, it needs to be converted into a yaml file. A script has been made to automatically do the conversion. It can be found in the `scripts` folder.
+
+**Note**: right now, it will only convert the data for the mpu9250 imu.
+
+### Usage
+```bash
+cd scripts
+./convert_params path/to/RTIMULib.ini path/to/params.yaml
+```
+
+
