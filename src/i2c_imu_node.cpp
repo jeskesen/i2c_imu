@@ -291,6 +291,26 @@ bool I2cImu::ImuSettings::loadSettings()
 	{
 	  	ROS_INFO("No Calibration for Compass");
 	}
+
+	std::vector<double> compass_cal_offset, compass_cal_corr;
+	if (settings_nh_->getParam("calib/compass_cal_offset", compass_cal_offset) &&
+		settings_nh_->getParam("calib/compass_cal_corr", compass_cal_corr))
+	{
+		m_compassCalEllipsoidOffset = RTVector3(compass_cal_offset[0],compass_cal_offset[1], compass_cal_offset[2]);
+		for (int i=0; i<3; i++)
+		{
+			for (int j=0; j<3; j++)
+			{
+				m_compassCalEllipsoidCorr[i][j] = compass_cal_corr[i*3 + j];
+			}
+		}
+		m_compassCalEllipsoidValid = true;
+		ROS_INFO("Got Ellipsoid Calibration for Compass");
+	}
+	else
+	{
+		ROS_INFO("No Ellipsoid Calibration for Compass");
+	}
 	
 	std::vector<double> accel_max, accel_min;
 	if (settings_nh_->getParam("calib/accel_min", accel_min)
