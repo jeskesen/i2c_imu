@@ -18,36 +18,6 @@ Path(os.path.dirname(target_path)).mkdir(parents=True, exist_ok=True)
 print("Target path: '" + str(target_path) + "'")
 
 
-general_params = {
-    "imu_type": None,
-    "imu_frame": "imu_link",
-    "i2c_bus": None,
-    "i2c_slave_address": None,
-    "fusion_type": None,
-    "magnetic_declination": None
-}
-
-# TODO: add parameters for other imu types
-imu_params = {
-    "mpu9250": {
-        "compass_sample_rate": None,
-        "gyro_accel_sample_rate": None,
-        "accel_low_pass_filter": None,
-        "accel_full_scale_range": None,
-        "gyro_low_pass_filter": None,
-        "gyro_full_scale_range": None,
-    }
-}
-
-calibration = {
-    "compass_min": [0] * 3,
-    "compass_max": [0] * 3,
-    "compass_cal_offset": [0] * 3,
-    "compass_cal_corr": [0] * 9,
-    "accel_min": [0] * 3,
-    "accel_max": [0] * 3
-}
-
 imu_types = {
     2: "mpu9150",
     3: "GD20HM303D",
@@ -58,6 +28,16 @@ imu_types = {
 }
 
 imu_name = None
+general_params = {}
+imu_params = {}
+calibration = {
+    "compass_min": [0] * 3,
+    "compass_max": [0] * 3,
+    "compass_cal_offset": [0] * 3,
+    "compass_cal_corr": [0] * 9,
+    "accel_min": [0] * 3,
+    "accel_max": [0] * 3
+}
 
 
 def get_value_from_line(line, key, dict, type, index=-1):
@@ -127,20 +107,102 @@ with open(source_path, "r") as f:
             get_value_from_line(line, "accel_max", calibration, float, index=2)
 
         # Get imu parameters
-        if imu_name == "mpu9250":
+        if imu_name == "mpu9150":
+            if "MPU9150GyroAccelSampleRate" in line:
+                get_value_from_line(line, "gyro_accel_sample_rate", imu_params, int)
+            elif "MPU9150CompassSampleRate" in line:
+                get_value_from_line(line, "compass_sample_rate", imu_params, int)
+            elif "MPU9150GyroAccelLpf" in line:
+                get_value_from_line(line, "gyro_accel_low_pass_filter", imu_params, int)
+            elif "MPU9150GyroFSR" in line:
+                get_value_from_line(line, "gyro_full_scale_range", imu_params, int)
+            elif "MPU9150AccelFSR" in line:
+                get_value_from_line(line, "accel_full_scale_range", imu_params, int)
+        elif imu_name == "mpu9250":
             if "MPU9250GyroAccelSampleRate" in line:
-                get_value_from_line(line, "gyro_accel_sample_rate", imu_params[imu_name], int)
+                get_value_from_line(line, "gyro_accel_sample_rate", imu_params, int)
             elif "MPU9250CompassSampleRate" in line:
-                get_value_from_line(line, "compass_sample_rate", imu_params[imu_name], int)
+                get_value_from_line(line, "compass_sample_rate", imu_params, int)
             elif "MPU9250GyroLpf" in line:
-                get_value_from_line(line, "gyro_low_pass_filter", imu_params[imu_name], int)
+                get_value_from_line(line, "gyro_low_pass_filter", imu_params, int)
             elif "MPU9250AccelLpf" in line:
-                get_value_from_line(line, "accel_low_pass_filter", imu_params[imu_name], int)
+                get_value_from_line(line, "accel_low_pass_filter", imu_params, int)
             elif "MPU9250GyroFSR" in line:
-                get_value_from_line(line, "gyro_full_scale_range", imu_params[imu_name], int)
+                get_value_from_line(line, "gyro_full_scale_range", imu_params, int)
             elif "MPU9250AccelFSR" in line:
-                get_value_from_line(line, "accel_full_scale_range", imu_params[imu_name], int)
-        # TODO: do other imu types
+                get_value_from_line(line, "accel_full_scale_range", imu_params, int)
+        elif imu_name == "GD20HM303D":
+            if "GD20HM303DGyroSampleRate" in line:
+                get_value_from_line(line, "gyro_sample_rate", imu_params, int)
+            elif "GD20HM303DGyroFsr" in line:
+                get_value_from_line(line, "gyro_full_scale_range", imu_params, int)
+            elif "GD20HM303DGyroHpf" in line:
+                get_value_from_line(line, "gyro_high_pass_filter", imu_params, int)
+            elif "GD20HM303DGyroBW" in line:
+                get_value_from_line(line, "gyro_bandwidth", imu_params, int)
+            elif "GD20HM303DAccelSampleRate" in line:
+                get_value_from_line(line, "accel_sample_rate", imu_params, int)
+            elif "GD20HM303DAccelFsr" in line:
+                get_value_from_line(line, "accel_full_scale_range", imu_params, int)
+            elif "GD20HM303DAccelLpf" in line:
+                get_value_from_line(line, "accel_low_pass_filter", imu_params, int)
+            elif "GD20HM303DCompassSampleRate" in line:
+                get_value_from_line(line, "compass_sample_rate", imu_params, int)
+            elif "GD20HM303DCompassFsr" in line:
+                get_value_from_line(line, "compass_full_scale_range", imu_params, int)
+        elif imu_name == "GD20M303DLHC":
+            if "GD20M303DLHCGyroSampleRate" in line:
+                get_value_from_line(line, "gyro_sample_rate", imu_params, int)
+            elif "GD20M303DLHCGyroFsr" in line:
+                get_value_from_line(line, "gyro_full_scale_range", imu_params, int)
+            elif "GD20M303DLHCGyroHpf" in line:
+                get_value_from_line(line, "gyro_high_pass_filter", imu_params, int)
+            elif "GD20M303DLHCGyroBW" in line:
+                get_value_from_line(line, "gyro_bandwidth", imu_params, int)
+            elif "GD20M303DLHCAccelSampleRate" in line:
+                get_value_from_line(line, "accel_sample_rate", imu_params, int)
+            elif "GD20M303DLHCAccelFsr" in line:
+                get_value_from_line(line, "accel_full_scale_range", imu_params, int)
+            elif "GD20M303DLHCCompassSampleRate" in line:
+                get_value_from_line(line, "compass_sample_rate", imu_params, int)
+            elif "GD20M303DLHCCompassFsr" in line:
+                get_value_from_line(line, "compass_full_scale_range", imu_params, int)
+        elif imu_name == "GD20HM303DLHC":
+            if "GD20HM303DLHCGyroSampleRate" in line:
+                get_value_from_line(line, "gyro_sample_rate", imu_params, int)
+            elif "GD20HM303DLHCGyroFsr" in line:
+                get_value_from_line(line, "gyro_full_scale_range", imu_params, int)
+            elif "GD20HM303DLHCGyroHpf" in line:
+                get_value_from_line(line, "gyro_high_pass_filter", imu_params, int)
+            elif "GD20HM303DLHCGyroBW" in line:
+                get_value_from_line(line, "gyro_bandwidth", imu_params, int)
+            elif "GD20HM303DLHCAccelSampleRate" in line:
+                get_value_from_line(line, "accel_sample_rate", imu_params, int)
+            elif "GD20HM303DLHCAccelFsr" in line:
+                get_value_from_line(line, "accel_full_scale_range", imu_params, int)
+            elif "GD20HM303DLHCCompassSampleRate" in line:
+                get_value_from_line(line, "compass_sample_rate", imu_params, int)
+            elif "GD20HM303DLHCCompassFsr" in line:
+                get_value_from_line(line, "compass_full_scale_range", imu_params, int)
+        elif imu_name == "LSM9DS0":
+            if "LSM9DS0GyroSampleRate" in line:
+                get_value_from_line(line, "gyro_sample_rate", imu_params, int)
+            elif "LSM9DS0GyroFsr" in line:
+                get_value_from_line(line, "gyro_full_scale_range", imu_params, int)
+            elif "LSM9DS0GyroHpf" in line:
+                get_value_from_line(line, "gyro_high_pass_filter", imu_params, int)
+            elif "LSM9DS0GyroBW" in line:
+                get_value_from_line(line, "gyro_bandwidth", imu_params, int)
+            elif "LSM9DS0AccelSampleRate" in line:
+                get_value_from_line(line, "accel_sample_rate", imu_params, int)
+            elif "LSM9DS0AccelFsr" in line:
+                get_value_from_line(line, "accel_full_scale_range", imu_params, int)
+            elif "LSM9DS0AccelLpf" in line:
+                get_value_from_line(line, "accel_low_pass_filter", imu_params, int)
+            elif "LSM9DS0CompassSampleRate" in line:
+                get_value_from_line(line, "compass_sample_rate", imu_params, int)
+            elif "LSM9DS0CompassFsr" in line:
+                get_value_from_line(line, "compass_full_scale_range", imu_params, int)
 
 
 # Write yaml file
@@ -152,9 +214,9 @@ with open(target_path, "w") as f:
 
     # IMU parameters
     f.write("\n" + imu_name + ": \n")
-    imu_param_keys = list(imu_params[imu_name].keys())
+    imu_param_keys = list(imu_params.keys())
     for param in imu_param_keys:
-        f.write("  " + param + ": " + str(imu_params[imu_name][param]) + "\n")
+        f.write("  " + param + ": " + str(imu_params[param]) + "\n")
 
     # Calibration data
     f.write("\ncalib: \n")
